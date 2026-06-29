@@ -40,6 +40,7 @@ module.exports = {
         "db",
         "infra",
         "docs",
+        "adr",
         "ci",
         "deps",
         "release",
