@@ -31,7 +31,7 @@ dependencies = [
   "pyotp>=2.9.0,<3",
 
   # Observabilidade / logging estruturado
-  "structlog>=24.4.0,<25",
+  "structlog>=24.4.0,<27",
   "python-json-logger>=2.0.7,<3",
 
   # ETL
