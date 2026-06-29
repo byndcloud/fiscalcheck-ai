@@ -4,94 +4,280 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
-  Tailwind v4 — tokens base.
-  Esses tokens são placeholders; serão substituídos pelos valores do
-  Design System (ver docs/design-system/) quando o documento for inserido.
+  FiscoCheck Design System v1.0 — tokens base.
+  Spec completa em docs/design-system/design-system.md (§3 cor, §4 tipografia,
+  §5 raio/elevação, §6 movimento, §10 CSS de referência).
+
+  Convenção: tokens DS (--c-*, --n-*, --r-*, --e-*, --grad-*) são a fonte da
+  verdade; os aliases shadcn (--primary, --background, --ring, --radius, ...)
+  apontam para esses tokens. Trocar a paleta = editar só os tokens DS.
 */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
-}
-
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --radius: 0.625rem;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
-    "Liberation Mono", monospace;
+	/* === DS · Marca institucional === */
+	--c-brand-darkest: #071d41;
+	--c-brand-deep: #0c326f;
+	--c-brand: #1351b4;
+	--c-brand-hover: #103f8c;
+	--c-brand-300: #5b8def;
+	--c-brand-100: #c5d4f0;
+	--c-brand-050: #eaf1fb;
+
+	/* === DS · Camada Aurora (IA — uso restrito, §3.2) === */
+	--c-aurora: #0ea5c4;
+	--c-aurora-from: #1351b4;
+	--c-aurora-mid: #2d8fe0;
+	--c-aurora-to: #19d3e8;
+	--grad-aurora: linear-gradient(100deg, #1351b4 0%, #2d8fe0 52%, #19d3e8 100%);
+
+	/* === DS · Espectro de risco (assinatura semântica, §3.3) === */
+	--c-risk-1: #168821;
+	--c-risk-2: #7fb23c;
+	--c-risk-3: #f2a900;
+	--c-risk-4: #e8590c;
+	--c-risk-5: #c5160b;
+	--grad-risk: linear-gradient(
+		90deg,
+		#168821 0%,
+		#7fb23c 28%,
+		#f2a900 56%,
+		#e8590c 80%,
+		#c5160b 100%
+	);
+
+	/* === DS · Semânticas === */
+	--c-success: #168821;
+	--c-warning: #ffcd07;
+	--c-danger: #e52207;
+	--c-info: #155bcb;
+
+	/* === DS · Neutros (cinza fria-equilibrada) === */
+	--n-0: #ffffff;
+	--n-25: #f7f9fc;
+	--n-50: #f1f4f9;
+	--n-100: #e6eaf2;
+	--n-200: #d3dae6;
+	--n-300: #b4bece;
+	--n-400: #8b97ac;
+	--n-500: #66718a;
+	--n-600: #54607a;
+	--n-700: #333d52;
+	--n-800: #1f2737;
+	--n-900: #121826;
+
+	/* Texto e superfícies derivadas */
+	--t-strong: #121826;
+	--t-default: #1f2737;
+	--t-muted: #54607a;
+	--t-on-brand: #ffffff;
+	--surface: #ffffff;
+	--app-bg: #f4f6fb;
+	--border-ds: #e1e6f0;
+
+	/* === DS · Tipografia ===
+     Rawline (UI) e Roboto Mono (dados) são injetadas pelo next/font em
+     apps/web/app/layout.tsx. Rawline é auto-hospedada a partir de
+     apps/web/app/fonts/ (OFL 1.1 — ver apps/web/app/fonts/LICENSE.txt).
+     Os fallbacks listados aqui cobrem o intervalo em que a fonte ainda
+     não terminou de carregar (display: swap). */
+	--font-ui: var(--font-rawline), "Raleway", system-ui, -apple-system,
+		"Segoe UI", sans-serif;
+	--font-data: var(--font-roboto-mono), "Roboto Mono", ui-monospace,
+		SFMono-Regular, Menlo, monospace;
+
+	/* === DS · Espaçamento (base 4 px) === */
+	--s-1: 4px;
+	--s-2: 8px;
+	--s-3: 12px;
+	--s-4: 16px;
+	--s-5: 20px;
+	--s-6: 24px;
+	--s-8: 32px;
+	--s-10: 40px;
+	--s-12: 48px;
+	--s-16: 64px;
+
+	/* === DS · Raio === */
+	--r-sm: 6px;
+	--r-md: 10px;
+	--r-lg: 16px;
+	--r-pill: 999px;
+
+	/* === DS · Elevação === */
+	--e-1: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.07);
+	--e-2: 0 6px 16px -4px rgba(16, 24, 40, 0.1), 0 2px 6px rgba(16, 24, 40, 0.06);
+	--e-3: 0 18px 42px -12px rgba(13, 42, 92, 0.26);
+
+	/* === DS · Movimento === */
+	--ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+	--dur-fast: 140ms;
+	--dur: 220ms;
+	--dur-slow: 360ms;
+
+	/* ============================================================
+     Aliases shadcn ↔ tokens DS
+     ============================================================ */
+	--background: var(--app-bg);
+	--foreground: var(--t-default);
+	--card: var(--surface);
+	--card-foreground: var(--t-default);
+	--popover: var(--surface);
+	--popover-foreground: var(--t-default);
+	--primary: var(--c-brand);
+	--primary-foreground: var(--t-on-brand);
+	--secondary: var(--n-50);
+	--secondary-foreground: var(--c-brand-deep);
+	--muted: var(--n-50);
+	--muted-foreground: var(--t-muted);
+	--accent: var(--c-brand-050);
+	--accent-foreground: var(--c-brand-deep);
+	--destructive: var(--c-danger);
+	--destructive-foreground: var(--t-on-brand);
+	--border: var(--border-ds);
+	--input: var(--n-300);
+	--ring: var(--c-brand-300);
+	--radius: var(--r-lg);
 }
 
+/*
+  Tema escuro — valores conservadores derivados dos neutros DS.
+  Spec do DS ainda não formaliza dark mode; mantemos contraste WCAG AA
+  e ajustamos o primário para --c-brand-300 (legível sobre fundo --n-900).
+*/
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
+	--background: var(--n-900);
+	--foreground: var(--n-25);
+	--card: var(--n-800);
+	--card-foreground: var(--n-25);
+	--popover: var(--n-800);
+	--popover-foreground: var(--n-25);
+	--primary: var(--c-brand-300);
+	--primary-foreground: var(--c-brand-darkest);
+	--secondary: var(--n-700);
+	--secondary-foreground: var(--n-25);
+	--muted: var(--n-700);
+	--muted-foreground: var(--n-300);
+	--accent: var(--n-700);
+	--accent-foreground: var(--n-25);
+	--destructive: var(--c-danger);
+	--destructive-foreground: var(--t-on-brand);
+	--border: var(--n-700);
+	--input: var(--n-700);
+	--ring: var(--c-brand-300);
+}
+
+/*
+  Exposição dos tokens DS como utilitários Tailwind v4.
+  Permite escrever `bg-brand`, `text-aurora`, `bg-risk-3`, `rounded-pill`,
+  `font-data`, `shadow-e-2`, etc., sem perder o vínculo com os tokens DS.
+*/
+@theme inline {
+	/* Aliases shadcn (já mapeados acima para tokens DS) */
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+
+	/* Marca institucional */
+	--color-brand: var(--c-brand);
+	--color-brand-darkest: var(--c-brand-darkest);
+	--color-brand-deep: var(--c-brand-deep);
+	--color-brand-hover: var(--c-brand-hover);
+	--color-brand-300: var(--c-brand-300);
+	--color-brand-100: var(--c-brand-100);
+	--color-brand-050: var(--c-brand-050);
+
+	/* Aurora (IA) */
+	--color-aurora: var(--c-aurora);
+	--color-aurora-from: var(--c-aurora-from);
+	--color-aurora-mid: var(--c-aurora-mid);
+	--color-aurora-to: var(--c-aurora-to);
+
+	/* Espectro de risco */
+	--color-risk-1: var(--c-risk-1);
+	--color-risk-2: var(--c-risk-2);
+	--color-risk-3: var(--c-risk-3);
+	--color-risk-4: var(--c-risk-4);
+	--color-risk-5: var(--c-risk-5);
+
+	/* Semânticas (success/warning/info; danger já vem por --destructive) */
+	--color-success: var(--c-success);
+	--color-warning: var(--c-warning);
+	--color-info: var(--c-info);
+
+	/* Texto e superfícies extras */
+	--color-surface: var(--surface);
+	--color-text-strong: var(--t-strong);
+	--color-text-muted: var(--t-muted);
+
+	/* Neutros (apenas referências comumente úteis para UI densa) */
+	--color-n-0: var(--n-0);
+	--color-n-25: var(--n-25);
+	--color-n-50: var(--n-50);
+	--color-n-100: var(--n-100);
+	--color-n-200: var(--n-200);
+	--color-n-300: var(--n-300);
+	--color-n-400: var(--n-400);
+	--color-n-500: var(--n-500);
+	--color-n-600: var(--n-600);
+	--color-n-700: var(--n-700);
+	--color-n-800: var(--n-800);
+	--color-n-900: var(--n-900);
+
+	/* Raio (alinhado ao DS) */
+	--radius-sm: var(--r-sm);
+	--radius-md: var(--r-md);
+	--radius-lg: var(--r-lg);
+	--radius-xl: calc(var(--r-lg) + 4px);
+	--radius-pill: var(--r-pill);
+
+	/* Tipografia */
+	--font-sans: var(--font-ui);
+	--font-mono: var(--font-data);
+	--font-data: var(--font-data);
+
+	/* Movimento (expõe --ease e durações como utilitários) */
+	--ease-ds: var(--ease);
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
-  }
+	* {
+		@apply border-border;
+	}
+
+	body {
+		@apply bg-background text-foreground;
+		font-feature-settings: "rlig" 1, "calt" 1;
+	}
+
+	/*
+    §6 do DS: todo movimento é suprimido sob `prefers-reduced-motion: reduce`.
+    Aplicamos globalmente para cobrir animações de bibliotecas terceiras
+    (tw-animate-css, Radix) sem necessidade de configuração por componente.
+  */
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		*::before,
+		*::after {
+			animation-duration: 0.001ms !important;
+			animation-iteration-count: 1 !important;
+			transition-duration: 0.001ms !important;
+			scroll-behavior: auto !important;
+		}
+	}
 }

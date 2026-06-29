@@ -1,0 +1,19 @@
+# Garante line endings consistentes em arquivos de texto e marca binários
+# para evitar diffs ruidosos em PRs (especialmente fontes auto-hospedadas).
+* text=auto eol=lf
+
+# Fontes (Rawline auto-hospedada — apps/web/app/fonts/)
+*.woff   binary
+*.woff2  binary
+*.ttf    binary
+*.otf    binary
+*.eot    binary
+
+# Imagens e mídia
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.webp   binary
+*.ico    binary
+*.pdf    binary
