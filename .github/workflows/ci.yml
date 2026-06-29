@@ -169,4 +169,4 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec markdownlint-cli "**/*.md" --ignore node_modules --ignore .next --ignore CHANGELOG.md
+      - run: pnpm exec markdownlint "**/*.md" --ignore node_modules --ignore .next --ignore CHANGELOG.md
