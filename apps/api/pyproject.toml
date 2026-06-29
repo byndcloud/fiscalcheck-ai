@@ -36,7 +36,7 @@ dependencies = [
 
   # ETL
   "polars>=1.17.0,<2",
-  "pyarrow>=18.1.0,<19",
+  "pyarrow>=18.1.0,<25",
   "httpx>=0.28.0,<0.29",
 
   # ML / IA
