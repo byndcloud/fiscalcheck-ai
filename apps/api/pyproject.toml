@@ -4,7 +4,6 @@ version = "0.1.0"
 description = "FiscoCheck AI — Backend FastAPI (agentes IA, ETL, ML, graph analytics)"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
-license = { text = "Proprietary" }
 authors = [
   { name = "Beyond / Aurora" },
 ]

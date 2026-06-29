@@ -20,6 +20,9 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o 
 
 ### Security
 
-- Licença proprietária ("All Rights Reserved") adotada como default.
 - `SECURITY.md` com política de divulgação responsável e SLA de resposta.
 - `.gitignore` reforçado para impedir commit de `.env`, dumps de banco e dados de contribuintes.
+
+### Pending
+
+- Definição de licença do projeto (a abordar em sprint posterior).

@@ -25,7 +25,6 @@ apps/api/src/fiscocheck_api/modules/ai/** @owner-ai
 apps/api/src/fiscocheck_api/modules/compliance/** @owner-security @owner-backend
 docs/compliance/**                  @owner-security
 SECURITY.md                         @owner-security
-LICENSE                             @owner-legal @owner-tech-lead
 
 # Infra / CI
 infra/**                            @owner-devops

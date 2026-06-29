@@ -92,7 +92,7 @@ Quando você gerar PR:
 ## 6. Limites operacionais
 
 - **Não rodar `force push`** em `main` ou `develop`.
-- **Não criar `LICENSE` permissiva** sem confirmação (projeto é proprietário por default).
+- **Não criar arquivo `LICENSE`** sem confirmação explícita do mantenedor — a definição de licenciamento será tratada em sprint dedicado.
 - **Não desabilitar** Husky, commitlint, lint-staged ou checks de CI.
 - **Não baixar/instalar** binários externos sem ADR.
 - **Não modificar** `.env.example` para incluir valores reais.
