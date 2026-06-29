@@ -2,10 +2,20 @@
 
 from __future__ import annotations
 
-import pytest
-from httpx import AsyncClient
+from typing import TYPE_CHECKING
 
+import pytest
+from pydantic import SecretStr, ValidationError
+
+from fiscocheck_api.core.config import (
+    JWT_SECRET_PLACEHOLDER,
+    PSEUDONYM_SALT_PLACEHOLDER,
+    Settings,
+)
 from fiscocheck_api.core.security import pseudonymize
+
+if TYPE_CHECKING:
+    from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
@@ -47,3 +57,31 @@ def test_pseudonymize_is_deterministic() -> None:
 
 def test_pseudonymize_diverges_for_different_values() -> None:
     assert pseudonymize("12345678900") != pseudonymize("12345678901")
+
+
+def test_settings_allows_placeholders_in_development() -> None:
+    """Em dev local o app precisa subir sem Secrets — placeholders são tolerados."""
+    settings = Settings(
+        environment="development",
+        jwt_secret=SecretStr(JWT_SECRET_PLACEHOLDER),
+        pseudonymization_salt=SecretStr(PSEUDONYM_SALT_PLACEHOLDER),
+    )
+    assert settings.environment == "development"
+
+
+def test_settings_refuses_jwt_placeholder_in_production() -> None:
+    with pytest.raises(ValidationError, match="JWT_SECRET"):
+        Settings(
+            environment="production",
+            jwt_secret=SecretStr(JWT_SECRET_PLACEHOLDER),
+            pseudonymization_salt=SecretStr("real-salt-not-placeholder"),
+        )
+
+
+def test_settings_refuses_salt_placeholder_in_staging() -> None:
+    with pytest.raises(ValidationError, match="PSEUDONYMIZATION_SALT"):
+        Settings(
+            environment="staging",
+            jwt_secret=SecretStr("real-jwt-secret-not-placeholder"),
+            pseudonymization_salt=SecretStr(PSEUDONYM_SALT_PLACEHOLDER),
+        )
