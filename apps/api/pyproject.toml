@@ -23,7 +23,7 @@ dependencies = [
   "pgvector>=0.3.0,<0.4",
 
   # Cache / fila
-  "redis>=5.2.0,<6",
+  "redis>=5.2.0,<9",
 
   # Auth e segurança
   "passlib[bcrypt]>=1.7.4,<2",
