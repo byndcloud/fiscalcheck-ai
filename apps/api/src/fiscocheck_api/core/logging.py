@@ -10,23 +10,33 @@ from __future__ import annotations
 import logging
 import sys
 import uuid
-from collections.abc import Awaitable, Callable
 from contextvars import ContextVar
-from typing import Final
+from typing import TYPE_CHECKING, Final
 
 import structlog
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
-from starlette.responses import Response
+
+if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
+
+    from starlette.requests import Request
+    from starlette.responses import Response
+    from structlog.types import EventDict, WrappedLogger
 
 _correlation_id_var: ContextVar[str | None] = ContextVar(
-    "correlation_id", default=None,
+    "correlation_id",
+    default=None,
 )
 
 CORRELATION_ID_HEADER: Final[str] = "X-Correlation-Id"
+MAX_CORRELATION_ID_LENGTH: Final[int] = 128
 
 
-def _add_correlation_id(_: object, __: str, event_dict: dict[str, object]) -> dict[str, object]:
+def _add_correlation_id(
+    _: WrappedLogger,
+    __: str,
+    event_dict: EventDict,
+) -> EventDict:
     cid = _correlation_id_var.get()
     if cid is not None:
         event_dict["correlation_id"] = cid
@@ -81,7 +91,11 @@ class CorrelationIdMiddleware(BaseHTTPMiddleware):
         call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
         incoming = request.headers.get(CORRELATION_ID_HEADER)
-        cid = incoming if incoming and len(incoming) <= 128 else str(uuid.uuid4())
+        cid = (
+            incoming
+            if incoming and len(incoming) <= MAX_CORRELATION_ID_LENGTH
+            else str(uuid.uuid4())
+        )
 
         token = _correlation_id_var.set(cid)
         request.state.correlation_id = cid
