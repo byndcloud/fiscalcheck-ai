@@ -42,7 +42,7 @@ A plataforma é **agêntica**, mas o auditor é sempre o decisor.
 
 Monorepo `pnpm`:
 
-```
+```text
 apps/web    → Next.js 15 (App Router) + TS + Tailwind v4 + shadcn/ui
 apps/api    → FastAPI + Python 3.12 + LangGraph + Polars + SQLAlchemy
 packages/*  → tipos TS compartilhados, configs Biome/TS
@@ -113,7 +113,7 @@ uv run pytest -q
 
 ### 4.2 Python / FastAPI (apps/api)
 
-- **Python 3.12** com type hints completos. Nada de `from __future__ import annotations` (3.12 já tem PEP 604/695 nativo).
+- **Python 3.12** com type hints completos. Prefira sintaxe nativa PEP 604 (`str | None`) e PEP 695 (`type X = ...`). `from __future__ import annotations` é **permitido** quando ajuda em forward refs, evita import circular ou habilita `TYPE_CHECKING` para reduzir custo de runtime — não remova quando já estiver presente.
 - **Pydantic v2** para schemas (request/response).
 - **SQLAlchemy 2.0** com sintaxe nova (`select()`, `Mapped[]`, `mapped_column()`).
 - **async/await** em endpoints; `sync_to_async` para libs bloqueantes.
