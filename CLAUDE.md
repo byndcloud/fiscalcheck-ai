@@ -10,14 +10,16 @@ Instruções específicas para **Claude Code** e **Replit Agent** atuando no Fis
 
 Skills do Claude Code ficam em [`.claude/skills/`](./.claude/skills/). Cada skill tem seu próprio `SKILL.md` com frontmatter (`name`, `description`).
 
-Skills esperadas neste projeto:
+Skills neste projeto:
 
-- **`frontend/`** — desenvolvimento Next.js 15, Tailwind v4, shadcn/ui, TanStack Query, Zustand
-- **`backend/`** — FastAPI, SQLAlchemy 2.0, Polars (ETL), LangGraph (agentes), Alembic
-- **`qa/`** — Vitest, pytest, golden tests para regras fiscais, fixtures pseudonimizadas
-- **`security-auditor/`** — revisão LGPD, sigilo fiscal (art. 198 CTN), RBAC, cadeia de custódia
+| Pasta | `name` no frontmatter | Status | Foco |
+|---|---|---|---|
+| `frontend/` | `frontend` | Ativa | Next.js 15, Tailwind v4, shadcn/ui, TanStack Query, Zustand |
+| `backend/` | `backend` | Ativa | FastAPI, SQLAlchemy 2.0, Polars (ETL), LangGraph (agentes), Alembic |
+| `qa-test-strategist/` | `qa-test-strategist` | Ativa | Estratégia de testes; Vitest, pytest, golden tests fiscais, evals de LLM |
+| `security-auditor/` | `security-auditor` | Ativa | Revisão LGPD, sigilo fiscal (art. 198 CTN), RBAC, cadeia de custódia |
 
-**Como usar uma skill:** quando o usuário pedir uma tarefa que case com a descrição da skill, **leia o `SKILL.md` correspondente** e siga suas instruções.
+**Como usar uma skill:** quando o usuário pedir uma tarefa que case com a `description` do `SKILL.md`, **leia o `SKILL.md` correspondente** e siga suas instruções. Cada skill tem em `references/00-fiscocheck-context.md` o contexto **obrigatório** do projeto — leia-o antes de qualquer outra referência da mesma skill.
 
 ---
 

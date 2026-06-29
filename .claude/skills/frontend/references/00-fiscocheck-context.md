@@ -1,0 +1,106 @@
+# 00 — Contexto FiscoCheck AI (leitura obrigatória)
+
+> **Esta é a primeira referência da skill `frontend`.** Leia antes de qualquer outra referência (`01-component-patterns.md`, `06-design-tokens.md`, etc.). As demais são genéricas — este arquivo as restringe ao projeto.
+
+---
+
+## 1. Stack fixa do `apps/web`
+
+Não há decisão de stack a tomar. **Não introduza** alternativas sem ADR.
+
+| Camada | Decisão |
+|---|---|
+| Framework | **Next.js 15** (App Router; Pages Router proibido) |
+| Linguagem | **TypeScript** estrito (`strict: true`, `noImplicitAny`, `noUncheckedIndexedAccess`) — sem `any` em código novo |
+| Estilos | **Tailwind CSS v4** (`@import "tailwindcss"`, `@theme inline`, sem `tailwind.config.js`) + **tw-animate-css** |
+| Componentes | **shadcn/ui** (`style: "new-york"`, prefix vazio) em `components/ui/`; instalação via `pnpm dlx shadcn@latest add <componente>` |
+| Estado servidor | **TanStack Query v5** (cliente em [`apps/web/components/providers.tsx`](../../../../apps/web/components/providers.tsx)) — sem `useEffect` para fetch |
+| Estado UI | **Zustand** — só para sidebars, modais, filtros globais (ver [`apps/web/stores/ui-store.ts`](../../../../apps/web/stores/ui-store.ts)) |
+| Forms | **react-hook-form** + **zod** + **@hookform/resolvers** |
+| Ícones | **lucide-react** |
+| Cliente HTTP | [`apps/web/lib/api-client.ts`](../../../../apps/web/lib/api-client.ts) — propaga `X-Correlation-Id` em toda chamada |
+| Tipos do backend | `@fiscocheck/shared-types` (gerados do OpenAPI; **não editar à mão**) |
+| Lint/format | **Biome** (config em [`packages/biome-config/biome.json`](../../../../packages/biome-config/biome.json)) — `indentStyle: space, indentWidth: 2` |
+| Testes | **Vitest** + **@testing-library/react** + **jsdom** ([`vitest.config.ts`](../../../../apps/web/vitest.config.ts)) |
+
+Path alias: `@/*` aponta para `apps/web/`. Use `import { ... } from "@/components/..."`, nunca caminhos relativos longos.
+
+## 2. Identidade visual — FiscoCheck Design System v1.0
+
+A spec completa está em [`docs/design-system/design-system.md`](../../../../docs/design-system/design-system.md). Os tokens vivem em [`apps/web/app/globals.css`](../../../../apps/web/app/globals.css) (`:root` e `.dark`) e estão expostos como utilitários Tailwind via `@theme inline`.
+
+### 2.1 Sobre as recomendações genéricas em `01-component-patterns.md`
+
+A skill genérica diz "nunca use Inter/Roboto/Arial como escolha primária". **Aqui é diferente:**
+
+- **Rawline** (auto-hospedada em [`apps/web/app/fonts/`](../../../../apps/web/app/fonts/), OFL 1.1) é a fonte UI institucional — não substituir.
+- **Roboto Mono** é decisão deliberada do DS para **dados, KPIs, valores monetários, scores** (§4 do DS). Use a utility `font-data`/`font-mono`.
+
+Não troque as fontes. Não importe outras famílias.
+
+### 2.2 Camadas semânticas de cor (regra dura)
+
+- **Marca institucional** (`bg-primary`, `text-brand`, `bg-brand-050`, …) — ações de efeito jurídico (intimação, abrir fiscalização). Botões de decisão usam `variant="default"`.
+- **Camada Aurora** (`bg-[image:var(--grad-aurora)]`, `text-aurora`, …) — **exclusiva** de saídas de IA: Copilot, esteira de agentes, monitoramento contínuo, indicadores ao vivo. Botão `variant="aurora"` carrega o gradiente. Nunca use Aurora para ações fiscais — viola o princípio human-in-the-loop ([`AGENTS.md` §1.1](../../../../AGENTS.md)).
+- **Espectro de risco** (`bg-risk-1` verde → `bg-risk-5` vermelho) — exclusivo para representar o score de risco do contribuinte (RF03 do edital). Não use para outros gradientes.
+- **Semânticas** (`bg-success`, `bg-warning`, `bg-info`, `bg-destructive`) — feedback de operação.
+
+### 2.3 Movimento
+
+`prefers-reduced-motion: reduce` já está aplicado globalmente em `apps/web/app/globals.css` `@layer base`. **Não duplique** a media query em componentes. Use `transition` curtos com `--ease-ds` (220ms padrão); animações longas (> 360ms) precisam de justificativa.
+
+### 2.4 Foco visível (não-negociável — WCAG 2.1 AA + edital)
+
+- Anel de foco: **3px** em `--c-brand-300` com offset 2px.
+- O Botão padrão ([`apps/web/components/ui/button.tsx`](../../../../apps/web/components/ui/button.tsx)) já implementa via `focus-visible:ring-[3px] focus-visible:ring-brand-300 focus-visible:ring-offset-2`.
+- Replicar para qualquer componente interativo novo.
+
+## 3. Idioma e tom
+
+- **UI em pt-BR** — labels, mensagens, placeholders, errors, empty states, tooltips.
+- **Identificadores de código em inglês** — `riskScore`, `caseList`, `auditorId` (não `pontuacaoDeRisco`).
+- **Mensagens ao auditor**: tom sóbrio, sem jargão técnico, sem "oops!". Exemplo: "Não foi possível carregar a fila de casos. Tente novamente em instantes."
+- **Mensagens ao cidadão** (módulo 4 — portal de autorregularização): linguagem ainda mais simples; sem termos técnicos fiscais (`PGDAS`, `CTC`) sem antes explicar.
+
+## 4. Human-in-the-loop na UI (princípio do projeto)
+
+Ver [`docs/design-system/design-system.md` §2 "Padrão transversal"](../../../../docs/design-system/design-system.md) e [`AGENTS.md` §1.1](../../../../AGENTS.md).
+
+- Saídas de agente vêm rotuladas (`Detectado por agente`, `Fundamentado em N fontes`) — **nunca** mostradas como fato consumado.
+- Botões de **efeito jurídico** usam o azul primário sólido, exigem confirmação explícita e devem disparar registro de auditoria no backend.
+- Em telas que listam recomendações de IA, mantenha sempre uma ação humana visível ("Aprovar", "Recusar", "Pedir mais contexto") — não há fluxo sem decisão.
+
+## 5. Privacidade e LGPD na UI
+
+- **Nunca** logar dado de contribuinte no `console`. A regra `noConsole` do Biome já avisa.
+- **Nunca** mandar CPF/CNPJ/valor para serviços externos do navegador (analytics, Sentry browser sem PII scrubbing, etc.) — coordene com o backend antes.
+- Componentes que exibem dado sensível devem ter `<span data-sensitive>` para permitir mascaramento futuro (a regra exata virá do módulo 6).
+
+## 6. Áreas críticas — mudanças exigem revisão
+
+| Caminho | Por quê |
+|---|---|
+| [`apps/web/app/globals.css`](../../../../apps/web/app/globals.css) | Tokens do DS — qualquer alteração impacta a UI inteira. Cite a §do DS em PRs. |
+| [`apps/web/app/layout.tsx`](../../../../apps/web/app/layout.tsx) | Fontes, providers, headers de metadata — mudança aqui propaga para todo o app. |
+| [`apps/web/components/providers.tsx`](../../../../apps/web/components/providers.tsx) | QueryClient global — mudar `staleTime`/`retry` afeta cache em todas as queries. |
+| [`apps/web/lib/api-client.ts`](../../../../apps/web/lib/api-client.ts) | Cliente HTTP central — mudanças aqui mudam toda a cadeia de custódia (correlation-id). |
+| [`apps/web/next.config.ts`](../../../../apps/web/next.config.ts) | Headers de segurança (HSTS, X-Frame-Options, Permissions-Policy) — não remover sem ADR. |
+
+## 7. Fluxo de entrega esperado
+
+1. **Leia o DS** ([`docs/design-system/design-system.md`](../../../../docs/design-system/design-system.md)) — pelo menos as seções §3 (cor), §4 (tipografia) e §6 (movimento).
+2. **Localize tokens** em `apps/web/app/globals.css` antes de inventar valores hex novos.
+3. **Verifique se há shadcn** para o componente; se sim, `pnpm dlx shadcn@latest add ...` e customize via `cn()`.
+4. **Idioma pt-BR** e **identificadores em inglês**.
+5. **Acessibilidade**: foco visível, `aria-*`, contraste ≥ 4.5:1, suporte a teclado.
+6. **`pnpm --filter @fiscocheck/web lint && typecheck`** antes de declarar pronto.
+
+## 8. Anti-padrões específicos do FiscoCheck
+
+- ❌ Botão `variant="default"` para uma sugestão de IA — confunde efeito jurídico com recomendação.
+- ❌ `variant="aurora"` em um botão de "Confirmar intimação" — viola human-in-the-loop.
+- ❌ Espectro de risco usado decorativamente (ex.: barra de progresso de upload colorida do verde ao vermelho) — confunde a semântica do score.
+- ❌ `useEffect(() => { fetch(...) }, [])` — sempre TanStack Query.
+- ❌ Estado de servidor duplicado no Zustand — store é só para UI local.
+- ❌ Importar `Inter`, `Roboto` (sem ser Mono), `Arial`, ou qualquer fonte do `next/font/google` que não seja Roboto Mono — quebra a identidade do DS.
+- ❌ Esconder o foco com `outline: none` sem fornecer ring alternativo — barreira de acessibilidade.

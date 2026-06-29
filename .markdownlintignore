@@ -4,3 +4,9 @@ dist/
 build/
 coverage/
 CHANGELOG.md
+
+# Skills do Claude Code: instrucoes para o agente, nao docs do produto.
+# As genericas vieram prontas em ingles e seguem o estilo do upstream;
+# os addendums FiscoCheck-aware vivem em references/00-fiscocheck-context.md
+# de cada skill e sao revisados manualmente.
+.claude/skills/
