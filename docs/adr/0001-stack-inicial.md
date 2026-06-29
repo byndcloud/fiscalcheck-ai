@@ -1,9 +1,11 @@
 # ADR-0001: Stack inicial — monorepo pnpm, Next.js 15, FastAPI, PostgreSQL único
 
-- **Status:** Accepted
+- **Status:** Accepted (parcialmente revisitado por [ADR-0002](./0002-database-mvp-replit.md))
 - **Data:** 2026-06-29
 - **Autor(es):** @owner-tech-lead
 - **Revisores:** @owner-architect, @owner-backend, @owner-frontend
+
+> **Nota (2026-06-29):** a estratégia de banco para o **MVP no Replit** foi revisitada em [ADR-0002](./0002-database-mvp-replit.md). MVP usa Postgres do Replit + `pgvector` apenas; **Apache AGE é adiado** para a migração à nuvem nacional. O restante desta ADR permanece inalterado.
 
 ## Contexto
 

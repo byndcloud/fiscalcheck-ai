@@ -7,10 +7,19 @@ hidden = [".pnpm-store", "node_modules", ".venv", ".uv", ".next", "dist", "__pyc
 [nix]
 channel = "stable-24_05"
 
+# Deploy: Replit Deployments destina-se ao piloto/demo. Produção real
+# vai para nuvem nacional (AWS São Paulo / Azure Brazil South / nuvem
+# TCE-SC) — ver ADR-0001. O `run` abaixo sobe web + api em paralelo
+# usando o workflow padrão.
 [deployment]
-run = ["sh", "-c", "pnpm --filter @fiscocheck/web start"]
+run = ["sh", "-c", "pnpm dev"]
 deploymentTarget = "cloudrun"
 ignorePorts = false
+
+# Apenas as portas que o próprio Repl expõe são listadas aqui.
+# Postgres e Redis no MVP são serviços gerenciados pelo Replit
+# (não rodam em localhost dentro do Repl), por isso 5432 e 6379
+# não aparecem como localPort.
 
 [[ports]]
 localPort = 3000
@@ -21,16 +30,6 @@ description = "Next.js web (frontend do auditor)"
 localPort = 8000
 externalPort = 8000
 description = "FastAPI (backend / agentes IA)"
-
-[[ports]]
-localPort = 5432
-externalPort = 5432
-description = "PostgreSQL"
-
-[[ports]]
-localPort = 6379
-externalPort = 6379
-description = "Redis"
 
 [env]
 PYTHONUNBUFFERED = "1"
@@ -75,3 +74,11 @@ runButton = "Dev (web + api)"
     [[workflows.workflow.tasks]]
     task = "shell.exec"
     args = "pnpm test"
+
+  [[workflows.workflow]]
+  name = "DB migrate"
+  mode = "sequential"
+
+    [[workflows.workflow.tasks]]
+    task = "shell.exec"
+    args = "pnpm --filter @fiscocheck/api migrate"

@@ -62,7 +62,7 @@ Especificações detalhadas em [`docs/modules/`](./docs/modules/).
 | Backend | FastAPI + Python 3.12 | Ecossistema maduro para IA/ML/agentes |
 | ETL | Polars | 5–10x mais rápido que Pandas para volumes fiscais |
 | Agentes IA | LangGraph | Máquinas de estado com human-in-the-loop nativo |
-| Banco | PostgreSQL 16 + pgvector + Apache AGE | Relacional + embeddings + grafo num só banco |
+| Banco | PostgreSQL 16 + pgvector (AGE adiado — ver [ADR-0002](./docs/adr/0002-database-mvp-replit.md)) | Relacional + embeddings num só banco; grafo do Módulo 2 em NetworkX in-memory no MVP |
 | Cache/fila | Redis 7 | Cache, filas Celery/Arq, sessões |
 | Runtime | Node 22, Python 3.12, pnpm 9 | LTS estáveis exigidos pelo Replit |
 | Lint/format | Biome (web) + Ruff (api) | Latência baixa, formatação rápida |
@@ -70,7 +70,7 @@ Especificações detalhadas em [`docs/modules/`](./docs/modules/).
 
 ## Estrutura do repositório
 
-```
+```text
 fiscocheck-ai/
 ├── apps/
 │   ├── web/                  # Next.js 15 — UI do auditor

@@ -34,7 +34,7 @@ flowchart TB
         end
         subgraph Cross [Módulo 2: Cruzamento]
             Match[Matching declarado x NFS-e]
-            Graph[Apache AGE graph]
+            Graph[GraphStore: NetworkX MVP / AGE fase 2]
         end
         subgraph AI [Módulo 3: IA Preditiva]
             Score[Score de risco]
@@ -54,7 +54,7 @@ flowchart TB
     subgraph DB [PostgreSQL 16]
         Relational[Relacional]
         Vector[pgvector]
-        AGE[Apache AGE]
+        AGE["Apache AGE (fase 2)"]
     end
 
     subgraph Frontend [apps/web Next.js]
@@ -72,7 +72,7 @@ flowchart TB
     QA --> Relational
     Relational --> Match
     Match --> Graph
-    Graph --> AGE
+    Graph -.->|"fase 2 (nuvem nacional)"| AGE
     Match --> Score
     Score --> XAI
     XAI --> Orch
@@ -93,7 +93,7 @@ flowchart TB
 | ETL | Polars + PyArrow |
 | Agentes | LangGraph |
 | ML | scikit-learn + NetworkX |
-| Banco | PostgreSQL 16 + pgvector + Apache AGE |
+| Banco | PostgreSQL 16 + pgvector (Apache AGE adiado — ver [ADR-0002](../adr/0002-database-mvp-replit.md)) |
 | Cache/fila | Redis 7 |
 | Lint/format | Biome (web) + Ruff (api) |
 | Typecheck | tsc + Pyright |

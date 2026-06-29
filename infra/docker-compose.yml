@@ -1,10 +1,23 @@
 name: fiscocheck-ai
 
+# Convenção de perfis (ver ADR-0002):
+#   default → postgres (com pgvector) + redis. Cobre o MVP e bate com Replit.
+#   graph   → postgres-age (com pgvector + Apache AGE). Dev local que precisa
+#             validar a futura implementação AgeGraphStore.
+#   dev     → utilitários auxiliares (mailhog).
+# Ative com:
+#   docker compose up -d                         # default
+#   docker compose --profile graph up -d         # com AGE
+#   docker compose --profile dev up -d           # com mailhog
+
 services:
   postgres:
-    # imagem apache/age inclui pgvector e Apache AGE
-    image: apache/age:PG16_latest
+    # Imagem oficial 16 — equivalente ao Replit Postgres no que diz respeito
+    # a extensões disponíveis. pgvector é instalado via postgres-init.sql.
+    image: postgres:16-alpine
     container_name: fiscocheck-postgres
+    profiles:
+      - default
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -23,9 +36,38 @@ services:
       retries: 10
     restart: unless-stopped
 
+  postgres-age:
+    # Imagem apache/age inclui pgvector e Apache AGE. Use só quando precisar
+    # exercitar AgeGraphStore localmente — não é a topologia do MVP.
+    image: apache/age:PG16_latest
+    container_name: fiscocheck-postgres-age
+    profiles:
+      - graph
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fiscocheck
+      POSTGRES_INITDB_ARGS: "--locale=pt_BR.UTF-8"
+      LANG: pt_BR.UTF-8
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_age_data:/var/lib/postgresql/data
+      - ./postgres-init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+      - ./postgres-init-age.sql:/docker-entrypoint-initdb.d/01-init-age.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fiscocheck"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
   redis:
     image: redis:7-alpine
     container_name: fiscocheck-redis
+    profiles:
+      - default
+      - graph
     ports:
       - "6379:6379"
     volumes:
@@ -41,13 +83,14 @@ services:
   mailhog:
     image: mailhog/mailhog:latest
     container_name: fiscocheck-mailhog
+    profiles:
+      - dev
     ports:
       - "1025:1025"   # SMTP
       - "8025:8025"   # UI web
     restart: unless-stopped
-    profiles:
-      - dev
 
 volumes:
   postgres_data:
+  postgres_age_data:
   redis_data:

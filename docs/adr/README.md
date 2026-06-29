@@ -13,7 +13,8 @@ Cada decisão arquitetural relevante vira um ADR numerado. Uma vez `Accepted`, *
 
 | # | Título | Status |
 |---|---|---|
-| [0001](./0001-stack-inicial.md) | Stack inicial — monorepo pnpm, Next.js 15, FastAPI, PostgreSQL único | Accepted |
+| [0001](./0001-stack-inicial.md) | Stack inicial — monorepo pnpm, Next.js 15, FastAPI, PostgreSQL único | Accepted (revisitado em parte por ADR-0002) |
+| [0002](./0002-database-mvp-replit.md) | Estratégia de banco para o MVP no Replit — pgvector sim, Apache AGE adiado | Accepted |
 
 ## Padrões de qualidade
 

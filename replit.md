@@ -43,6 +43,7 @@ A lista completa está em [`.env.example`](./.env.example).
 | `Web only` | `pnpm web:dev` | Trabalhando só no frontend. |
 | `API only` | `pnpm api:dev` | Trabalhando só no backend / agentes. |
 | `Tests (all)` | `pnpm test` | Validar antes de PR. |
+| `DB migrate` | `pnpm --filter @fiscocheck/api migrate` | Aplicar migrations Alembic (`alembic upgrade head`). |
 
 Trocar de workflow: clique na seta ao lado do botão **Run** → escolha.
 
@@ -50,20 +51,18 @@ Trocar de workflow: clique na seta ao lado do botão **Run** → escolha.
 
 ## 4. Banco e extensões
 
-O Replit Postgres **não** vem com `pgvector` ou `Apache AGE` por padrão. Para o piloto:
+O Replit Postgres (gerenciado, backend Neon) **suporta `pgvector`** mas **não suporta Apache AGE**. Por isso, no MVP usamos só `pgvector` — o grafo do Módulo 2 vive em **NetworkX in-memory** no `apps/api`. Decisão completa em [ADR-0002](./docs/adr/0002-database-mvp-replit.md).
+
+Para habilitar as extensões mínimas:
 
 ```sql
--- Conecte no DB (psql ou shell do Replit) e rode:
+-- Conecte no DB pela aba Database do Replit (psql) e rode:
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS vector;
-CREATE EXTENSION IF NOT EXISTS age;
-LOAD 'age';
-SET search_path = ag_catalog, "$user", public;
-SELECT create_graph('fisco_graph');
 ```
 
-Para dev local fora do Replit, use o `docker-compose` em [`infra/docker-compose.yml`](./infra/docker-compose.yml) — a imagem `apache/age` já inclui ambas as extensões.
-
-> Se o módulo 2 (graph analytics) ainda não estiver em uso, AGE pode ser pulado.
+Para experimentar a stack completa com `Apache AGE` (útil ao preparar a migração para nuvem nacional), use o `docker-compose` em [`infra/docker-compose.yml`](./infra/docker-compose.yml) **fora** do Replit — a imagem `apache/age:PG16_latest` já inclui o pacote de extensões e o init em [`infra/postgres-init-age.sql`](./infra/postgres-init-age.sql) cria o grafo `fisco_graph`.
 
 ---
 
@@ -73,10 +72,8 @@ Para dev local fora do Replit, use o `docker-compose` em [`infra/docker-compose.
 |---|---|---|
 | 3000 | 80 (HTTPS público) | Next.js (frontend) |
 | 8000 | 8000 | FastAPI (backend) |
-| 5432 | 5432 | PostgreSQL |
-| 6379 | 6379 | Redis |
 
-A configuração está no [`.replit`](./.replit).
+PostgreSQL e Redis são serviços **gerenciados pelo Replit** — o app conecta neles pela URL injetada em Secrets (`DATABASE_URL`, `REDIS_URL`), e por isso eles não aparecem como `localPort` no [`.replit`](./.replit). Para dev local fora do Replit, suba o Postgres/Redis via [`infra/docker-compose.yml`](./infra/docker-compose.yml).
 
 ---
 
@@ -105,11 +102,11 @@ Os agentes do módulo 1 (ingestão) e 2 (cruzamento) operam **24/7**. Para o pil
 
 ## 8. Deploy (produção)
 
-O `.replit` já tem a seção `[deployment]` configurada para **Replit Deployments → Cloud Run**, mas:
+O `.replit` já tem a seção `[deployment]` configurada para **Replit Deployments → Cloud Run**, com `run = "pnpm dev"` (sobe web + api em paralelo). Isso é adequado apenas para a fase de **piloto/demo**.
 
 > **Atenção LGPD:** dados fiscais reais exigem **localização nacional** dos dados. Replit hospeda em US; para produção, migrar para **AWS São Paulo**, **Azure Brazil South** ou nuvem do TCE/SC. Replit Deployments é adequado apenas para a fase de piloto.
 
-Veja o ADR [`docs/adr/0001-stack-inicial.md`](./docs/adr/0001-stack-inicial.md) para o registro dessa decisão.
+Veja [`docs/adr/0001-stack-inicial.md`](./docs/adr/0001-stack-inicial.md) e [`docs/adr/0002-database-mvp-replit.md`](./docs/adr/0002-database-mvp-replit.md) para o registro dessas decisões.
 
 ---
 
