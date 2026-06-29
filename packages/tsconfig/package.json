@@ -1,7 +1,12 @@
 {
-  "name": "@fiscocheck/tsconfig",
-  "version": "0.1.0",
-  "private": true,
-  "description": "TSConfig compartilhados para o monorepo FiscoCheck AI",
-  "files": ["base.json", "nextjs.json"]
+	"name": "@fiscocheck/tsconfig",
+	"version": "0.1.0",
+	"private": true,
+	"description": "TSConfig compartilhados para o monorepo FiscoCheck AI",
+	"exports": {
+		"./base.json": "./base.json",
+		"./nextjs.json": "./nextjs.json",
+		"./package.json": "./package.json"
+	},
+	"files": ["base.json", "nextjs.json"]
 }
