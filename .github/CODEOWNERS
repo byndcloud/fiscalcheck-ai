@@ -1,0 +1,43 @@
+# CODEOWNERS — FiscoCheck AI
+#
+# Define quem revisa cada parte do código. PRs que tocam estes
+# arquivos exigem revisão dos owners listados (configurar branch
+# protection no GitHub para reforçar).
+#
+# AJUSTAR: substituir @owner-* pelos handles reais quando os
+# responsáveis estiverem definidos.
+
+# Default — qualquer arquivo
+*                                   @owner-tech-lead
+
+# Frontend
+apps/web/**                         @owner-frontend
+packages/biome-config/**            @owner-frontend
+packages/tsconfig/**                @owner-frontend
+packages/shared-types/**            @owner-frontend @owner-backend
+
+# Backend / agentes / ETL / ML
+apps/api/**                         @owner-backend
+apps/api/src/fiscocheck_api/agents/** @owner-backend @owner-ai
+apps/api/src/fiscocheck_api/modules/ai/** @owner-ai
+
+# Compliance / segurança — REQUER security-auditor
+apps/api/src/fiscocheck_api/modules/compliance/** @owner-security @owner-backend
+docs/compliance/**                  @owner-security
+SECURITY.md                         @owner-security
+LICENSE                             @owner-legal @owner-tech-lead
+
+# Infra / CI
+infra/**                            @owner-devops
+.github/workflows/**                @owner-devops
+.replit                             @owner-devops
+replit.nix                          @owner-devops
+
+# Documentação / ADRs
+docs/adr/**                         @owner-tech-lead @owner-architect
+docs/architecture/**                @owner-tech-lead @owner-architect
+docs/design-system/**               @owner-design @owner-frontend
+docs/modules/**                     @owner-tech-lead
+
+# Skills (Claude Code)
+.claude/skills/**                   @owner-tech-lead

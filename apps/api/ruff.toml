@@ -1,0 +1,47 @@
+target-version = "py312"
+line-length = 100
+indent-width = 4
+extend-exclude = ["alembic/versions"]
+
+[lint]
+select = [
+  "E",     # pycodestyle errors
+  "W",     # pycodestyle warnings
+  "F",     # pyflakes
+  "I",     # isort
+  "B",     # bugbear
+  "C4",    # comprehensions
+  "UP",    # pyupgrade
+  "N",     # pep8-naming
+  "S",     # bandit (segurança)
+  "A",     # builtins
+  "DTZ",   # datetimez (sem datetime naive)
+  "EM",    # mensagens de exceção
+  "PIE",   # melhorias gerais
+  "PL",    # pylint
+  "RUF",   # regras ruff
+  "SIM",   # simplificação
+  "TID",   # tidy-imports
+  "TCH",   # type-checking imports
+]
+ignore = [
+  "E501",     # line too long (delegado ao formatter)
+  "PLR0913",  # muitos argumentos (frequente em FastAPI)
+  "S101",     # uso de assert (ok em testes)
+  "EM101",    # string literal em exceção (verboso demais)
+  "EM102",    # f-string em exceção
+]
+
+[lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "PLR2004", "S105", "S106"]
+"alembic/env.py" = ["ALL"]
+
+[lint.isort]
+known-first-party = ["fiscocheck_api"]
+combine-as-imports = true
+
+[format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+docstring-code-format = true

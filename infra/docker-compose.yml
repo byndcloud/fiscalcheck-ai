@@ -1,0 +1,53 @@
+name: fiscocheck-ai
+
+services:
+  postgres:
+    # imagem apache/age inclui pgvector e Apache AGE
+    image: apache/age:PG16_latest
+    container_name: fiscocheck-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fiscocheck
+      POSTGRES_INITDB_ARGS: "--locale=pt_BR.UTF-8"
+      LANG: pt_BR.UTF-8
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres-init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fiscocheck"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: fiscocheck-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  # mailhog para testar notificações de e-mail em dev
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: fiscocheck-mailhog
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # UI web
+    restart: unless-stopped
+    profiles:
+      - dev
+
+volumes:
+  postgres_data:
+  redis_data:

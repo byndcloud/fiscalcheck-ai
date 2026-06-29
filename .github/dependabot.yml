@@ -1,0 +1,62 @@
+version: 2
+
+updates:
+  # JS/TS — monorepo pnpm (raiz pega tudo via workspaces)
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+    commit-message:
+      prefix: "chore(deps)"
+      include: scope
+    groups:
+      react:
+        patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
+      nextjs:
+        patterns: ["next", "@next/*", "eslint-config-next"]
+      tanstack:
+        patterns: ["@tanstack/*"]
+      radix:
+        patterns: ["@radix-ui/*"]
+      tooling:
+        patterns:
+          ["@biomejs/*", "typescript", "@types/node", "husky", "lint-staged", "@commitlint/*"]
+      tailwind:
+        patterns: ["tailwindcss", "@tailwindcss/*", "tw-animate-css"]
+
+  # Python — apps/api com uv
+  - package-ecosystem: pip
+    directory: "/apps/api"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore(deps)"
+      include: scope
+    groups:
+      fastapi:
+        patterns: ["fastapi", "uvicorn", "pydantic", "pydantic-settings"]
+      sqlalchemy:
+        patterns: ["sqlalchemy", "alembic", "asyncpg", "psycopg", "pgvector"]
+      ml:
+        patterns: ["scikit-learn", "numpy", "networkx", "polars", "pyarrow"]
+      langchain:
+        patterns: ["langgraph", "langchain*"]
+      tooling:
+        patterns: ["ruff", "pyright", "pytest*"]
+
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "ci(deps)"

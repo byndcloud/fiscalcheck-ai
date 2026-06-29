@@ -1,0 +1,77 @@
+run = "pnpm dev"
+entrypoint = "README.md"
+modules = ["nodejs-22", "python-3.12", "postgresql-16"]
+
+hidden = [".pnpm-store", "node_modules", ".venv", ".uv", ".next", "dist", "__pycache__"]
+
+[nix]
+channel = "stable-24_05"
+
+[deployment]
+run = ["sh", "-c", "pnpm --filter @fiscocheck/web start"]
+deploymentTarget = "cloudrun"
+ignorePorts = false
+
+[[ports]]
+localPort = 3000
+externalPort = 80
+description = "Next.js web (frontend do auditor)"
+
+[[ports]]
+localPort = 8000
+externalPort = 8000
+description = "FastAPI (backend / agentes IA)"
+
+[[ports]]
+localPort = 5432
+externalPort = 5432
+description = "PostgreSQL"
+
+[[ports]]
+localPort = 6379
+externalPort = 6379
+description = "Redis"
+
+[env]
+PYTHONUNBUFFERED = "1"
+PNPM_HOME = "/home/runner/.local/share/pnpm"
+PATH = "$PNPM_HOME:$PATH"
+
+[workflows]
+runButton = "Dev (web + api)"
+
+  [[workflows.workflow]]
+  name = "Dev (web + api)"
+  mode = "parallel"
+
+    [[workflows.workflow.tasks]]
+    task = "shell.exec"
+    args = "pnpm --filter @fiscocheck/web dev"
+
+    [[workflows.workflow.tasks]]
+    task = "shell.exec"
+    args = "pnpm --filter @fiscocheck/api dev"
+
+  [[workflows.workflow]]
+  name = "API only"
+  mode = "sequential"
+
+    [[workflows.workflow.tasks]]
+    task = "shell.exec"
+    args = "pnpm --filter @fiscocheck/api dev"
+
+  [[workflows.workflow]]
+  name = "Web only"
+  mode = "sequential"
+
+    [[workflows.workflow.tasks]]
+    task = "shell.exec"
+    args = "pnpm --filter @fiscocheck/web dev"
+
+  [[workflows.workflow]]
+  name = "Tests (all)"
+  mode = "sequential"
+
+    [[workflows.workflow.tasks]]
+    task = "shell.exec"
+    args = "pnpm test"

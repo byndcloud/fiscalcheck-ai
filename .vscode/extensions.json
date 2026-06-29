@@ -1,0 +1,18 @@
+{
+  "recommendations": [
+    "biomejs.biome",
+    "charliermarsh.ruff",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "bradlc.vscode-tailwindcss",
+    "DavidAnson.vscode-markdownlint",
+    "editorconfig.editorconfig",
+    "yzhang.markdown-all-in-one",
+    "redhat.vscode-yaml",
+    "tamasfe.even-better-toml",
+    "ms-azuretools.vscode-docker",
+    "github.vscode-github-actions",
+    "github.vscode-pull-request-github",
+    "vivaxy.vscode-conventional-commits"
+  ]
+}

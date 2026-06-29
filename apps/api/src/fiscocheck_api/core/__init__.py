@@ -1,0 +1,1 @@
+"""Núcleo: configuração, logging, segurança."""
