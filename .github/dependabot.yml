@@ -1,5 +1,18 @@
 version: 2
 
+# Política deste arquivo:
+# 1. Dependabot NÃO abre PRs de major bump (ignore global). Majors
+#    são tratados manualmente em branch dedicada, com migração
+#    explícita e revisão humana — alinhado ao AGENTS.md (sem
+#    aprovação silenciosa de mudanças de runtime na stack fiscal).
+# 2. Famílias com versões acopladas (react, next, tanstack, radix,
+#    tailwind, fastapi, sqlalchemy, langchain, etc.) sobem em PR
+#    único por família.
+# 3. Tudo o que sobra é agrupado por dependency-type (production
+#    vs development) — 2 PRs por semana cobrem o "long tail".
+# 4. open-pull-requests-limit baixo (5) porque com grouping o
+#    volume cai naturalmente.
+
 updates:
   # JS/TS — monorepo pnpm (raiz pega tudo via workspaces)
   - package-ecosystem: npm
@@ -9,11 +22,17 @@ updates:
       day: monday
       time: "06:00"
       timezone: "America/Sao_Paulo"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     versioning-strategy: increase
+    labels:
+      - dependencies
+      - automated
     commit-message:
       prefix: "chore(deps)"
       include: scope
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
       react:
         patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
@@ -22,14 +41,25 @@ updates:
       tanstack:
         patterns: ["@tanstack/*"]
       radix:
-        patterns: ["@radix-ui/*"]
-      tooling:
-        patterns:
-          ["@biomejs/*", "typescript", "@types/node", "husky", "lint-staged", "@commitlint/*"]
+        patterns: ["@radix-ui/*", "radix-ui"]
       tailwind:
         patterns: ["tailwindcss", "@tailwindcss/*", "tw-animate-css"]
+      prod-minor-patch:
+        dependency-type: "production"
+        update-types: ["minor", "patch"]
+      dev-minor-patch:
+        dependency-type: "development"
+        update-types: ["minor", "patch"]
 
-  # Python — apps/api com uv
+  # Python — apps/api com uv (pyproject.toml + uv.lock)
+  #
+  # TODO(verificar no primeiro PR pip): o CI da API roda `uv sync --frozen`
+  # (.github/workflows/ci.yml), o que exige uv.lock consistente com
+  # pyproject.toml. Confirmar que o dependabot regrava apps/api/uv.lock
+  # junto com pyproject.toml. Se NAO regravar, adicionar workflow
+  # auxiliar que roda `uv lock` em branches dependabot/pip/** e commita
+  # de volta. Fallback: migrar ecossistema pip para Renovate (suporte
+  # uv.lock nativo). Tracking: scripts/dependabot/pending-majors-issue.md.
   - package-ecosystem: pip
     directory: "/apps/api"
     schedule:
@@ -37,10 +67,16 @@ updates:
       day: monday
       time: "06:00"
       timezone: "America/Sao_Paulo"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - automated
     commit-message:
       prefix: "chore(deps)"
       include: scope
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
       fastapi:
         patterns: ["fastapi", "uvicorn", "pydantic", "pydantic-settings"]
@@ -50,13 +86,27 @@ updates:
         patterns: ["scikit-learn", "numpy", "networkx", "polars", "pyarrow"]
       langchain:
         patterns: ["langgraph", "langchain*"]
-      tooling:
-        patterns: ["ruff", "pyright", "pytest*"]
+      prod-minor-patch:
+        dependency-type: "production"
+        update-types: ["minor", "patch"]
+      dev-minor-patch:
+        dependency-type: "development"
+        update-types: ["minor", "patch"]
 
-  # GitHub Actions
+  # GitHub Actions — volume baixo, sem agrupamento
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - automated
     commit-message:
       prefix: "ci(deps)"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
