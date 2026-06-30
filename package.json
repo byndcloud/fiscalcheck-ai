@@ -1,33 +1,33 @@
 {
-  "name": "fiscocheck-ai",
-  "version": "0.1.0",
-  "private": true,
-  "description": "FiscoCheck AI — Plataforma de Inteligência Fiscal Agêntica (Brusque/SC)",
-  "engines": {
-    "node": ">=22.0.0",
-    "pnpm": ">=9.0.0"
-  },
-  "packageManager": "pnpm@9.15.0",
-  "scripts": {
-    "dev": "pnpm -r --parallel dev",
-    "build": "pnpm -r build",
-    "lint": "pnpm -r lint",
-    "lint:fix": "pnpm -r lint:fix",
-    "typecheck": "pnpm -r typecheck",
-    "test": "pnpm -r test",
-    "format": "pnpm -r format",
-    "format:check": "pnpm -r format:check",
-    "api:dev": "pnpm --filter @fiscocheck/api dev",
-    "web:dev": "pnpm --filter @fiscocheck/web dev",
-    "prepare": "husky"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
-    "@commitlint/cli": "^19.6.0",
-    "@commitlint/config-conventional": "^19.6.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^15.2.10",
-    "markdownlint-cli": "^0.43.0",
-    "typescript": "^5.7.2"
-  }
+	"name": "fiscocheck-ai",
+	"version": "0.1.0",
+	"private": true,
+	"description": "FiscoCheck AI — Plataforma de Inteligência Fiscal Agêntica (Brusque/SC)",
+	"engines": {
+		"node": ">=22.0.0",
+		"pnpm": ">=9.0.0"
+	},
+	"packageManager": "pnpm@9.15.0",
+	"scripts": {
+		"dev": "pnpm -r --parallel dev",
+		"build": "pnpm -r build",
+		"lint": "pnpm -r lint",
+		"lint:fix": "pnpm -r lint:fix",
+		"typecheck": "pnpm -r typecheck",
+		"test": "pnpm -r test",
+		"format": "pnpm -r format",
+		"format:check": "pnpm -r format:check",
+		"api:dev": "pnpm --filter @fiscocheck/api dev",
+		"web:dev": "pnpm --filter @fiscocheck/web dev",
+		"prepare": "husky"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"@commitlint/cli": "^19.6.0",
+		"@commitlint/config-conventional": "^19.6.0",
+		"husky": "^9.1.7",
+		"lint-staged": "^15.2.10",
+		"markdownlint-cli": "^0.49.0",
+		"typescript": "^5.7.2"
+	}
 }
