@@ -3,7 +3,7 @@ import type * as React from "react";
 import { cn } from "@/lib/utils";
 
 /*
-  FiscoCheck DS — Campo de texto (docs/design-system/design-system.md §7).
+  FiscalCheck DS — Campo de texto (docs/design-system/design-system.md §7).
   - Borda --n-300 (mapeada por --input), raio --r-sm (rounded-sm = 6px).
   - Foco: borda --c-brand + halo --c-brand-050 (3px) sem deslocar layout.
   - aria-invalid: borda --c-danger + halo de erro.

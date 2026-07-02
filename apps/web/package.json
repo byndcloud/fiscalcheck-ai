@@ -1,8 +1,8 @@
 {
-	"name": "@fiscocheck/web",
+	"name": "@fiscalcheck/web",
 	"version": "0.1.0",
 	"private": true,
-	"description": "FiscoCheck AI — Frontend Next.js do auditor fiscal",
+	"description": "FiscalCheck AI — Frontend Next.js do auditor fiscal",
 	"scripts": {
 		"dev": "next dev --turbo --port 3000",
 		"build": "next build",
@@ -34,9 +34,9 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
-		"@fiscocheck/biome-config": "workspace:*",
-		"@fiscocheck/shared-types": "workspace:*",
-		"@fiscocheck/tsconfig": "workspace:*",
+		"@fiscalcheck/biome-config": "workspace:*",
+		"@fiscalcheck/shared-types": "workspace:*",
+		"@fiscalcheck/tsconfig": "workspace:*",
 		"@tailwindcss/postcss": "^4.0.0",
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/react": "^16.1.0",

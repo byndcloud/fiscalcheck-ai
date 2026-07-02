@@ -1,7 +1,7 @@
 [project]
-name = "fiscocheck-api"
+name = "fiscalcheck-api"
 version = "0.1.0"
-description = "FiscoCheck AI — Backend FastAPI (agentes IA, ETL, ML, graph analytics)"
+description = "FiscalCheck AI — Backend FastAPI (agentes IA, ETL, ML, graph analytics)"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 authors = [
@@ -70,7 +70,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/fiscocheck_api"]
+packages = ["src/fiscalcheck_api"]
 
 [tool.uv]
 package = true

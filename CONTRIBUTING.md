@@ -1,4 +1,4 @@
-# Contribuindo com o FiscoCheck AI
+# Contribuindo com o FiscalCheck AI
 
 Obrigado pelo interesse. Este projeto trata dados fiscais sensíveis e tem requisitos elevados de qualidade e conformidade — por favor leia este guia antes de abrir o primeiro PR.
 
@@ -15,7 +15,7 @@ Obrigado pelo interesse. Este projeto trata dados fiscais sensíveis e tem requi
 
 ## Fluxo de branches
 
-```
+```text
 main         ←── apenas releases (PR obrigatório + reviews + CI verde)
 └── develop  ←── integração contínua (PR obrigatório + CI verde, self-merge ok)
     ├── feat/<curto-descritivo>
@@ -34,7 +34,7 @@ main         ←── apenas releases (PR obrigatório + reviews + CI verde)
 
 Usamos [Conventional Commits](https://www.conventionalcommits.org/pt-br/). O `commitlint` (via Husky) **bloqueia** mensagens fora do padrão.
 
-```
+```text
 <tipo>(<escopo opcional>): <descrição imperativa>
 
 [corpo opcional]
@@ -45,7 +45,7 @@ Usamos [Conventional Commits](https://www.conventionalcommits.org/pt-br/). O `co
 ### Tipos aceitos
 
 | Tipo | Uso |
-|---|---|
+| --- | --- |
 | `feat` | Nova funcionalidade |
 | `fix` | Correção de bug |
 | `docs` | Mudança só de documentação |
@@ -64,7 +64,7 @@ Usamos [Conventional Commits](https://www.conventionalcommits.org/pt-br/). O `co
 
 ### Exemplos
 
-```
+```text
 feat(crossing): adicionar deteccao de subdeclarante via grafo
 fix(auth): corrigir validacao de MFA expirada
 docs(compliance): atualizar template RIPD com novos campos
@@ -75,7 +75,7 @@ chore(deps): subir Next.js para 15.1.0
 
 Use `!` após o tipo/escopo e/ou rodapé `BREAKING CHANGE:`:
 
-```
+```text
 feat(api)!: trocar schema de score de risco
 
 BREAKING CHANGE: campo `riskScore.factors` agora é `riskScore.explainers`
@@ -134,8 +134,8 @@ O **pre-commit hook** (Husky + lint-staged) já roda `lint:fix` nos arquivos sta
 ### TypeScript
 
 ```powershell
-pnpm --filter @fiscocheck/web add <pacote>
-pnpm --filter @fiscocheck/web add -D <pacote>
+pnpm --filter @fiscalcheck/web add <pacote>
+pnpm --filter @fiscalcheck/web add -D <pacote>
 ```
 
 ### Python
@@ -153,8 +153,8 @@ uv add --dev <pacote>
 ## Como adicionar um módulo / agente novo
 
 1. Abra um ADR em `docs/adr/` explicando o porquê.
-2. Crie a pasta em `apps/api/src/fiscocheck_api/modules/<nome>/` com `__init__.py`, `router.py`, `schemas.py`, `service.py`, `models.py`, `repository.py`.
-3. Registre o router em `apps/api/src/fiscocheck_api/main.py`.
+2. Crie a pasta em `apps/api/src/fiscalcheck_api/modules/<nome>/` com `__init__.py`, `router.py`, `schemas.py`, `service.py`, `models.py`, `repository.py`.
+3. Registre o router em `apps/api/src/fiscalcheck_api/main.py`.
 4. Gere migration: `uv run alembic revision --autogenerate -m "add <nome>"`.
 5. Adicione doc do módulo em `docs/modules/`.
 6. Adicione testes em `apps/api/tests/<nome>/`.

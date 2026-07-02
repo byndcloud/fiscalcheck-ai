@@ -1,5 +1,5 @@
 { pkgs }: {
-  # Stack do FiscoCheck AI no Replit (piloto). Para a topologia do MVP:
+  # Stack do FiscalCheck AI no Replit (piloto). Para a topologia do MVP:
   #
   # - O Postgres e o Redis usados pelo app são serviços GERENCIADOS do
   #   Replit (não rodam in-process aqui). O app conecta via DATABASE_URL

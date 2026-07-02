@@ -55,7 +55,7 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @fiscocheck/web lint
+      - run: pnpm --filter @fiscalcheck/web lint
 
   web-typecheck:
     name: web · typecheck
@@ -70,7 +70,7 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @fiscocheck/web typecheck
+      - run: pnpm --filter @fiscalcheck/web typecheck
 
   web-build:
     name: web · build
@@ -85,7 +85,7 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @fiscocheck/web build
+      - run: pnpm --filter @fiscalcheck/web build
 
   web-test:
     name: web · test
@@ -100,7 +100,7 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @fiscocheck/web test
+      - run: pnpm --filter @fiscalcheck/web test
 
   # ---------------- API ----------------
   api-lint:

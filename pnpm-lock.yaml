@@ -83,13 +83,13 @@ importers:
       '@biomejs/biome':
         specifier: ^1.9.4
         version: 1.9.4
-      '@fiscocheck/biome-config':
+      '@fiscalcheck/biome-config':
         specifier: workspace:*
         version: link:../../packages/biome-config
-      '@fiscocheck/shared-types':
+      '@fiscalcheck/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
-      '@fiscocheck/tsconfig':
+      '@fiscalcheck/tsconfig':
         specifier: workspace:*
         version: link:../../packages/tsconfig
       '@tailwindcss/postcss':

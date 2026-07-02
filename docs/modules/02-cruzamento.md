@@ -1,7 +1,7 @@
 # Módulo 2 — Cruzamento e Detecção de Inconsistências
 
 > Núcleo analítico: identificação ativa de omissões, subdeclarações e contribuintes fora do radar.
-> Pasta: `apps/api/src/fiscocheck_api/modules/crossing/`.
+> Pasta: `apps/api/src/fiscalcheck_api/modules/crossing/`.
 
 ## Objetivo (do edital)
 
@@ -17,7 +17,7 @@
 
 ## Arquitetura interna
 
-```
+```text
 modules/crossing/
 ├── router.py
 ├── service.py

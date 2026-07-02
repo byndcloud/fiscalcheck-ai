@@ -10,7 +10,7 @@
 
 ## Contexto
 
-[ADR-0001](./0001-stack-inicial.md) definiu **PostgreSQL 16 + pgvector + Apache AGE** como banco único do FiscoCheck AI, hospedado no Replit durante o piloto e migrando para nuvem nacional em produção.
+[ADR-0001](./0001-stack-inicial.md) definiu **PostgreSQL 16 + pgvector + Apache AGE** como banco único do FiscalCheck AI, hospedado no Replit durante o piloto e migrando para nuvem nacional em produção.
 
 Ao validar a hospedagem do MVP no **Replit**, identificamos que:
 
@@ -30,7 +30,7 @@ O Módulo 2 (Cruzamento e Detecção de Inconsistências) é o único cliente di
 
 ### Implicações concretas
 
-1. **Módulo 2 — grafo no MVP**: implementado com **NetworkX in-memory** carregado a partir de tabelas relacionais (`entities`, `relationships`/`edges`) e reconstruído sob demanda. Quando o módulo for codificado, será introduzida a interface `GraphStore` em [`apps/api/src/fiscocheck_api/modules/crossing/graph/`](../../apps/api/src/fiscocheck_api/modules/crossing/graph/) com:
+1. **Módulo 2 — grafo no MVP**: implementado com **NetworkX in-memory** carregado a partir de tabelas relacionais (`entities`, `relationships`/`edges`) e reconstruído sob demanda. Quando o módulo for codificado, será introduzida a interface `GraphStore` em [`apps/api/src/fiscalcheck_api/modules/crossing/graph/`](../../apps/api/src/fiscalcheck_api/modules/crossing/graph/) com:
    - `NetworkXGraphStore` — implementação MVP.
    - `AgeGraphStore` — implementação fase 2, ativada quando migrar para a nuvem nacional.
    - A interface expõe operações idempotentes: `add_entity`, `add_relationship`, `find_common_neighbors`, `shortest_path`, `centrality_score`.
@@ -97,7 +97,7 @@ Quando migrarmos para a nuvem nacional (AWS São Paulo / Azure Brazil South / nu
 ## Como reverter
 
 - Trocar a implementação `GraphStore` injetada no DI por `AgeGraphStore`.
-- Adicionar uma migration que habilita `CREATE EXTENSION age;` e cria `fisco_graph`.
+- Adicionar uma migration que habilita `CREATE EXTENSION age;` e cria `fiscal_graph`.
 - Migrar dados do `entities`/`relationships` para o grafo AGE (script one-off).
 - Manter `NetworkXGraphStore` no código como fallback por 1 sprint.
 

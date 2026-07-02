@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from fiscocheck_api.main import create_app
+from fiscalcheck_api.main import create_app
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator

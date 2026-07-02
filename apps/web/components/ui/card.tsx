@@ -3,7 +3,7 @@ import type * as React from "react";
 import { cn } from "@/lib/utils";
 
 /*
-  FiscoCheck DS — Card (docs/design-system/design-system.md §5 e §7).
+  FiscalCheck DS — Card (docs/design-system/design-system.md §5 e §7).
   - Raio --r-lg (rounded-lg = 16px) e elevação --e-1 no padrão.
   - Hover eleva para --e-2 com transição --dur-fast (140ms).
   - Movimento é suprimido por prefers-reduced-motion (regra global em

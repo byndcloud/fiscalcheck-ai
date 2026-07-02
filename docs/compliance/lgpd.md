@@ -1,13 +1,13 @@
-# LGPD aplicada ao FiscoCheck AI
+# LGPD aplicada ao FiscalCheck AI
 
 > Lei nº 13.709/2018 — Lei Geral de Proteção de Dados Pessoais.
 >
-> Este documento descreve **como** o FiscoCheck AI implementa cada princípio da LGPD. Não substitui a opinião jurídica do encarregado (DPO) da Beyond/Aurora nem do município contratante.
+> Este documento descreve **como** o FiscalCheck AI implementa cada princípio da LGPD. Não substitui a opinião jurídica do encarregado (DPO) da Beyond/Aurora nem do município contratante.
 
 ## Papéis
 
-| Papel LGPD | Quem é no FiscoCheck AI |
-|---|---|
+| Papel LGPD | Quem é no FiscalCheck AI |
+| --- | --- |
 | **Titular** | Cidadão / contribuinte (e auditor, na medida de seus dados pessoais) |
 | **Controlador** | Município de Brusque / Secretaria Municipal da Fazenda |
 | **Operador** | Beyond / Aurora (fornecedor da solução) |
@@ -16,7 +16,7 @@
 ## Princípios e implementação
 
 | Princípio (art. 6º) | Como implementamos |
-|---|---|
+| --- | --- |
 | Finalidade | Tratamento exclusivo para a triagem fiscal e suporte à arrecadação. Não há uso secundário (marketing, perfilamento comercial, etc.). |
 | Adequação | Cada módulo trata apenas dados pertinentes à sua função; `modules/compliance/parameters/` define escopo. |
 | Necessidade | Mínima coleta possível; campos não necessários ao indício não são copiados das fontes. |
@@ -63,10 +63,10 @@ Resposta em até **24 horas** após confirmação. Runbook em [`runbook-incident
 
 ## Pseudonimização (implementação técnica)
 
-Aplicada em `apps/api/src/fiscocheck_api/core/security.py`:
+Aplicada em `apps/api/src/fiscalcheck_api/core/security.py`:
 
 ```python
-from fiscocheck_api.core.security import pseudonymize
+from fiscalcheck_api.core.security import pseudonymize
 
 cpf_hash = pseudonymize("12345678900")  # HMAC-SHA256 com salt do .env
 ```

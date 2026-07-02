@@ -31,8 +31,8 @@ from uuid import UUID, uuid4
 
 import polars as pl
 
-from fiscocheck_api.core.logging import get_logger
-from fiscocheck_api.core.security import pseudonymize
+from fiscalcheck_api.core.logging import get_logger
+from fiscalcheck_api.core.security import pseudonymize
 
 logger = get_logger(__name__)
 

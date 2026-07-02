@@ -20,11 +20,11 @@ e com identidade visual genuína — sem padrões repetitivos de IA.
 
 ## Primeira referência (obrigatória)
 
-> **`references/00-fiscocheck-context.md`** — stack fixa (Next.js 15 + Tailwind v4 + shadcn/ui + Rawline + Roboto Mono), Design System v1.0, regras de cor (marca / Aurora / risco), idioma, human-in-the-loop na UI, arquivos críticos. **Leia antes de qualquer outra referência desta skill** — ele restringe e sobrepõe recomendações genéricas das demais.
+> **`references/00-fiscalcheck-context.md`** — stack fixa (Next.js 15 + Tailwind v4 + shadcn/ui + Raleway + Montserrat + Roboto Mono), Design System v2.0, regras de cor (marca / Aurora / risco), idioma, human-in-the-loop na UI, arquivos críticos. **Leia antes de qualquer outra referência desta skill** — ele restringe e sobrepõe recomendações genéricas das demais.
 
 ## Qual referência ler
 
-Leia **apenas** o(s) arquivo(s) relevante(s) para a tarefa atual — sempre depois do `00-fiscocheck-context.md`.
+Leia **apenas** o(s) arquivo(s) relevante(s) para a tarefa atual — sempre depois do `00-fiscalcheck-context.md`.
 
 | Tarefa                                        | Leia primeiro               | Combine com                 |
 |-----------------------------------------------|-----------------------------|-----------------------------|
@@ -44,7 +44,7 @@ leia também `references/01-component-patterns.md` — seção "Identidade Visua
 
 ## Detecção de stack
 
-No FiscoCheck a stack é fixa (ver `00-fiscocheck-context.md` §1): Next.js 15 App Router + TS estrito + Tailwind v4 + shadcn/ui. Não pergunte — assuma.
+No FiscalCheck a stack é fixa (ver `00-fiscalcheck-context.md` §1): Next.js 15 App Router + TS estrito + Tailwind v4 + shadcn/ui. Não pergunte — assuma.
 
 Para qualquer outra base de código (em outro projeto), identifique:
 - **Framework** de componentes (React / Vue / Svelte / Angular / Vanilla)

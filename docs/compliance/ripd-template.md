@@ -18,14 +18,14 @@
 
 - **Controlador:** Município de Brusque / Secretaria Municipal da Fazenda
 - **Operador:** Beyond / Aurora
-- **Sistema:** FiscoCheck AI — Plataforma de Inteligência Fiscal Agêntica
+- **Sistema:** FiscalCheck AI — Plataforma de Inteligência Fiscal Agêntica
 - **Módulo afetado (1–7):**
 - **Edital:** CPSI — Brusque/SC
 
 ## 3. Natureza dos dados
 
 | Categoria | Exemplos | Sensível? |
-|---|---|---|
+| --- | --- | --- |
 | Identificação | CPF, CNPJ, razão social, nome | Não (mas protegido pelo sigilo fiscal) |
 | Econômico-financeiro | Faturamento, NFS-e, declarações | Não (mas sob sigilo fiscal) |
 | Cadastral | Endereço, e-mail, telefone | Não |
@@ -84,7 +84,7 @@ Citar política em politica-retencao.md. Para dados fiscais, mínimo 5 anos
 ## 10. Riscos identificados
 
 | Risco | Probabilidade | Impacto | Tratamento | Risco residual |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | Vazamento de dado identificável | | | | |
 | Acesso não autorizado | | | | |
 | Reidentificação de pseudonimizado | | | | |
@@ -103,7 +103,7 @@ Use escala: Baixa / Média / Alta.
 Como esta operação atende cada direito (art. 18 LGPD):
 
 | Direito | Como é atendido |
-|---|---|
+| --- | --- |
 | Confirmação | Portal do cidadão (módulo 4) |
 | Acesso | Portal do cidadão |
 | Correção | Portal + canal DPO |
@@ -123,9 +123,9 @@ Detalhes da explicabilidade:
 
 ## 14. Aprovação
 
-- **Elaborado por:** ____________________ Data: ___/___/___
-- **Revisado pelo DPO:** ____________________ Data: ___/___/___
-- **Aprovado pelo gestor:** ____________________ Data: ___/___/___
+- **Elaborado por:** ____________________ Data: _**/**_/___
+- **Revisado pelo DPO:** ____________________ Data: _**/**_/___
+- **Aprovado pelo gestor:** ____________________ Data: _**/**_/___
 
 ## 15. Revisão programada
 

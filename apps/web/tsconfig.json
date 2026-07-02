@@ -1,9 +1,9 @@
 {
-	"extends": "@fiscocheck/tsconfig/nextjs.json",
+	"extends": "@fiscalcheck/tsconfig/nextjs.json",
 	"compilerOptions": {
 		"paths": {
 			"@/*": ["./*"],
-			"@fiscocheck/shared-types": ["../../packages/shared-types/src/index.ts"]
+			"@fiscalcheck/shared-types": ["../../packages/shared-types/src/index.ts"]
 		},
 		"plugins": [{ "name": "next" }]
 	},

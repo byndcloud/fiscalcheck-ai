@@ -1,24 +1,24 @@
 {
-  "name": "@fiscocheck/shared-types",
-  "version": "0.1.0",
-  "private": true,
-  "description": "Tipos TypeScript compartilhados, gerados do OpenAPI da API",
-  "type": "module",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "exports": {
-    ".": "./src/index.ts"
-  },
-  "scripts": {
-    "generate": "openapi-typescript http://localhost:8000/openapi.json -o src/openapi.d.ts",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write .",
-    "typecheck": "tsc --noEmit",
-    "test": "echo \"no tests\" && exit 0"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
-    "openapi-typescript": "^7.4.4",
-    "typescript": "^5.7.2"
-  }
+	"name": "@fiscalcheck/shared-types",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Tipos TypeScript compartilhados, gerados do OpenAPI da API",
+	"type": "module",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"generate": "openapi-typescript http://localhost:8000/openapi.json -o src/openapi.d.ts",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"typecheck": "tsc --noEmit",
+		"test": "echo \"no tests\" && exit 0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"openapi-typescript": "^7.4.4",
+		"typescript": "^5.7.2"
+	}
 }

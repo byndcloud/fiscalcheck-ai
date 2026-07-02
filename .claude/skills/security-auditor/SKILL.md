@@ -9,7 +9,7 @@ Use this skill to find security problems **that matter**, with **low false-posit
 
 ## First reference (required)
 
-> **`references/00-fiscocheck-context.md`** — FiscoCheck threat model (taxpayer PII, art. 198 CTN, LGPD, audit chain-of-custody), critical paths (`core/security.py`, `core/config.py`, `modules/compliance/**`, `alembic/versions/*`), high-prior patterns to find (PII in logs, LLM without pseudonymization, mutable audit log, etc.), severity calibration, and finding format. **Read this before any other reference in this skill** — it sets priorities and overrides generic OWASP framing.
+> **`references/00-fiscalcheck-context.md`** — FiscalCheck threat model (taxpayer PII, art. 198 CTN, LGPD, audit chain-of-custody), critical paths (`core/security.py`, `core/config.py`, `modules/compliance/**`, `alembic/versions/*`), high-prior patterns to find (PII in logs, LLM without pseudonymization, mutable audit log, etc.), severity calibration, and finding format. **Read this before any other reference in this skill** — it sets priorities and overrides generic OWASP framing.
 
 ## Core principles
 

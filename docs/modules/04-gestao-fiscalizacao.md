@@ -1,7 +1,7 @@
 # Módulo 4 — Gestão da Fiscalização e Autorregularização
 
 > Orquestração do ciclo do caso, do indício à regularização — sempre com decisão do auditor.
-> Pasta: `apps/api/src/fiscocheck_api/modules/cases/`.
+> Pasta: `apps/api/src/fiscalcheck_api/modules/cases/`.
 
 ## Objetivo (do edital)
 
@@ -18,7 +18,7 @@
 
 ## Arquitetura interna
 
-```
+```text
 modules/cases/
 ├── router.py
 ├── service.py

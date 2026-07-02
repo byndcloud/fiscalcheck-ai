@@ -8,4 +8,4 @@ from sqlalchemy.orm import DeclarativeBase
 
 
 class Base(DeclarativeBase):
-    """Base de todas as models do FiscoCheck AI."""
+    """Base de todas as models do FiscalCheck AI."""

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
 	title: "Entrar",
-	description: "Autenticação de auditor fiscal — FiscoCheck AI",
+	description: "Autenticação de auditor fiscal — FiscalCheck AI",
 };
 
 export default function LoginPage() {

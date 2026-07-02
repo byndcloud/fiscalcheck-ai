@@ -1,4 +1,4 @@
-# FiscoCheck AI
+# FiscalCheck AI
 
 > Plataforma de **Inteligência Fiscal Agêntica** para a Secretaria Municipal da Fazenda de Brusque/SC.
 >
@@ -55,7 +55,7 @@ Especificações detalhadas em [`docs/modules/`](./docs/modules/).
 ## Stack técnica
 
 | Camada | Tecnologia | Justificativa |
-|---|---|---|
+| --- | --- | --- |
 | Frontend | Next.js 15 (App Router) + TypeScript | SSR/Streaming para painéis pesados, contratos tipados |
 | UI | Tailwind CSS v4 + shadcn/ui | Design system controlado pelo time; tokens nativos no CSS |
 | Estado | Zustand + TanStack Query v5 | Estado local simples + cache de servidor robusto |
@@ -71,7 +71,7 @@ Especificações detalhadas em [`docs/modules/`](./docs/modules/).
 ## Estrutura do repositório
 
 ```text
-fiscocheck-ai/
+fiscalcheck-ai/
 ├── apps/
 │   ├── web/                  # Next.js 15 — UI do auditor
 │   └── api/                  # FastAPI — agentes, ETL, ML
@@ -107,8 +107,8 @@ No Replit, tudo isso já vem provisionado pelo [`replit.nix`](./replit.nix).
 
 ```powershell
 # 1. Clonar e instalar dependências
-git clone <repo-url> fiscocheck-ai
-cd fiscocheck-ai
+git clone <repo-url> fiscalcheck-ai
+cd fiscalcheck-ai
 pnpm install
 
 # 2. Copiar variáveis de ambiente
@@ -136,7 +136,7 @@ No **Replit**, basta clicar em **Run** — o workflow `Dev (web + api)` sobe amb
 ## Scripts disponíveis
 
 | Comando | Descrição |
-|---|---|
+| --- | --- |
 | `pnpm dev` | Roda `apps/web` e `apps/api` em paralelo |
 | `pnpm web:dev` | Apenas o frontend Next.js |
 | `pnpm api:dev` | Apenas o backend FastAPI |
@@ -186,4 +186,4 @@ Documentação detalhada em [`docs/compliance/`](./docs/compliance/).
 
 ---
 
-**FiscoCheck AI** — porque a atenção do auditor vale muito.
+**FiscalCheck AI** — porque a atenção do auditor vale muito.

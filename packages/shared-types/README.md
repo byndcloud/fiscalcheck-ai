@@ -1,4 +1,4 @@
-# @fiscocheck/shared-types
+# @fiscalcheck/shared-types
 
 Tipos TS compartilhados, **gerados** do schema OpenAPI da API.
 
@@ -11,13 +11,13 @@ Tipos TS compartilhados, **gerados** do schema OpenAPI da API.
 pnpm api:dev
 
 # 2. Em outro shell, gere os tipos
-pnpm --filter @fiscocheck/shared-types generate
+pnpm --filter @fiscalcheck/shared-types generate
 ```
 
 Os tipos gerados ficam em `src/openapi.d.ts`. Importe em `apps/web` como:
 
 ```ts
-import type { components, paths } from "@fiscocheck/shared-types";
+import type { components, paths } from "@fiscalcheck/shared-types";
 
 type Auditor = components["schemas"]["Auditor"];
 type ListCasesResponse = paths["/cases"]["get"]["responses"]["200"]["content"]["application/json"];

@@ -1,6 +1,6 @@
 # 03 — Agentes LangGraph (human-in-the-loop)
 
-> Decisão de stack em [`ADR-0001`](../../../../docs/adr/0001-stack-inicial.md). Cada agente vive em [`apps/api/src/fiscocheck_api/agents/<nome>/graph.py`](../../../../apps/api/src/fiscocheck_api/agents/).
+> Decisão de stack em [`ADR-0001`](../../../../docs/adr/0001-stack-inicial.md). Cada agente vive em [`apps/api/src/fiscalcheck_api/agents/<nome>/graph.py`](../../../../apps/api/src/fiscalcheck_api/agents/).
 
 ## 1. Por que LangGraph
 
@@ -33,8 +33,8 @@ from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.graph import END, StateGraph
 from langgraph.types import interrupt
 
-from fiscocheck_api.core.logging import get_logger
-from fiscocheck_api.core.security import pseudonymize
+from fiscalcheck_api.core.logging import get_logger
+from fiscalcheck_api.core.security import pseudonymize
 
 logger = get_logger(__name__)
 
@@ -110,7 +110,7 @@ def build_graph(checkpointer: PostgresSaver):
 # modules/cases/router.py (trecho)
 from langgraph.checkpoint.postgres import PostgresSaver
 
-from fiscocheck_api.agents.triage_assistant.graph import build_graph
+from fiscalcheck_api.agents.triage_assistant.graph import build_graph
 
 
 @router.post("/triage/{case_id}")

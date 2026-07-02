@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from fiscocheck_api.core.config import get_settings
+from fiscalcheck_api.core.config import get_settings
 
 _settings = get_settings()
 

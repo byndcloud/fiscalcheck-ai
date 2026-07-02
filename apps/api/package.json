@@ -1,19 +1,19 @@
 {
-  "name": "@fiscocheck/api",
-  "version": "0.1.0",
-  "private": true,
-  "description": "FiscoCheck AI — Backend FastAPI (agentes IA, ETL, ML, graph analytics)",
-  "scripts": {
-    "dev": "uv run uvicorn fiscocheck_api.main:app --reload --host 0.0.0.0 --port 8000",
-    "start": "uv run uvicorn fiscocheck_api.main:app --host 0.0.0.0 --port 8000",
-    "build": "echo \"Python apps are not bundled; deploy uses uv sync.\"",
-    "lint": "uv run ruff check . && uv run ruff format --check .",
-    "lint:fix": "uv run ruff check --fix . && uv run ruff format .",
-    "format": "uv run ruff format .",
-    "format:check": "uv run ruff format --check .",
-    "typecheck": "uv run pyright",
-    "test": "uv run pytest -q",
-    "migrate": "uv run alembic upgrade head",
-    "migrate:new": "uv run alembic revision --autogenerate -m"
-  }
+	"name": "@fiscalcheck/api",
+	"version": "0.1.0",
+	"private": true,
+	"description": "FiscalCheck AI — Backend FastAPI (agentes IA, ETL, ML, graph analytics)",
+	"scripts": {
+		"dev": "uv run uvicorn fiscalcheck_api.main:app --reload --host 0.0.0.0 --port 8000",
+		"start": "uv run uvicorn fiscalcheck_api.main:app --host 0.0.0.0 --port 8000",
+		"build": "echo \"Python apps are not bundled; deploy uses uv sync.\"",
+		"lint": "uv run ruff check . && uv run ruff format --check .",
+		"lint:fix": "uv run ruff check --fix . && uv run ruff format .",
+		"format": "uv run ruff format .",
+		"format:check": "uv run ruff format --check .",
+		"typecheck": "uv run pyright",
+		"test": "uv run pytest -q",
+		"migrate": "uv run alembic upgrade head",
+		"migrate:new": "uv run alembic revision --autogenerate -m"
+	}
 }

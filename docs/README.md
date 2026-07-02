@@ -1,11 +1,11 @@
-# Documentação — FiscoCheck AI
+# Documentação — FiscalCheck AI
 
 Índice geral da documentação do projeto.
 
 ## Estrutura
 
 | Pasta | Conteúdo |
-|---|---|
+| --- | --- |
 | [`architecture/`](./architecture/) | Visão arquitetural, modelo de dados, diagramas |
 | [`adr/`](./adr/) | Architecture Decision Records (decisões auditáveis) |
 | [`compliance/`](./compliance/) | LGPD, sigilo fiscal, RIPD, ROPA, retenção, incidentes |

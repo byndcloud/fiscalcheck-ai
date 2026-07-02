@@ -1,4 +1,4 @@
-# CODEOWNERS — FiscoCheck AI
+# CODEOWNERS — FiscalCheck AI
 #
 # Define quem revisa cada parte do código. PRs que tocam estes
 # arquivos exigem revisão dos owners listados (configurar branch
@@ -18,11 +18,11 @@ packages/shared-types/**            @owner-frontend @owner-backend
 
 # Backend / agentes / ETL / ML
 apps/api/**                         @owner-backend
-apps/api/src/fiscocheck_api/agents/** @owner-backend @owner-ai
-apps/api/src/fiscocheck_api/modules/ai/** @owner-ai
+apps/api/src/fiscalcheck_api/agents/** @owner-backend @owner-ai
+apps/api/src/fiscalcheck_api/modules/ai/** @owner-ai
 
 # Compliance / segurança — REQUER security-auditor
-apps/api/src/fiscocheck_api/modules/compliance/** @owner-security @owner-backend
+apps/api/src/fiscalcheck_api/modules/compliance/** @owner-security @owner-backend
 docs/compliance/**                  @owner-security
 SECURITY.md                         @owner-security
 

@@ -1,7 +1,7 @@
 # Módulo 7 — Suporte, Capacitação e Funcionalidades Adicionais
 
 > Adoção pela equipe, transferência de conhecimento e diferenciais agênticos de TRL elevado.
-> Pasta: `apps/api/src/fiscocheck_api/modules/support/`.
+> Pasta: `apps/api/src/fiscalcheck_api/modules/support/`.
 
 ## Objetivo (do edital)
 
@@ -18,7 +18,7 @@
 
 ## Arquitetura interna
 
-```
+```text
 modules/support/
 ├── router.py
 ├── service.py

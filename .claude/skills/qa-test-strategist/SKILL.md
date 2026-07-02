@@ -11,7 +11,7 @@ The skill is **stack-agnostic**. It picks the *kind* of tests that fit the featu
 
 ## First reference (required)
 
-> **`references/00-fiscocheck-context.md`** — fiscal-domain constraints (LGPD, sigilo fiscal, art. 198 CTN), golden tests for modules 2 & 3, pseudonymized fixtures in `apps/api/tests/fixtures/`, Vitest + pytest setup, append-only audit log testing rules. **Read this before any other reference in this skill** — it restricts and overrides generic advice from the others.
+> **`references/00-fiscalcheck-context.md`** — fiscal-domain constraints (LGPD, sigilo fiscal, art. 198 CTN), golden tests for modules 2 & 3, pseudonymized fixtures in `apps/api/tests/fixtures/`, Vitest + pytest setup, append-only audit log testing rules. **Read this before any other reference in this skill** — it restricts and overrides generic advice from the others.
 
 ## Core principle
 

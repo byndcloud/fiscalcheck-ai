@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Instruções específicas para **Claude Code** e **Replit Agent** atuando no FiscoCheck AI.
+Instruções específicas para **Claude Code** e **Replit Agent** atuando no FiscalCheck AI.
 
 > Este arquivo **estende** [`AGENTS.md`](./AGENTS.md). Leia o `AGENTS.md` primeiro — ele contém os princípios não-negociáveis (human-in-the-loop, LGPD, RBAC, idioma).
 
@@ -13,19 +13,19 @@ Skills do Claude Code ficam em [`.claude/skills/`](./.claude/skills/). Cada skil
 Skills neste projeto:
 
 | Pasta | `name` no frontmatter | Status | Foco |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `frontend/` | `frontend` | Ativa | Next.js 15, Tailwind v4, shadcn/ui, TanStack Query, Zustand |
 | `backend/` | `backend` | Ativa | FastAPI, SQLAlchemy 2.0, Polars (ETL), LangGraph (agentes), Alembic |
 | `qa-test-strategist/` | `qa-test-strategist` | Ativa | Estratégia de testes; Vitest, pytest, golden tests fiscais, evals de LLM |
 | `security-auditor/` | `security-auditor` | Ativa | Revisão LGPD, sigilo fiscal (art. 198 CTN), RBAC, cadeia de custódia |
 
-**Como usar uma skill:** quando o usuário pedir uma tarefa que case com a `description` do `SKILL.md`, **leia o `SKILL.md` correspondente** e siga suas instruções. Cada skill tem em `references/00-fiscocheck-context.md` o contexto **obrigatório** do projeto — leia-o antes de qualquer outra referência da mesma skill.
+**Como usar uma skill:** quando o usuário pedir uma tarefa que case com a `description` do `SKILL.md`, **leia o `SKILL.md` correspondente** e siga suas instruções. Cada skill tem em `references/00-fiscalcheck-context.md` o contexto **obrigatório** do projeto — leia-o antes de qualquer outra referência da mesma skill.
 
 ---
 
 ## 2. Contexto do produto (resumo)
 
-FiscoCheck AI = triagem fiscal agêntica para a Secretaria da Fazenda de Brusque/SC.
+FiscalCheck AI = triagem fiscal agêntica para a Secretaria da Fazenda de Brusque/SC.
 
 7 módulos, todos com decisão humana:
 
@@ -48,7 +48,7 @@ Mapa pasta → módulo está em [`AGENTS.md` § 2.2](./AGENTS.md).
 - **`.env`**, **`*.local`**, **`secrets/`** — segredos; **nunca** ler/expor/commitar conteúdo.
 - **`docs/compliance/*`** — base legal e procedimentos LGPD/sigilo fiscal; mudanças exigem revisão da `security-auditor` skill.
 - **`docs/adr/*`** — decisões arquiteturais imutáveis após "Accepted". Use `Superseded` em vez de editar.
-- **`apps/api/src/fiscocheck_api/modules/compliance/`** — código de auditoria, logs imutáveis, RBAC. Quebrar isto = quebrar a defensabilidade legal da plataforma.
+- **`apps/api/src/fiscalcheck_api/modules/compliance/`** — código de auditoria, logs imutáveis, RBAC. Quebrar isto = quebrar a defensabilidade legal da plataforma.
 - **`apps/api/alembic/versions/*`** — migrations já aplicadas em produção **nunca** são editadas; gere uma nova.
 
 ### Dados de contribuintes (CPF, CNPJ, valores, NFS-e)

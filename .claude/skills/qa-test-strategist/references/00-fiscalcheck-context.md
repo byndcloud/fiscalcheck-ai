@@ -1,4 +1,4 @@
-# 00 — Contexto FiscoCheck AI (leitura obrigatória)
+# 00 — Contexto FiscalCheck AI (leitura obrigatória)
 
 > **Esta é a primeira referência da skill `qa-test-strategist`.** Leia antes de `strategy.md`, `unit-tests.md`, etc. As demais são genéricas — este arquivo as restringe ao projeto.
 
@@ -17,8 +17,8 @@ Conforme [`AGENTS.md` §5](../../../../AGENTS.md):
 
 | Stack | Framework | Onde | Como rodar |
 |---|---|---|---|
-| Frontend | **Vitest** + `@testing-library/react` + `jsdom` | [`apps/web/tests/`](../../../../apps/web/tests/) (config em [`vitest.config.ts`](../../../../apps/web/vitest.config.ts)) | `pnpm --filter @fiscocheck/web test` ou `pnpm test` |
-| Backend | **pytest** + `pytest-asyncio` (modo `auto`) + `httpx.AsyncClient` | [`apps/api/tests/`](../../../../apps/api/tests/) (config em [`pyproject.toml`](../../../../apps/api/pyproject.toml) `[tool.pytest.ini_options]`) | `uv run pytest -q` no `apps/api/` ou `pnpm --filter @fiscocheck/api test` |
+| Frontend | **Vitest** + `@testing-library/react` + `jsdom` | [`apps/web/tests/`](../../../../apps/web/tests/) (config em [`vitest.config.ts`](../../../../apps/web/vitest.config.ts)) | `pnpm --filter @fiscalcheck/web test` ou `pnpm test` |
+| Backend | **pytest** + `pytest-asyncio` (modo `auto`) + `httpx.AsyncClient` | [`apps/api/tests/`](../../../../apps/api/tests/) (config em [`pyproject.toml`](../../../../apps/api/pyproject.toml) `[tool.pytest.ini_options]`) | `uv run pytest -q` no `apps/api/` ou `pnpm --filter @fiscalcheck/api test` |
 | Lint estático | Biome (web), Ruff + Pyright (api) | — | `pnpm lint && pnpm typecheck` |
 
 Marcadores pytest disponíveis:
@@ -95,7 +95,7 @@ Convenção quando criar fixtures novas em `apps/api/tests/fixtures/`:
 - **Valores monetários**: distribuição plausível (lognormal entre R$ 100 e R$ 1M para NFS-e), não múltiplos de 1000.
 - **Documente a fixture** em um `README.md` na subpasta explicando o que ela representa.
 
-## 7. Anti-padrões específicos do FiscoCheck
+## 7. Anti-padrões específicos do FiscalCheck
 
 - ❌ Teste que mocka `pseudonymize` para retornar o valor original — perde o propósito.
 - ❌ Golden test sem versionamento explícito do golden no Git (não pode regenerar silenciosamente em CI).
@@ -104,9 +104,9 @@ Convenção quando criar fixtures novas em `apps/api/tests/fixtures/`:
 - ❌ Coverage como meta — 100% com asserts `expect(x).toBeDefined()` é pior que 60% com asserts que protegem comportamento fiscal.
 - ❌ Dados reais de Brusque/SC em fixture, mesmo "só uma vez para testar". Use Faker.
 
-## 8. Relatório do plano (extensão FiscoCheck)
+## 8. Relatório do plano (extensão FiscalCheck)
 
-Quando emitir o "Test plan validation report" (Phase 6 do `SKILL.md`), adicione duas linhas FiscoCheck na nota dos itens aplicáveis:
+Quando emitir o "Test plan validation report" (Phase 6 do `SKILL.md`), adicione duas linhas FiscalCheck na nota dos itens aplicáveis:
 
 - **Módulo afetado** (1–7) — para rastreabilidade.
 - **Impacto LGPD/sigilo** — se a feature toca dado de contribuinte, descreva como o teste cobre pseudonimização e/ou ausência de PII em logs/payloads de erro.

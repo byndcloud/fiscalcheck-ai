@@ -8,7 +8,7 @@ Este projeto roda **direto no Replit** sem ajustes manuais: o [`replit.nix`](./r
 
 ## 1. Criar o Repl
 
-1. **Create Repl → Import from GitHub** → selecione o repositório `fiscocheck-ai`.
+1. **Create Repl → Import from GitHub** → selecione o repositório `fiscalcheck-ai`.
 2. Aguarde o Replit baixar dependências do Nix (primeira vez leva 3–5 minutos).
 3. O botão **Run** já está configurado para subir o workflow `Dev (web + api)`.
 
@@ -19,12 +19,12 @@ Este projeto roda **direto no Replit** sem ajustes manuais: o [`replit.nix`](./r
 No painel **Secrets** do Replit, configure pelo menos:
 
 | Chave | Origem |
-|---|---|
+| --- | --- |
 | `DATABASE_URL` | Replit Postgres (ou seu próprio) |
 | `REDIS_URL` | Replit Redis (ou seu próprio) |
 | `JWT_SECRET` | `openssl rand -hex 32` |
 | `NEXTAUTH_SECRET` | `openssl rand -hex 32` |
-| `NEXTAUTH_URL` | URL pública do Repl (ex.: `https://fiscocheck-ai.<usuario>.repl.co`) |
+| `NEXTAUTH_URL` | URL pública do Repl (ex.: `https://fiscalcheck-ai.<usuario>.repl.co`) |
 | `NEXT_PUBLIC_API_URL` | URL pública da API |
 | `OPENAI_API_KEY` | OpenAI (módulos 3 e 7) |
 | `PSEUDONYMIZATION_SALT` | `openssl rand -hex 32` (não compartilhar com JWT_SECRET) |
@@ -38,12 +38,12 @@ A lista completa está em [`.env.example`](./.env.example).
 ## 3. Workflows configurados
 
 | Workflow | Comando | Quando usar |
-|---|---|---|
+| --- | --- | --- |
 | `Dev (web + api)` | `pnpm dev` | Default. Sobe Next.js (porta 3000) e FastAPI (porta 8000) em paralelo. |
 | `Web only` | `pnpm web:dev` | Trabalhando só no frontend. |
 | `API only` | `pnpm api:dev` | Trabalhando só no backend / agentes. |
 | `Tests (all)` | `pnpm test` | Validar antes de PR. |
-| `DB migrate` | `pnpm --filter @fiscocheck/api migrate` | Aplicar migrations Alembic (`alembic upgrade head`). |
+| `DB migrate` | `pnpm --filter @fiscalcheck/api migrate` | Aplicar migrations Alembic (`alembic upgrade head`). |
 
 Trocar de workflow: clique na seta ao lado do botão **Run** → escolha.
 
@@ -62,14 +62,14 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS vector;
 ```
 
-Para experimentar a stack completa com `Apache AGE` (útil ao preparar a migração para nuvem nacional), use o `docker-compose` em [`infra/docker-compose.yml`](./infra/docker-compose.yml) **fora** do Replit — a imagem `apache/age:PG16_latest` já inclui o pacote de extensões e o init em [`infra/postgres-init-age.sql`](./infra/postgres-init-age.sql) cria o grafo `fisco_graph`.
+Para experimentar a stack completa com `Apache AGE` (útil ao preparar a migração para nuvem nacional), use o `docker-compose` em [`infra/docker-compose.yml`](./infra/docker-compose.yml) **fora** do Replit — a imagem `apache/age:PG16_latest` já inclui o pacote de extensões e o init em [`infra/postgres-init-age.sql`](./infra/postgres-init-age.sql) cria o grafo `fiscal_graph`.
 
 ---
 
 ## 5. Portas expostas
 
 | Porta interna | Porta externa | Serviço |
-|---|---|---|
+| --- | --- | --- |
 | 3000 | 80 (HTTPS público) | Next.js (frontend) |
 | 8000 | 8000 | FastAPI (backend) |
 
@@ -90,7 +90,7 @@ Os agentes do módulo 1 (ingestão) e 2 (cruzamento) operam **24/7**. Para o pil
 ## 7. Troubleshooting
 
 | Sintoma | Provável causa | Solução |
-|---|---|---|
+| --- | --- | --- |
 | `pnpm: command not found` | Corepack não inicializado | `corepack enable && corepack prepare pnpm@latest --activate` |
 | `uv: command not found` | `replit.nix` não foi rebuildado | Stop Repl → Run novamente (rebuilda Nix) |
 | `Postgres: connection refused` | Serviço Postgres do Replit não iniciou | Reabra a aba **Database** no Replit |

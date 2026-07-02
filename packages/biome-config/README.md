@@ -1,4 +1,4 @@
-# @fiscocheck/biome-config
+# @fiscalcheck/biome-config
 
 Configuração [Biome](https://biomejs.dev) compartilhada.
 

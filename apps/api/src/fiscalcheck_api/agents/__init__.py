@@ -1,4 +1,4 @@
-"""Agentes IA do FiscoCheck (LangGraph).
+"""Agentes IA do FiscalCheck (LangGraph).
 
 Cada agente é uma máquina de estado com `human-in-the-loop` nativo:
 o LangGraph oferece nós de interrupção para aguardar decisão do

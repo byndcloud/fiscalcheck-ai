@@ -8,19 +8,19 @@
 
 Em outras palavras: **dado fiscal não pode vazar.** Ponto.
 
-## Implicações para o FiscoCheck AI
+## Implicações para o FiscalCheck AI
 
 ### Quem pode acessar
 
 | Papel | Pode ver dado identificável? | Pode ver agregados? |
-|---|---|---|
+| --- | --- | --- |
 | `auditor` | Sim, dos contribuintes da sua carteira | Sim |
 | `supervisor` | Sim, da equipe sob sua supervisão | Sim |
 | `admin` | Apenas para configurar a plataforma; NÃO para operação fiscal | Sim |
 | `cidadao` | Apenas dados sobre **si mesmo** | Não |
 | `agente_sistema` | Sim (operações automatizadas), com tudo logado | Sim |
 
-Implementação: RBAC em `apps/api/src/fiscocheck_api/modules/compliance/rbac/`.
+Implementação: RBAC em `apps/api/src/fiscalcheck_api/modules/compliance/rbac/`.
 
 ### Onde o dado pode estar
 

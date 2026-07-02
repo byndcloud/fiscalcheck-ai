@@ -1,5 +1,5 @@
 /**
- * Cliente HTTP do FiscoCheck AI.
+ * Cliente HTTP do FiscalCheck AI.
  *
  * - Centraliza base URL e headers.
  * - Adiciona `X-Correlation-Id` por requisição para casar com o

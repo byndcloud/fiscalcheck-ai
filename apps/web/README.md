@@ -1,6 +1,6 @@
-# @fiscocheck/web
+# @fiscalcheck/web
 
-Frontend Next.js 15 (App Router) do **FiscoCheck AI** — a UI dos auditores fiscais.
+Frontend Next.js 15 (App Router) do **FiscalCheck AI** — a UI dos auditores fiscais.
 
 ## Stack
 
@@ -28,7 +28,7 @@ pnpm test         # vitest run
 
 ## Estrutura
 
-```
+```text
 app/                  # rotas (App Router)
 ├── (auth)/login      # autenticação
 ├── (dashboard)/      # área autenticada
@@ -48,10 +48,10 @@ tests/                # Vitest
 
 ## Aliases
 
-| Alias | Aponta para |
-|---|---|
-| `@/*` | `apps/web/*` |
-| `@fiscocheck/shared-types` | `packages/shared-types/src/index.ts` |
+| Alias                       | Aponta para                          |
+| --------------------------- | ------------------------------------ |
+| `@/*`                       | `apps/web/*`                         |
+| `@fiscalcheck/shared-types` | `packages/shared-types/src/index.ts` |
 
 ## Como adicionar componentes shadcn/ui
 

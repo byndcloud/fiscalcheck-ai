@@ -1,11 +1,20 @@
-FiscoCheck AI · Tipografia institucional
-========================================
+FiscalCheck AI · Tipografia institucional (fallback aceito)
+===========================================================
 
 Arquivos:
   - rawline-400.woff2
   - rawline-600.woff2
   - rawline-700.woff2
   - rawline-800.woff2
+
+Status na v2.0 do DS
+--------------------
+A partir do FiscalCheck Design System v2.0 (docs/design-system/design-system.md
+§4 e §12), a face canônica de UI passou a ser a Raleway, servida via Google
+Fonts. A Rawline permanece como **equivalente institucional aceito** para
+contextos gov.br: os arquivos .woff2 continuam auto-hospedados neste diretório
+e entram apenas como fallback declarativo na pilha --font-ui de globals.css.
+Eles não são mais carregados por padrão via next/font.
 
 Origem
 ------
@@ -21,8 +30,8 @@ Repositório de referência:
 
 Pesos incluídos
 ---------------
-Apenas os pesos consumidos pela escala tipográfica do FiscoCheck Design System
-(docs/design-system/design-system.md §4):
+Pesos originalmente selecionados para cobrir a escala tipográfica do
+FiscalCheck Design System (mantidos como fallback institucional aceito):
 
   400  Corpo
   600  Label, dados secundários

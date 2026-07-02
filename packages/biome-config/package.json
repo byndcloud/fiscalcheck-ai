@@ -1,7 +1,7 @@
 {
-  "name": "@fiscocheck/biome-config",
-  "version": "0.1.0",
-  "private": true,
-  "description": "Configuração Biome compartilhada do FiscoCheck AI",
-  "files": ["biome.json"]
+	"name": "@fiscalcheck/biome-config",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Configuração Biome compartilhada do FiscalCheck AI",
+	"files": ["biome.json"]
 }

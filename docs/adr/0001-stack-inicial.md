@@ -9,7 +9,7 @@
 
 ## Contexto
 
-O FiscoCheck AI atende ao Edital CPSI — Município de Brusque/SC, para uma plataforma de **inteligência fiscal agêntica** com:
+O FiscalCheck AI atende ao Edital CPSI — Município de Brusque/SC, para uma plataforma de **inteligência fiscal agêntica** com:
 
 - Agentes IA 24/7 (ingestão, cruzamento, calibragem, orquestração, copilot).
 - ETL de grandes volumes (NFS-e, DIMP, ECD, DEFIS, PGDAS).

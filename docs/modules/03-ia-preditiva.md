@@ -1,7 +1,7 @@
 # Módulo 3 — Inteligência Artificial e Análise Preditiva
 
 > Priorização baseada em risco, com explicabilidade e melhoria contínua.
-> Pasta: `apps/api/src/fiscocheck_api/modules/ai/`.
+> Pasta: `apps/api/src/fiscalcheck_api/modules/ai/`.
 
 ## Objetivo (do edital)
 
@@ -17,7 +17,7 @@
 
 ## Arquitetura interna
 
-```
+```text
 modules/ai/
 ├── router.py
 ├── service.py

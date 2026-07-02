@@ -1,6 +1,6 @@
 # Modelo de Dados — visão preliminar
 
-> Este documento descreve o **modelo conceitual** dos dados do FiscoCheck AI. O modelo físico será materializado em migrations Alembic conforme cada módulo entrar em desenvolvimento.
+> Este documento descreve o **modelo conceitual** dos dados do FiscalCheck AI. O modelo físico será materializado em migrations Alembic conforme cada módulo entrar em desenvolvimento.
 
 ## Entidades principais
 

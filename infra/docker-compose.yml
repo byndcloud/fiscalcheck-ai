@@ -1,4 +1,4 @@
-name: fiscocheck-ai
+name: fiscalcheck-ai
 
 # Convenção de perfis (ver ADR-0002):
 #   default → postgres (com pgvector) + redis. Cobre o MVP e bate com Replit.
@@ -15,13 +15,13 @@ services:
     # Imagem oficial 16 — equivalente ao Replit Postgres no que diz respeito
     # a extensões disponíveis. pgvector é instalado via postgres-init.sql.
     image: postgres:16-alpine
-    container_name: fiscocheck-postgres
+    container_name: fiscalcheck-postgres
     profiles:
       - default
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: fiscocheck
+      POSTGRES_DB: fiscalcheck
       POSTGRES_INITDB_ARGS: "--locale=pt_BR.UTF-8"
       LANG: pt_BR.UTF-8
     ports:
@@ -30,7 +30,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres-init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d fiscocheck"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fiscalcheck"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -40,13 +40,13 @@ services:
     # Imagem apache/age inclui pgvector e Apache AGE. Use só quando precisar
     # exercitar AgeGraphStore localmente — não é a topologia do MVP.
     image: apache/age:PG16_latest
-    container_name: fiscocheck-postgres-age
+    container_name: fiscalcheck-postgres-age
     profiles:
       - graph
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: fiscocheck
+      POSTGRES_DB: fiscalcheck
       POSTGRES_INITDB_ARGS: "--locale=pt_BR.UTF-8"
       LANG: pt_BR.UTF-8
     ports:
@@ -56,7 +56,7 @@ services:
       - ./postgres-init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
       - ./postgres-init-age.sql:/docker-entrypoint-initdb.d/01-init-age.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d fiscocheck"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fiscalcheck"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -64,7 +64,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: fiscocheck-redis
+    container_name: fiscalcheck-redis
     profiles:
       - default
       - graph
@@ -82,7 +82,7 @@ services:
   # mailhog para testar notificações de e-mail em dev
   mailhog:
     image: mailhog/mailhog:latest
-    container_name: fiscocheck-mailhog
+    container_name: fiscalcheck-mailhog
     profiles:
       - dev
     ports:

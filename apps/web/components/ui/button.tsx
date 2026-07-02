@@ -5,7 +5,7 @@ import type * as React from "react";
 import { cn } from "@/lib/utils";
 
 /*
-  FiscoCheck DS — Botão (docs/design-system/design-system.md §7).
+  FiscalCheck DS — Botão (docs/design-system/design-system.md §7).
   - Formato pílula (rounded-full ≙ --r-pill) em todas as variantes.
   - Foco visível obrigatório: anel 3px em --c-brand-300, offset 2px.
   - `default` (primário institucional) → ações de efeito jurídico (RF04/FA04).

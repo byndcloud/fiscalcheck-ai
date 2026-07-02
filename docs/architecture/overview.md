@@ -1,4 +1,4 @@
-# Visão Arquitetural — FiscoCheck AI
+# Visão Arquitetural — FiscalCheck AI
 
 ## Contexto
 
@@ -85,7 +85,7 @@ flowchart TB
 ## Stack
 
 | Camada | Tecnologia |
-|---|---|
+| --- | --- |
 | Frontend | Next.js 15 + TS + Tailwind v4 + shadcn/ui |
 | Estado | Zustand (UI) + TanStack Query v5 (servidor) |
 | Backend | FastAPI + Python 3.12 (async) |
