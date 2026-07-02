@@ -32,13 +32,13 @@ uv run alembic current
 Atalhos no `package.json`:
 
 ```powershell
-pnpm --filter @fiscocheck/api migrate          # = uv run alembic upgrade head
-pnpm --filter @fiscocheck/api migrate:new "modulo: descricao"
+pnpm --filter @fiscalcheck/api migrate          # = uv run alembic upgrade head
+pnpm --filter @fiscalcheck/api migrate:new "modulo: descricao"
 ```
 
 ## 3. Workflow padrão
 
-1. Altere `models.py` no módulo (ex.: novo campo em [`modules/cases/models.py`](../../../../apps/api/src/fiscocheck_api/modules/cases/models.py)).
+1. Altere `models.py` no módulo (ex.: novo campo em [`modules/cases/models.py`](../../../../apps/api/src/fiscalcheck_api/modules/cases/models.py)).
 2. Gere migration: `uv run alembic revision --autogenerate -m "cases: adicionar field X"`.
 3. **Revise o arquivo gerado** — autogenerate é assistido, não infalível. Ajuste constraints, índices, defaults.
 4. Aplique localmente: `uv run alembic upgrade head`.
@@ -86,7 +86,7 @@ def upgrade() -> None:
 
     # Revoga UPDATE/DELETE para o role do app (append-only por privilégio).
     op.execute("""
-        REVOKE UPDATE, DELETE ON audit_log FROM fiscocheck_app;
+        REVOKE UPDATE, DELETE ON audit_log FROM fiscalcheck_app;
     """)
     # Trigger defensiva (caso o role mude no futuro):
     op.execute("""
@@ -109,7 +109,7 @@ def downgrade() -> None:
     op.drop_table("audit_log")
 ```
 
-> O `revoke` exige que o role `fiscocheck_app` exista. No Replit Postgres o role é fornecido automaticamente; documente o nome em `replit.md` quando o Módulo 6 entrar.
+> O `revoke` exige que o role `fiscalcheck_app` exista. No Replit Postgres o role é fornecido automaticamente; documente o nome em `replit.md` quando o Módulo 6 entrar.
 
 ### 5.2 Particionamento (NFS-e)
 

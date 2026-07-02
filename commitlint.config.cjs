@@ -1,5 +1,5 @@
 /**
- * Conventional Commits — config compartilhada para o monorepo FiscoCheck AI.
+ * Conventional Commits — config compartilhada para o monorepo FiscalCheck AI.
  *
  * Mais detalhes em CONTRIBUTING.md.
  */

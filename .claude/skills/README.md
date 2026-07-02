@@ -11,7 +11,7 @@ Esta pasta contém **skills** que o Claude Code (e Replit Agent) deve consultar 
 | [`qa-test-strategist/`](./qa-test-strategist/) | `qa-test-strategist` | Planejar testes, decidir mix (unit / integração / contract / e2e / property / evals de LLM), auditar suíte |
 | [`security-auditor/`](./security-auditor/) | `security-auditor` | Revisar PR/diff/módulo por segurança (LGPD, sigilo fiscal, RBAC, IDOR, injeção, segredos, etc.) |
 
-Cada skill carrega o contexto FiscoCheck em `references/00-fiscocheck-context.md` (leitura obrigatória antes das demais referências da mesma skill).
+Cada skill carrega o contexto FiscalCheck em `references/00-fiscalcheck-context.md` (leitura obrigatória antes das demais referências da mesma skill).
 
 ## Formato esperado de cada skill
 
@@ -36,8 +36,8 @@ Quando o usuário pede uma tarefa que case com o `description` de uma skill, o C
 
 ## Convenções deste projeto
 
-- **Idioma**: `references/00-fiscocheck-context.md` e qualquer conteúdo novo deste repo em pt-BR. Skills genéricas podem manter referências em inglês quando vieram prontas (são documentos de boa qualidade que não duplicaremos).
-- **Escopo**: o contexto FiscoCheck mora em `references/00-fiscocheck-context.md`. As outras referências podem ser genéricas — o agente combina as duas camadas.
+- **Idioma**: `references/00-fiscalcheck-context.md` e qualquer conteúdo novo deste repo em pt-BR. Skills genéricas podem manter referências em inglês quando vieram prontas (são documentos de boa qualidade que não duplicaremos).
+- **Escopo**: o contexto FiscalCheck mora em `references/00-fiscalcheck-context.md`. As outras referências podem ser genéricas — o agente combina as duas camadas.
 - **Referências**: cite arquivos do repo com caminho relativo (`apps/api/...`).
 - **LGPD e sigilo**: skills de `backend` e `security-auditor` reforçam pseudonimização, RBAC, audit log append-only.
 
@@ -45,7 +45,7 @@ Quando o usuário pede uma tarefa que case com o `description` de uma skill, o C
 
 1. Crie a pasta: `.claude/skills/<nome-em-kebab-case>/`.
 2. Crie `SKILL.md` com frontmatter `name` + `description`.
-3. Crie `references/00-fiscocheck-context.md` com o recorte FiscoCheck (princípios, arquivos críticos, gatilhos automáticos).
+3. Crie `references/00-fiscalcheck-context.md` com o recorte FiscalCheck (princípios, arquivos críticos, gatilhos automáticos).
 4. (Opcional) Adicione `scripts/`, `assets/`, demais `references/`.
 5. Atualize a tabela acima e a tabela em [`../../CLAUDE.md`](../../CLAUDE.md) §1.
 

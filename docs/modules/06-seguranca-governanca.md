@@ -1,7 +1,7 @@
 # Módulo 6 — Segurança, Governança e Conformidade
 
 > Atuação **transversal** a todos os módulos. Sem ele, a plataforma é juridicamente indefensável.
-> Pasta: `apps/api/src/fiscocheck_api/modules/compliance/`.
+> Pasta: `apps/api/src/fiscalcheck_api/modules/compliance/`.
 
 ## Objetivo (do edital)
 
@@ -16,7 +16,7 @@
 
 ## Arquitetura interna
 
-```
+```text
 modules/compliance/
 ├── router.py
 ├── service.py
@@ -42,9 +42,9 @@ modules/compliance/
 Todo módulo importa daqui:
 
 ```python
-from fiscocheck_api.modules.compliance.rbac import require_role
-from fiscocheck_api.modules.compliance.audit import audit_action
-from fiscocheck_api.modules.compliance.parameters import get_param
+from fiscalcheck_api.modules.compliance.rbac import require_role
+from fiscalcheck_api.modules.compliance.audit import audit_action
+from fiscalcheck_api.modules.compliance.parameters import get_param
 
 @router.post("/cases/{id}/decide")
 async def decidir(

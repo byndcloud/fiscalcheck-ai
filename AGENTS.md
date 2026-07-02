@@ -2,7 +2,7 @@
 
 Instruções para **qualquer coding agent** (Claude, GPT, Cursor, Replit Agent, Copilot, etc.) que atue neste repositório.
 
-> Este arquivo é a **fonte da verdade** sobre como agentes devem se comportar no FiscoCheck AI. Arquivos como `CLAUDE.md` apenas estendem o que está aqui.
+> Este arquivo é a **fonte da verdade** sobre como agentes devem se comportar no FiscalCheck AI. Arquivos como `CLAUDE.md` apenas estendem o que está aqui.
 
 ---
 
@@ -55,26 +55,26 @@ Detalhes em [`docs/architecture/overview.md`](./docs/architecture/overview.md).
 ### 2.1 Onde colocar código
 
 | Tipo de mudança | Lugar |
-|---|---|
+| --- | --- |
 | Componente de UI reutilizável | `apps/web/components/ui/` (se shadcn) ou `apps/web/components/` |
 | Página/rota nova | `apps/web/app/.../page.tsx` |
-| Endpoint REST | `apps/api/src/fiscocheck_api/modules/<modulo>/router.py` |
-| Modelo SQLAlchemy | `apps/api/src/fiscocheck_api/modules/<modulo>/models.py` |
-| Agente LangGraph | `apps/api/src/fiscocheck_api/agents/<nome>/graph.py` |
+| Endpoint REST | `apps/api/src/fiscalcheck_api/modules/<modulo>/router.py` |
+| Modelo SQLAlchemy | `apps/api/src/fiscalcheck_api/modules/<modulo>/models.py` |
+| Agente LangGraph | `apps/api/src/fiscalcheck_api/agents/<nome>/graph.py` |
 | Migration | `apps/api/alembic/versions/` (gerado por `alembic revision --autogenerate`) |
 | Tipo TS compartilhado | `packages/shared-types/` (gerado do OpenAPI, **não editar à mão**) |
 
 ### 2.2 Mapa dos 7 módulos → pastas
 
 | Módulo | Pasta |
-|---|---|
-| 1. Ingestão e Qualidade | `apps/api/src/fiscocheck_api/modules/ingestion/` |
-| 2. Cruzamento e Detecção | `apps/api/src/fiscocheck_api/modules/crossing/` |
-| 3. IA Preditiva | `apps/api/src/fiscocheck_api/modules/ai/` |
-| 4. Gestão da Fiscalização | `apps/api/src/fiscocheck_api/modules/cases/` |
-| 5. Monitoramento | `apps/api/src/fiscocheck_api/modules/analytics/` |
-| 6. Segurança e Conformidade | `apps/api/src/fiscocheck_api/modules/compliance/` |
-| 7. Suporte e Copilot | `apps/api/src/fiscocheck_api/modules/support/` |
+| --- | --- |
+| 1. Ingestão e Qualidade | `apps/api/src/fiscalcheck_api/modules/ingestion/` |
+| 2. Cruzamento e Detecção | `apps/api/src/fiscalcheck_api/modules/crossing/` |
+| 3. IA Preditiva | `apps/api/src/fiscalcheck_api/modules/ai/` |
+| 4. Gestão da Fiscalização | `apps/api/src/fiscalcheck_api/modules/cases/` |
+| 5. Monitoramento | `apps/api/src/fiscalcheck_api/modules/analytics/` |
+| 6. Segurança e Conformidade | `apps/api/src/fiscalcheck_api/modules/compliance/` |
+| 7. Suporte e Copilot | `apps/api/src/fiscalcheck_api/modules/support/` |
 
 ---
 
@@ -108,7 +108,7 @@ uv run pytest -q
 - **TanStack Query v5** para todo fetch de dados do servidor. Sem `useEffect` para fetch.
 - **Zustand** apenas para estado de UI local (sidebars, modais, filtros globais). Estado de servidor é Query.
 - **Tipagem estrita**: `noImplicitAny`, `strict: true`. Nunca usar `any` em código novo.
-- **Tipos do backend**: importar de `@fiscocheck/shared-types` (gerados do OpenAPI, não editar à mão).
+- **Tipos do backend**: importar de `@fiscalcheck/shared-types` (gerados do OpenAPI, não editar à mão).
 - **Path aliases**: `@/*` aponta para `apps/web/`.
 
 ### 4.2 Python / FastAPI (apps/api)

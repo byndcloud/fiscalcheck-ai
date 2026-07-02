@@ -5,7 +5,7 @@ Composição Docker para **dev fora do Replit**. No Replit, use o Postgres e o R
 ## Perfis disponíveis
 
 | Perfil | Serviços | Quando usar |
-|---|---|---|
+| --- | --- | --- |
 | `default` (sem flag) | `postgres` (`postgres:16-alpine` + `pgvector`) + `redis` | Espelha o MVP no Replit. Use no dia a dia. |
 | `graph` | `postgres-age` (`apache/age:PG16_latest` com `pgvector` + `Apache AGE`) + `redis` | Exercitar o `AgeGraphStore` em preparação à migração para nuvem nacional. **Não** é a topologia do MVP. |
 | `dev` | `mailhog` (1025 SMTP / 8025 UI) | Capturar e-mails de teste localmente. |
@@ -30,7 +30,7 @@ docker compose -f infra/docker-compose.yml --profile dev up -d
 ## Validar extensões
 
 ```sql
-\c fiscocheck
+\c fiscalcheck
 
 -- pgvector (em ambos os perfis)
 SELECT '[1,2,3]'::vector;
@@ -38,7 +38,7 @@ SELECT '[1,2,3]'::vector;
 -- Apache AGE (apenas no perfil graph)
 LOAD 'age';
 SET search_path = ag_catalog, "$user", public;
-SELECT * FROM ag_catalog.ag_graph WHERE name = 'fisco_graph';
+SELECT * FROM ag_catalog.ag_graph WHERE name = 'fiscal_graph';
 ```
 
 ## Resetar tudo

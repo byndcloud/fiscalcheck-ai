@@ -37,7 +37,7 @@ ignore = [
 "alembic/env.py" = ["ALL"]
 
 [lint.isort]
-known-first-party = ["fiscocheck_api"]
+known-first-party = ["fiscalcheck_api"]
 combine-as-imports = true
 
 [format]

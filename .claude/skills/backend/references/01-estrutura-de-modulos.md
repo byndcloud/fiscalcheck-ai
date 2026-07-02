@@ -1,6 +1,6 @@
 # 01 — Estrutura de módulos do `apps/api`
 
-Cada um dos 7 módulos do edital vira uma subpasta em [`apps/api/src/fiscocheck_api/modules/`](../../../../apps/api/src/fiscocheck_api/modules/). Padrão obrigatório para coesão e revisão.
+Cada um dos 7 módulos do edital vira uma subpasta em [`apps/api/src/fiscalcheck_api/modules/`](../../../../apps/api/src/fiscalcheck_api/modules/). Padrão obrigatório para coesão e revisão.
 
 ---
 
@@ -32,7 +32,7 @@ Camadas separadas porque:
 ### `__init__.py`
 
 ```python
-from fiscocheck_api.modules.<nome>.router import router
+from fiscalcheck_api.modules.<nome>.router import router
 
 __all__ = ["router"]
 ```
@@ -81,7 +81,7 @@ from sqlalchemy import ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID as PgUUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from fiscocheck_api.db.base import Base
+from fiscalcheck_api.db.base import Base
 
 
 class Case(Base):
@@ -120,7 +120,7 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from fiscocheck_api.modules.<nome>.models import Case
+from fiscalcheck_api.modules.<nome>.models import Case
 
 
 class CaseRepository:
@@ -146,10 +146,10 @@ class CaseRepository:
 
 import uuid
 
-from fiscocheck_api.core.logging import get_logger
-from fiscocheck_api.modules.<nome>.models import Case
-from fiscocheck_api.modules.<nome>.repository import CaseRepository
-from fiscocheck_api.modules.<nome>.schemas import CaseCreate, CaseRead
+from fiscalcheck_api.core.logging import get_logger
+from fiscalcheck_api.modules.<nome>.models import Case
+from fiscalcheck_api.modules.<nome>.repository import CaseRepository
+from fiscalcheck_api.modules.<nome>.schemas import CaseCreate, CaseRead
 
 logger = get_logger(__name__)
 
@@ -193,13 +193,13 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from fiscocheck_api.db.session import get_db_session
-from fiscocheck_api.modules.<nome>.repository import CaseRepository
-from fiscocheck_api.modules.<nome>.schemas import CaseCreate, CaseRead
-from fiscocheck_api.modules.<nome>.service import CaseService
+from fiscalcheck_api.db.session import get_db_session
+from fiscalcheck_api.modules.<nome>.repository import CaseRepository
+from fiscalcheck_api.modules.<nome>.schemas import CaseCreate, CaseRead
+from fiscalcheck_api.modules.<nome>.service import CaseService
 
 # TODO(sprint-auth): substituir por dependência real de auth (modules/compliance).
-from fiscocheck_api.auth.placeholder import get_current_auditor  # pseudo-código
+from fiscalcheck_api.auth.placeholder import get_current_auditor  # pseudo-código
 
 router = APIRouter(prefix="/cases", tags=["cases"])
 
@@ -227,8 +227,8 @@ async def create_case(
 ## 3. Registrar o router em `main.py`
 
 ```python
-# apps/api/src/fiscocheck_api/main.py
-from fiscocheck_api.modules.cases.router import router as cases_router
+# apps/api/src/fiscalcheck_api/main.py
+from fiscalcheck_api.modules.cases.router import router as cases_router
 
 def create_app() -> FastAPI:
     app = FastAPI(...)
@@ -243,7 +243,7 @@ Padronize **`/api/v1`** como prefix de todos os módulos para versionamento.
 
 Use FastAPI `Depends` para injetar:
 
-- `session: AsyncSession = Depends(get_db_session)` — de [`db/session.py`](../../../../apps/api/src/fiscocheck_api/db/session.py).
+- `session: AsyncSession = Depends(get_db_session)` — de [`db/session.py`](../../../../apps/api/src/fiscalcheck_api/db/session.py).
 - `auditor = Depends(get_current_auditor)` — virá do módulo 6. Não invente outra; espere ou contribua para a implementação.
 - Repositório e service são instanciados no `router.py` recebendo o `session`. Não use `Depends` para essas camadas (overkill).
 

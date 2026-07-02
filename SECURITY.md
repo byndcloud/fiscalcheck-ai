@@ -1,6 +1,6 @@
 # Política de Segurança
 
-O FiscoCheck AI processa **dados fiscais e identificáveis** protegidos pelo sigilo fiscal (art. 198 do CTN) e pela LGPD (Lei nº 13.709/2018). Levamos vulnerabilidades a sério.
+O FiscalCheck AI processa **dados fiscais e identificáveis** protegidos pelo sigilo fiscal (art. 198 do CTN) e pela LGPD (Lei nº 13.709/2018). Levamos vulnerabilidades a sério.
 
 ---
 
@@ -9,7 +9,7 @@ O FiscoCheck AI processa **dados fiscais e identificáveis** protegidos pelo sig
 O projeto está em **fase de piloto**. Apenas a `main` recebe correções de segurança.
 
 | Versão | Suporte |
-|---|---|
+| --- | --- |
 | `main` | Ativo |
 | Outras branches | Sem suporte |
 
@@ -17,11 +17,11 @@ O projeto está em **fase de piloto**. Apenas a `main` recebe correções de seg
 
 ## Como reportar uma vulnerabilidade
 
-### NÃO abra issue pública.
+### NÃO abra issue pública
 
 Em vez disso:
 
-1. Envie e-mail para **security@beyond-aurora.com.br** (ajustar quando o canal oficial estiver definido).
+1. Envie e-mail para **<security@beyond-aurora.com.br>** (ajustar quando o canal oficial estiver definido).
 2. Inclua, se possível:
    - Descrição do impacto.
    - Passos para reproduzir.
@@ -37,7 +37,7 @@ Você também pode usar o **[Private vulnerability reporting](https://docs.githu
 ## Compromissos de resposta
 
 | Etapa | Prazo |
-|---|---|
+| --- | --- |
 | Confirmação de recebimento | 48h úteis |
 | Avaliação inicial e classificação de severidade | 5 dias úteis |
 | Patch ou mitigação | Conforme severidade (ver tabela abaixo) |
@@ -47,7 +47,7 @@ Você também pode usar o **[Private vulnerability reporting](https://docs.githu
 ### Classificação de severidade
 
 | Severidade | Exemplos | Prazo de correção |
-|---|---|---|
+| --- | --- | --- |
 | **Crítica** | Vazamento de CPF/CNPJ/valor; bypass de RBAC; RCE | ≤ 7 dias |
 | **Alta** | Privilege escalation; SQL injection sem PII; XSS persistente | ≤ 30 dias |
 | **Média** | XSS refletido; CSRF; SSRF limitado | ≤ 60 dias |

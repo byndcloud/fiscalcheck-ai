@@ -35,8 +35,8 @@ class Settings(BaseSettings):
     environment: Literal["development", "staging", "production", "test"] = "development"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 
-    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/fiscocheck"
-    database_url_sync: str = "postgresql+psycopg://postgres:postgres@localhost:5432/fiscocheck"
+    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/fiscalcheck"
+    database_url_sync: str = "postgresql+psycopg://postgres:postgres@localhost:5432/fiscalcheck"
     database_url_test: str | None = None
 
     redis_url: str = "redis://localhost:6379/0"
@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     openai_api_key: SecretStr | None = None
     anthropic_api_key: SecretStr | None = None
     langsmith_api_key: SecretStr | None = None
-    langsmith_project: str = "fiscocheck-ai-dev"
+    langsmith_project: str = "fiscalcheck-ai-dev"
     langsmith_tracing: bool = False
 
     sentry_dsn: str | None = None

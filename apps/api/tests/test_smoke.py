@@ -7,12 +7,12 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import SecretStr, ValidationError
 
-from fiscocheck_api.core.config import (
+from fiscalcheck_api.core.config import (
     JWT_SECRET_PLACEHOLDER,
     PSEUDONYM_SALT_PLACEHOLDER,
     Settings,
 )
-from fiscocheck_api.core.security import pseudonymize
+from fiscalcheck_api.core.security import pseudonymize
 
 if TYPE_CHECKING:
     from httpx import AsyncClient

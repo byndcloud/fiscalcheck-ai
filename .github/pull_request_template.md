@@ -46,7 +46,7 @@ Passo a passo para validar manualmente. Se houver migration, indicar.
 ```powershell
 # exemplo:
 pnpm install
-pnpm --filter @fiscocheck/api migrate
+pnpm --filter @fiscalcheck/api migrate
 pnpm test
 ```
 
@@ -55,7 +55,7 @@ pnpm test
 - [ ] `pnpm lint` passa local
 - [ ] `pnpm typecheck` passa local
 - [ ] `pnpm test` passa local
-- [ ] (se mudou web) `pnpm --filter @fiscocheck/web build` passa
+- [ ] (se mudou web) `pnpm --filter @fiscalcheck/web build` passa
 - [ ] Adicionei/atualizei testes para mudanças de comportamento
 - [ ] Atualizei documentação relevante (`docs/`, `README.md`, `CHANGELOG.md`)
 - [ ] Mensagens de commit seguem Conventional Commits

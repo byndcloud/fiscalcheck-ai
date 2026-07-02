@@ -1,6 +1,6 @@
 # 05 — Logging estruturado e pseudonimização
 
-> Arquivos de referência: [`core/logging.py`](../../../../apps/api/src/fiscocheck_api/core/logging.py), [`core/security.py`](../../../../apps/api/src/fiscocheck_api/core/security.py).
+> Arquivos de referência: [`core/logging.py`](../../../../apps/api/src/fiscalcheck_api/core/logging.py), [`core/security.py`](../../../../apps/api/src/fiscalcheck_api/core/security.py).
 
 A cadeia de custódia exigida pelo edital depende destes dois itens funcionarem juntos.
 
@@ -9,7 +9,7 @@ A cadeia de custódia exigida pelo edital depende destes dois itens funcionarem 
 ## 1. Logger por módulo
 
 ```python
-from fiscocheck_api.core.logging import get_logger
+from fiscalcheck_api.core.logging import get_logger
 
 logger = get_logger(__name__)
 ```
@@ -56,7 +56,7 @@ Padrão em prod: `INFO`. Em dev pode-se reduzir para `DEBUG`.
 
 ## 4. Correlation ID
 
-O middleware [`CorrelationIdMiddleware`](../../../../apps/api/src/fiscocheck_api/core/logging.py) já propaga `X-Correlation-Id`:
+O middleware [`CorrelationIdMiddleware`](../../../../apps/api/src/fiscalcheck_api/core/logging.py) já propaga `X-Correlation-Id`:
 
 - Lê do header da requisição (se válido, ≤ 128 chars).
 - Gera UUIDv4 senão.
@@ -71,8 +71,8 @@ Para jobs fora de requisição (ETL agendado, agente assíncrono):
 ```python
 import uuid
 
-from fiscocheck_api.core.logging import _correlation_id_var  # contextvar interno
-from fiscocheck_api.core.logging import get_logger
+from fiscalcheck_api.core.logging import _correlation_id_var  # contextvar interno
+from fiscalcheck_api.core.logging import get_logger
 
 logger = get_logger(__name__)
 
@@ -91,7 +91,7 @@ def run_etl_job() -> None:
 
 ## 5. Pseudonimização (`pseudonymize()`)
 
-[`core/security.py`](../../../../apps/api/src/fiscocheck_api/core/security.py):
+[`core/security.py`](../../../../apps/api/src/fiscalcheck_api/core/security.py):
 
 ```python
 def pseudonymize(value: str) -> str:

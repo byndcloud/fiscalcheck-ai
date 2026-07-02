@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
-  FiscoCheck Design System v1.0 — tokens base.
+  FiscalCheck Design System v2.0 — tokens base.
   Spec completa em docs/design-system/design-system.md (§3 cor, §4 tipografia,
   §5 raio/elevação, §6 movimento, §10 CSS de referência).
 
@@ -74,13 +74,19 @@
   --app-bg: #f4f6fb;
   --border-ds: #e1e6f0;
 
-  /* === DS · Tipografia ===
-     Rawline (UI) e Roboto Mono (dados) são injetadas pelo next/font em
-     apps/web/app/layout.tsx. Rawline é auto-hospedada a partir de
-     apps/web/app/fonts/ (OFL 1.1 — ver apps/web/app/fonts/LICENSE.txt).
+  /* === DS · Tipografia (v2.0 — três papéis) ===
+     Raleway (UI), Montserrat (display numérico) e Roboto Mono (dados
+     tabulares miúdos e identificadores) são injetadas via `next/font/google`
+     em apps/web/app/layout.tsx. A Rawline permanece como equivalente
+     institucional aceito para contextos gov.br — os .woff2 seguem
+     auto-hospedados em apps/web/app/fonts/ (OFL 1.1), mas entram apenas
+     como fallback declarativo em --font-ui, não são mais carregados por
+     padrão via next/font.
      Os fallbacks listados aqui cobrem o intervalo em que a fonte ainda
      não terminou de carregar (display: swap). */
-  --font-ui: var(--font-rawline), "Raleway", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-ui: var(--font-raleway), "Raleway", "Rawline", system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+  --font-display: var(--font-montserrat), "Montserrat", var(--font-raleway), "Raleway", sans-serif;
   --font-data: var(--font-roboto-mono), "Roboto Mono", ui-monospace, SFMono-Regular, Menlo,
     monospace;
 
@@ -247,6 +253,7 @@
 
   /* Tipografia */
   --font-sans: var(--font-ui);
+  --font-display: var(--font-display);
   --font-mono: var(--font-data);
   --font-data: var(--font-data);
 

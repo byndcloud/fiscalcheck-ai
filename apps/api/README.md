@@ -1,6 +1,6 @@
-# @fiscocheck/api
+# @fiscalcheck/api
 
-Backend **FastAPI** do FiscoCheck AI — agentes IA 24/7, ETL multifonte, ML preditivo, graph analytics.
+Backend **FastAPI** do FiscalCheck AI — agentes IA 24/7, ETL multifonte, ML preditivo, graph analytics.
 
 ## Stack
 
@@ -34,18 +34,18 @@ docker compose -f ../../infra/docker-compose.yml up -d
 ## Scripts (via pnpm na raiz)
 
 ```powershell
-pnpm --filter @fiscocheck/api dev        # uvicorn com reload em :8000
-pnpm --filter @fiscocheck/api lint       # ruff check + format check
-pnpm --filter @fiscocheck/api lint:fix   # ruff --fix
-pnpm --filter @fiscocheck/api typecheck  # pyright
-pnpm --filter @fiscocheck/api test       # pytest
-pnpm --filter @fiscocheck/api migrate    # alembic upgrade head
+pnpm --filter @fiscalcheck/api dev        # uvicorn com reload em :8000
+pnpm --filter @fiscalcheck/api lint       # ruff check + format check
+pnpm --filter @fiscalcheck/api lint:fix   # ruff --fix
+pnpm --filter @fiscalcheck/api typecheck  # pyright
+pnpm --filter @fiscalcheck/api test       # pytest
+pnpm --filter @fiscalcheck/api migrate    # alembic upgrade head
 ```
 
 Ou direto via `uv`:
 
 ```powershell
-uv run uvicorn fiscocheck_api.main:app --reload --port 8000
+uv run uvicorn fiscalcheck_api.main:app --reload --port 8000
 uv run ruff check .
 uv run pyright
 uv run pytest -q
@@ -63,8 +63,8 @@ O `openapi.json` é a fonte da verdade para os tipos TS em `packages/shared-type
 
 ## Estrutura
 
-```
-src/fiscocheck_api/
+```text
+src/fiscalcheck_api/
 ├── main.py                # app FastAPI + middleware + lifespan
 ├── core/
 │   ├── config.py          # Pydantic Settings (lê .env)
@@ -90,7 +90,7 @@ tests/                     # pytest
 
 Cada módulo segue o padrão:
 
-```
+```text
 modules/<nome>/
 ├── __init__.py
 ├── router.py              # FastAPI APIRouter

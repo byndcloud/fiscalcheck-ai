@@ -1,4 +1,4 @@
-# 00 — Contexto FiscoCheck AI (leitura obrigatória)
+# 00 — Contexto FiscalCheck AI (leitura obrigatória)
 
 > **Esta é a primeira referência da skill `security-auditor`.** Leia antes de `threat-modeling.md`, `access-control.md`, etc. As demais são genéricas — este arquivo as restringe e prioriza o domínio fiscal.
 
@@ -6,7 +6,7 @@
 
 ## 1. Modelo de ameaças deste produto (resumo)
 
-O FiscoCheck AI processa **dados identificáveis de contribuintes** (CPF, CNPJ, razão social, valores declarados, NFS-e) cobertos por:
+O FiscalCheck AI processa **dados identificáveis de contribuintes** (CPF, CNPJ, razão social, valores declarados, NFS-e) cobertos por:
 
 - **Sigilo fiscal** — art. 198 do CTN (Lei nº 5.172/1966). Quebra é crime, não só infração administrativa.
 - **LGPD** — Lei nº 13.709/2018. Vazamento exige notificação à ANPD em **≤ 24 horas** (ver [`docs/compliance/runbook-incidente-24h.md`](../../../../docs/compliance/runbook-incidente-24h.md)).
@@ -26,10 +26,10 @@ Mudança em qualquer um destes paths exige **diff-review com esta skill** antes 
 
 | Caminho | Por que é crítico |
 |---|---|
-| [`apps/api/src/fiscocheck_api/core/security.py`](../../../../apps/api/src/fiscocheck_api/core/security.py) | hash de senha, JWT, **pseudonimização**. Bug aqui = vazamento sistêmico. |
-| [`apps/api/src/fiscocheck_api/core/config.py`](../../../../apps/api/src/fiscocheck_api/core/config.py) | segredos, salt, CORS. Defaults vazando para produção = incidente. |
-| [`apps/api/src/fiscocheck_api/core/logging.py`](../../../../apps/api/src/fiscocheck_api/core/logging.py) | cadeia de custódia. Bug aqui = perda de defensabilidade legal. |
-| `apps/api/src/fiscocheck_api/modules/compliance/**` | RBAC, MFA, audit log. Quebrar isto = quebrar o edital. |
+| [`apps/api/src/fiscalcheck_api/core/security.py`](../../../../apps/api/src/fiscalcheck_api/core/security.py) | hash de senha, JWT, **pseudonimização**. Bug aqui = vazamento sistêmico. |
+| [`apps/api/src/fiscalcheck_api/core/config.py`](../../../../apps/api/src/fiscalcheck_api/core/config.py) | segredos, salt, CORS. Defaults vazando para produção = incidente. |
+| [`apps/api/src/fiscalcheck_api/core/logging.py`](../../../../apps/api/src/fiscalcheck_api/core/logging.py) | cadeia de custódia. Bug aqui = perda de defensabilidade legal. |
+| `apps/api/src/fiscalcheck_api/modules/compliance/**` | RBAC, MFA, audit log. Quebrar isto = quebrar o edital. |
 | [`apps/api/alembic/versions/*`](../../../../apps/api/alembic/versions/) | **Migrations já aplicadas são imutáveis.** Editar um arquivo existente = vetor de adulteração de audit. Sempre uma migration NOVA. |
 | `docs/compliance/**` | LGPD/sigilo formal. Mudança aqui afeta a base legal. |
 | [`apps/web/lib/api-client.ts`](../../../../apps/web/lib/api-client.ts) | propagação de correlation-id; perda = quebra cadeia de custódia. |
@@ -77,7 +77,7 @@ Qualquer chamada a OpenAI/Anthropic/Bedrock/etc. que contenha `cpf`, `cnpj`, `ra
 ### 3.7 CORS frouxo
 
 - ❌ `allow_origins=["*"]` ou wildcard.
-- ✓ Lista explícita em `CORS_ALLOW_ORIGINS` env var (ver [`config.py`](../../../../apps/api/src/fiscocheck_api/core/config.py)).
+- ✓ Lista explícita em `CORS_ALLOW_ORIGINS` env var (ver [`config.py`](../../../../apps/api/src/fiscalcheck_api/core/config.py)).
 - ❌ `allow_credentials=True` combinado com origem wildcard.
 
 ### 3.8 RBAC bypass
@@ -112,7 +112,7 @@ Verificar que [`apps/web/next.config.ts`](../../../../apps/web/next.config.ts) m
 
 Remoção de qualquer um = regressão de segurança = achado **Médio** no mínimo.
 
-## 4. Severidade — calibragem FiscoCheck
+## 4. Severidade — calibragem FiscalCheck
 
 A escala genérica em `references/reporting.md` aplica, mas no domínio fiscal:
 
@@ -128,7 +128,7 @@ Veja também [`SECURITY.md` "Classificação de severidade"](../../../../SECURIT
 1. **Scope** — diff-only por padrão; widen se a mudança tocar paths críticos do §2 acima.
 2. **Pre-pass** — `bash .claude/skills/security-auditor/scripts/triage.sh --diff origin/develop` para uma varredura barata.
 3. **Threat-model** rápido — qual papel ataca o quê, em qual módulo (1–7).
-4. **Read along risk axes** — para FiscoCheck, comece sempre por `access-control.md` + `secrets-and-data.md`.
+4. **Read along risk axes** — para FiscalCheck, comece sempre por `access-control.md` + `secrets-and-data.md`.
 5. **Findings** — sempre com **módulo afetado** (1–7) e **impacto LGPD/sigilo** explícito.
 6. **Filter** — descarte achados em fixtures de teste (mas **não** em código de produção que processa fixture).
 7. **Report** — usar formato do `reporting.md`, acrescentando o campo "Módulo:" antes de "Where:".
@@ -147,9 +147,9 @@ Veja também [`SECURITY.md` "Classificação de severidade"](../../../../SECURIT
 - Qualquer query com `f"... WHERE id={var}"` ou template literal com SQL.
 - Qualquer endpoint novo sem `Depends(get_current_user)` (ou equivalente) **se** retornar dado de contribuinte.
 - Adição de dependência transitiva inesperada num PR não-deps (supply chain).
-- Mudança em `apps/api/src/fiscocheck_api/modules/compliance/**` sem ADR linkado.
+- Mudança em `apps/api/src/fiscalcheck_api/modules/compliance/**` sem ADR linkado.
 
-## 8. Formato de achado (extensão FiscoCheck)
+## 8. Formato de achado (extensão FiscalCheck)
 
 Adicione duas linhas ao formato em `references/reporting.md`:
 

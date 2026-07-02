@@ -1,7 +1,7 @@
 # Módulo 1 — Integração, Ingestão e Qualidade de Dados
 
 > Consolidação multifonte e preparação confiável da base analítica.
-> Pasta: `apps/api/src/fiscocheck_api/modules/ingestion/`.
+> Pasta: `apps/api/src/fiscalcheck_api/modules/ingestion/`.
 
 ## Objetivo (do edital)
 
@@ -16,7 +16,7 @@
 
 ## Arquitetura interna
 
-```
+```text
 modules/ingestion/
 ├── router.py         # endpoints de upload manual, status de cargas
 ├── service.py        # orquestração de pipelines

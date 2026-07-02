@@ -1,8 +1,8 @@
 {
-	"name": "fiscocheck-ai",
+	"name": "fiscalcheck-ai",
 	"version": "0.1.0",
 	"private": true,
-	"description": "FiscoCheck AI — Plataforma de Inteligência Fiscal Agêntica (Brusque/SC)",
+	"description": "FiscalCheck AI — Plataforma de Inteligência Fiscal Agêntica (Brusque/SC)",
 	"engines": {
 		"node": ">=22.0.0",
 		"pnpm": ">=9.0.0"
@@ -17,8 +17,8 @@
 		"test": "pnpm -r test",
 		"format": "pnpm -r format",
 		"format:check": "pnpm -r format:check",
-		"api:dev": "pnpm --filter @fiscocheck/api dev",
-		"web:dev": "pnpm --filter @fiscocheck/web dev",
+		"api:dev": "pnpm --filter @fiscalcheck/api dev",
+		"web:dev": "pnpm --filter @fiscalcheck/web dev",
 		"prepare": "husky"
 	},
 	"devDependencies": {

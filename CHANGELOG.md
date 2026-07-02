@@ -8,12 +8,12 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o 
 
 ### Added
 
-- **Design System v1.0** documentado em `docs/design-system/design-system.md` (camada Aurora para IA, espectro de risco, foco visível 3px, motion respeitando `prefers-reduced-motion`).
+- **Design System v2.0** documentado em `docs/design-system/design-system.md` (camada Aurora para IA, espectro de risco, foco visível 3px, motion respeitando `prefers-reduced-motion`).
 - **shadcn/ui** integrado em `apps/web/components/ui/` (`button`, `card`, `input`) com variante `aurora` customizada para saídas de IA.
-- **Fonte Rawline** auto-hospedada em `apps/web/app/fonts/` (OFL 1.1) + Roboto Mono para dados e KPIs.
+- **Pilha tipográfica v2.0** servida via Google Fonts — **Raleway** (UI, 400–800), **Montserrat** (display numérico de KPIs, scores e valores hero, 600–800) e **Roboto Mono** (identificadores, CNPJ, protocolos, competências, contadores, valores em linhas de tabela, 400–700). A **Rawline** auto-hospedada em `apps/web/app/fonts/` (OFL 1.1) permanece como equivalente institucional aceito para contextos gov.br, entrando apenas como fallback declarativo em `--font-ui`.
 - **`pnpm-lock.yaml`** committado para reprodutibilidade do build no Replit e em CI.
 - **ADR-0002** (`docs/adr/0002-database-mvp-replit.md`): MVP usa Postgres Replit + `pgvector`; Apache AGE adiado para a migração à nuvem nacional. Módulo 2 implementa `GraphStore` com `NetworkXGraphStore` no MVP e `AgeGraphStore` na fase 2.
-- **Skills FiscoCheck-aware**: `references/00-fiscocheck-context.md` em `frontend/`, `qa-test-strategist/`, `security-auditor/` carregando o recorte do domínio fiscal (LGPD, sigilo, design system, golden tests, áreas críticas).
+- **Skills FiscalCheck-aware**: `references/00-fiscalcheck-context.md` em `frontend/`, `qa-test-strategist/`, `security-auditor/` carregando o recorte do domínio fiscal (LGPD, sigilo, design system, golden tests, áreas críticas).
 - **Skill `backend/`** nova, em pt-BR, com `SKILL.md` + 5 references (contexto, estrutura de módulos, ETL Polars, agentes LangGraph, migrations Alembic, logging/pseudonimização).
 - `infra/postgres-init-age.sql` (opt-in) e perfil `graph` no `docker-compose` para dev local que precise testar AGE em preparação à fase 2.
 - Workflow `DB migrate` no `.replit` (`alembic upgrade head`).
@@ -21,6 +21,7 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o 
 
 ### Changed
 
+- **Design System v1.0 → v2.0** (`docs/design-system/design-system.md`). Face primária de UI passou de **Rawline** para **Raleway** (Rawline permanece como equivalente institucional aceito, não canônica). Adicionada **Montserrat** como face de display numérico (KPIs 25/700, medidor 48/800, valor hero 35/800, valor secundário 19–22/700). **Roboto Mono** restrita a identificadores e dados tabulares miúdos (IDs, CNPJ, protocolos, competências, contadores, valores em linhas de tabela). Escala recalibrada para densidade de painel. Componentes revisados: KPI card (label caps + tile de ícone tingido + valor Montserrat + pílula de tendência mono), tabela de casos (score-chip + microtag `AGENTE`), navegação lateral 252px, barra superior com botão Copilot em gradiente Aurora animado, filtros em chip, botões-cartão, Copilot Fiscal em card claro. Novos padrões de domínio documentados: Próxima melhor ação, Análise de Redes, barra de fluxo agêntico, recorte mobile do canal do cidadão. Medidor de score passa a exibir número central em Montserrat 48/800 na cor do nível. Paleta (§3), espaçamento, raios, elevação (§5) e curvas/durações de movimento (§6) inalterados. **Nota**: componentes novos ainda não implementados no frontend — apenas configuração de fontes (`apps/web/app/layout.tsx`, `apps/web/app/globals.css`) e tokens foram alinhados nesta rodada; os componentes de domínio ficam para sprints dedicados.
 - **`Settings` agora falha rápido em staging/produção** se `JWT_SECRET` ou `PSEUDONYMIZATION_SALT` ainda forem os placeholders (`change-me-*`). Em `development`/`test` continuam tolerados para scaffolding.
 - **`CLAUDE.md` §1** reconciliado para refletir as 4 skills reais (`frontend`, `backend`, `qa-test-strategist`, `security-auditor`) com seus nomes corretos.
 - **`AGENTS.md` §4.2**: `from __future__ import annotations` passa de proibido a *permitido quando útil* (forward refs, `TYPE_CHECKING`, imports circulares) — alinhando a regra ao código já existente.

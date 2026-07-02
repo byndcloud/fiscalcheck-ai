@@ -16,7 +16,7 @@ from typing import Any
 from jose import jwt
 from passlib.context import CryptContext
 
-from fiscocheck_api.core.config import get_settings
+from fiscalcheck_api.core.config import get_settings
 
 _pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

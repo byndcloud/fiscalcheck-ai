@@ -1,4 +1,4 @@
-"""Aplicação FastAPI do FiscoCheck AI.
+"""Aplicação FastAPI do FiscalCheck AI.
 
 Ponto de entrada do backend. Configura:
 - Middleware de CORS (somente origens permitidas via env).
@@ -14,9 +14,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from fiscocheck_api import __version__
-from fiscocheck_api.core.config import get_settings
-from fiscocheck_api.core.logging import (
+from fiscalcheck_api import __version__
+from fiscalcheck_api.core.config import get_settings
+from fiscalcheck_api.core.logging import (
     CorrelationIdMiddleware,
     configure_logging,
     get_logger,
@@ -42,7 +42,7 @@ def create_app() -> FastAPI:
     """Factory do app FastAPI (também usada nos testes)."""
     settings = get_settings()
     app = FastAPI(
-        title="FiscoCheck AI — API",
+        title="FiscalCheck AI — API",
         description=(
             "Plataforma de Inteligência Fiscal Agêntica. "
             "Toda ação com efeito sobre o contribuinte exige auditor "
@@ -73,7 +73,7 @@ def create_app() -> FastAPI:
     @app.get("/", tags=["health"])
     async def root() -> dict[str, str]:
         return {
-            "name": "FiscoCheck AI — API",
+            "name": "FiscalCheck AI — API",
             "version": __version__,
             "docs": "/docs",
         }

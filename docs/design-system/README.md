@@ -1,4 +1,4 @@
-# Design System — FiscoCheck AI
+# Design System — FiscalCheck AI
 
 > Você (usuário) tem um documento de design system pronto em markdown. **Cole-o aqui.**
 
@@ -6,13 +6,13 @@
 
 Coloque o markdown principal em:
 
-```
+```text
 docs/design-system/design-system.md
 ```
 
 Se preferir dividir por seção (recomendado quando o DS crescer):
 
-```
+```text
 docs/design-system/
 ├── README.md            ← este arquivo (índice)
 ├── design-system.md     ← documento principal (ou removido se dividir)
@@ -28,9 +28,11 @@ docs/design-system/
 
 1. Os **tokens** (cores, tipografia, spacing, raio) vão virar variáveis CSS em [`apps/web/app/globals.css`](../../apps/web/app/globals.css) dentro do bloco `@theme inline`.
 2. Os **componentes** serão instalados via shadcn CLI:
+
    ```powershell
    pnpm dlx shadcn@latest add button input dialog table form
    ```
+
 3. Eventuais **componentes customizados** (não-shadcn) ficam em `apps/web/components/<dominio>/`.
 4. Considere adicionar **Storybook** quando o número de componentes passar de ~10 (ver [ADR-0001](../adr/0001-stack-inicial.md) seção "Não incluído agora").
 

@@ -2,7 +2,7 @@
 # para evitar diffs ruidosos em PRs (especialmente fontes auto-hospedadas).
 * text=auto eol=lf
 
-# Fontes (Rawline auto-hospedada — apps/web/app/fonts/)
+# Fontes auto-hospedadas (apps/web/app/fonts/ — Rawline como equivalente institucional aceito, DS v2.0 §4)
 *.woff   binary
 *.woff2  binary
 *.ttf    binary

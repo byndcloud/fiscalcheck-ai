@@ -45,11 +45,11 @@ runButton = "Dev (web + api)"
 
     [[workflows.workflow.tasks]]
     task = "shell.exec"
-    args = "pnpm --filter @fiscocheck/web dev"
+    args = "pnpm --filter @fiscalcheck/web dev"
 
     [[workflows.workflow.tasks]]
     task = "shell.exec"
-    args = "pnpm --filter @fiscocheck/api dev"
+    args = "pnpm --filter @fiscalcheck/api dev"
 
   [[workflows.workflow]]
   name = "API only"
@@ -57,7 +57,7 @@ runButton = "Dev (web + api)"
 
     [[workflows.workflow.tasks]]
     task = "shell.exec"
-    args = "pnpm --filter @fiscocheck/api dev"
+    args = "pnpm --filter @fiscalcheck/api dev"
 
   [[workflows.workflow]]
   name = "Web only"
@@ -65,7 +65,7 @@ runButton = "Dev (web + api)"
 
     [[workflows.workflow.tasks]]
     task = "shell.exec"
-    args = "pnpm --filter @fiscocheck/web dev"
+    args = "pnpm --filter @fiscalcheck/web dev"
 
   [[workflows.workflow]]
   name = "Tests (all)"
@@ -81,4 +81,4 @@ runButton = "Dev (web + api)"
 
     [[workflows.workflow.tasks]]
     task = "shell.exec"
-    args = "pnpm --filter @fiscocheck/api migrate"
+    args = "pnpm --filter @fiscalcheck/api migrate"

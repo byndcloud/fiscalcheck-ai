@@ -68,7 +68,7 @@ de migrar, fazer os ajustes de código, e linkar o PR aqui.
       com fastapi.
 - [ ] **`langgraph` 0.2 → 1.x** + **`langchain-core` 0.3 → 1.x** —
       release 1.0 das libs de agentes. Migrar agentes em
-      [`apps/api/src/fiscocheck_api/agents/`](../apps/api/src/fiscocheck_api/agents/)
+      [`apps/api/src/fiscalcheck_api/agents/`](../apps/api/src/fiscalcheck_api/agents/)
       conforme [release notes](https://github.com/langchain-ai/langgraph/releases).
 - [ ] **`redis` 5.x → 6/7/8** (constraint `<6`) — verificar API de
       `redis.asyncio` se mudou.
@@ -78,7 +78,7 @@ de migrar, fazer os ajustes de código, e linkar o PR aqui.
 ### Infra / observabilidade (médio impacto)
 
 - [ ] **`structlog` 24 → 25/26** — checar pipeline de processors em
-      [`core/logging.py`](../apps/api/src/fiscocheck_api/).
+      [`core/logging.py`](../apps/api/src/fiscalcheck_api/).
 - [ ] **`python-json-logger` 2 → 3/4** — pode coexistir com structlog
       mas vale revalidar.
 - [ ] **`python-multipart` 0.0.19 → 0.0.32** — uploads HTTP; revisar

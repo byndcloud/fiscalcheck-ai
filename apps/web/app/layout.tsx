@@ -1,37 +1,37 @@
 import { Providers } from "@/components/providers";
 import type { Metadata } from "next";
-import { Roboto_Mono } from "next/font/google";
-import localFont from "next/font/local";
+import { Montserrat, Raleway, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 
 /*
-  Rawline — fonte UI institucional do FiscoCheck DS (docs/design-system/design-system.md §4).
-  Auto-hospedada a partir de apps/web/app/fonts/ (arquivos baixados do CDN gov.br
-  sob SIL Open Font License 1.1 — ver apps/web/app/fonts/LICENSE.txt).
+  FiscalCheck Design System v2.0 §4 — três papéis tipográficos.
 
-  Pesos:
-    400 corpo, 600 label/dados secundários, 700 títulos de bloco, 800 display/H1.
+  Raleway (UI): face canônica de títulos, corpo, labels e botões.
+  Montserrat (display numérico): KPIs (25/700), medidor de score (48/800),
+    valor hero (35/800), valor secundário (19–22/700), métricas de rede.
+  Roboto Mono (dados tabulares miúdos e identificadores): IDs de caso,
+    CNPJ, competências, protocolos, contadores, valores em linhas de tabela,
+    extremos da escala do medidor.
 
-  Auto-hospedagem elimina dependência de CDN externo (resiliência + privacidade
-  do auditor — não vaza IP para terceiros só para carregar fonte).
+  A Rawline (auto-hospedada em apps/web/app/fonts/, OFL 1.1) permanece
+  como equivalente institucional aceito em contextos gov.br, mas deixa
+  de ser carregada por padrão pelo next/font — hoje entra apenas como
+  fallback declarativo em --font-ui (ver globals.css).
 */
-const rawline = localFont({
-	src: [
-		{ path: "./fonts/rawline-400.woff2", weight: "400", style: "normal" },
-		{ path: "./fonts/rawline-600.woff2", weight: "600", style: "normal" },
-		{ path: "./fonts/rawline-700.woff2", weight: "700", style: "normal" },
-		{ path: "./fonts/rawline-800.woff2", weight: "800", style: "normal" },
-	],
-	variable: "--font-rawline",
+const raleway = Raleway({
+	subsets: ["latin"],
+	weight: ["400", "500", "600", "700", "800"],
+	variable: "--font-raleway",
 	display: "swap",
-	fallback: ["Raleway", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
 });
 
-/*
-  Roboto Mono — fonte de dados (KPIs, scores, valores monetários).
-  Spec: docs/design-system/design-system.md §4. A variável CSS
-  `--font-roboto-mono` é consumida por `--font-data` em globals.css.
-*/
+const montserrat = Montserrat({
+	subsets: ["latin"],
+	weight: ["600", "700", "800"],
+	variable: "--font-montserrat",
+	display: "swap",
+});
+
 const robotoMono = Roboto_Mono({
 	subsets: ["latin"],
 	weight: ["400", "500", "600", "700"],
@@ -41,12 +41,12 @@ const robotoMono = Roboto_Mono({
 
 export const metadata: Metadata = {
 	title: {
-		default: "FiscoCheck AI",
-		template: "%s · FiscoCheck AI",
+		default: "FiscalCheck AI",
+		template: "%s · FiscalCheck AI",
 	},
 	description:
 		"Plataforma de Inteligência Fiscal Agêntica — Secretaria Municipal da Fazenda de Brusque/SC",
-	applicationName: "FiscoCheck AI",
+	applicationName: "FiscalCheck AI",
 	robots: {
 		index: false,
 		follow: false,
@@ -60,7 +60,7 @@ export default function RootLayout({
 		<html
 			lang="pt-BR"
 			suppressHydrationWarning
-			className={`${rawline.variable} ${robotoMono.variable}`}
+			className={`${raleway.variable} ${montserrat.variable} ${robotoMono.variable}`}
 		>
 			<body className="min-h-screen bg-background font-sans antialiased">
 				<Providers>{children}</Providers>

@@ -1,5 +1,5 @@
 -- ============================================================
--- FiscoCheck AI — Inicialização do PostgreSQL (MVP)
+-- FiscalCheck AI — Inicialização do PostgreSQL (MVP)
 -- Aplicado apenas no primeiro start do container.
 --
 -- Habilita o subconjunto de extensões que roda no Replit Postgres
@@ -10,10 +10,10 @@
 -- ============================================================
 
 -- Bancos
-CREATE DATABASE fiscocheck_test;
+CREATE DATABASE fiscalcheck_test;
 
 -- Conecta no banco principal
-\c fiscocheck
+\c fiscalcheck
 
 -- Extensões
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -21,7 +21,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS "vector";  -- pgvector (embeddings do copilot)
 
 -- Repete no banco de teste
-\c fiscocheck_test
+\c fiscalcheck_test
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS "vector";

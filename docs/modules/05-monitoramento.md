@@ -1,7 +1,7 @@
 # Módulo 5 — Monitoramento Estratégico e Relatórios
 
 > Visão gerencial, indicadores de desempenho e acompanhamento das metas.
-> Pasta: `apps/api/src/fiscocheck_api/modules/analytics/`.
+> Pasta: `apps/api/src/fiscalcheck_api/modules/analytics/`.
 
 ## Objetivo (do edital)
 
@@ -16,7 +16,7 @@
 
 ## Arquitetura interna
 
-```
+```text
 modules/analytics/
 ├── router.py
 ├── service.py

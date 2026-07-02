@@ -1,4 +1,4 @@
-# 00 — Contexto FiscoCheck AI (leitura obrigatória)
+# 00 — Contexto FiscalCheck AI (leitura obrigatória)
 
 > **Esta é a primeira referência da skill `frontend`.** Leia antes de qualquer outra referência (`01-component-patterns.md`, `06-design-tokens.md`, etc.). As demais são genéricas — este arquivo as restringe ao projeto.
 
@@ -19,13 +19,13 @@ Não há decisão de stack a tomar. **Não introduza** alternativas sem ADR.
 | Forms | **react-hook-form** + **zod** + **@hookform/resolvers** |
 | Ícones | **lucide-react** |
 | Cliente HTTP | [`apps/web/lib/api-client.ts`](../../../../apps/web/lib/api-client.ts) — propaga `X-Correlation-Id` em toda chamada |
-| Tipos do backend | `@fiscocheck/shared-types` (gerados do OpenAPI; **não editar à mão**) |
+| Tipos do backend | `@fiscalcheck/shared-types` (gerados do OpenAPI; **não editar à mão**) |
 | Lint/format | **Biome** (config em [`packages/biome-config/biome.json`](../../../../packages/biome-config/biome.json)) — `indentStyle: space, indentWidth: 2` |
 | Testes | **Vitest** + **@testing-library/react** + **jsdom** ([`vitest.config.ts`](../../../../apps/web/vitest.config.ts)) |
 
 Path alias: `@/*` aponta para `apps/web/`. Use `import { ... } from "@/components/..."`, nunca caminhos relativos longos.
 
-## 2. Identidade visual — FiscoCheck Design System v1.0
+## 2. Identidade visual — FiscalCheck Design System v2.0
 
 A spec completa está em [`docs/design-system/design-system.md`](../../../../docs/design-system/design-system.md). Os tokens vivem em [`apps/web/app/globals.css`](../../../../apps/web/app/globals.css) (`:root` e `.dark`) e estão expostos como utilitários Tailwind via `@theme inline`.
 
@@ -33,10 +33,12 @@ A spec completa está em [`docs/design-system/design-system.md`](../../../../doc
 
 A skill genérica diz "nunca use Inter/Roboto/Arial como escolha primária". **Aqui é diferente:**
 
-- **Rawline** (auto-hospedada em [`apps/web/app/fonts/`](../../../../apps/web/app/fonts/), OFL 1.1) é a fonte UI institucional — não substituir.
-- **Roboto Mono** é decisão deliberada do DS para **dados, KPIs, valores monetários, scores** (§4 do DS). Use a utility `font-data`/`font-mono`.
+- **Raleway** (Google Fonts, 400–800) é a face canônica de UI — títulos, corpo, labels e botões. Utility Tailwind: `font-sans`.
+- **Montserrat** (Google Fonts, 600–800) é a face de *display numérico* — KPIs (25/700), score do medidor (48/800), valor hero (35/800), valor secundário (19–22/700), métricas de rede. Utility Tailwind: `font-display`.
+- **Roboto Mono** (Google Fonts, 400–700) fica restrita a identificadores e dados tabulares miúdos — IDs de caso, CNPJ, competências, protocolos, contadores, valores em linhas de tabela, extremos da escala do medidor. Utility Tailwind: `font-data`/`font-mono`.
+- A **Rawline** permanece como equivalente institucional aceito para contextos gov.br (arquivos em [`apps/web/app/fonts/`](../../../../apps/web/app/fonts/), OFL 1.1) — entra apenas como fallback declarativo em `--font-ui`, não substitui Raleway na produção.
 
-Não troque as fontes. Não importe outras famílias.
+Não troque essas famílias. Não importe outras.
 
 ### 2.2 Camadas semânticas de cor (regra dura)
 
@@ -93,14 +95,14 @@ Ver [`docs/design-system/design-system.md` §2 "Padrão transversal"](../../../.
 3. **Verifique se há shadcn** para o componente; se sim, `pnpm dlx shadcn@latest add ...` e customize via `cn()`.
 4. **Idioma pt-BR** e **identificadores em inglês**.
 5. **Acessibilidade**: foco visível, `aria-*`, contraste ≥ 4.5:1, suporte a teclado.
-6. **`pnpm --filter @fiscocheck/web lint && typecheck`** antes de declarar pronto.
+6. **`pnpm --filter @fiscalcheck/web lint && typecheck`** antes de declarar pronto.
 
-## 8. Anti-padrões específicos do FiscoCheck
+## 8. Anti-padrões específicos do FiscalCheck
 
 - ❌ Botão `variant="default"` para uma sugestão de IA — confunde efeito jurídico com recomendação.
 - ❌ `variant="aurora"` em um botão de "Confirmar intimação" — viola human-in-the-loop.
 - ❌ Espectro de risco usado decorativamente (ex.: barra de progresso de upload colorida do verde ao vermelho) — confunde a semântica do score.
 - ❌ `useEffect(() => { fetch(...) }, [])` — sempre TanStack Query.
 - ❌ Estado de servidor duplicado no Zustand — store é só para UI local.
-- ❌ Importar `Inter`, `Roboto` (sem ser Mono), `Arial`, ou qualquer fonte do `next/font/google` que não seja Roboto Mono — quebra a identidade do DS.
+- ❌ Importar `Inter`, `Arial`, ou fontes do `next/font/google` que não sejam **Raleway**, **Montserrat** ou **Roboto Mono** — quebra a identidade do DS v2.0.
 - ❌ Esconder o foco com `outline: none` sem fornecer ring alternativo — barreira de acessibilidade.

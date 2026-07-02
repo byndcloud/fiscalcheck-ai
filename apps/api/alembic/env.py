@@ -12,8 +12,8 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from fiscocheck_api.core.config import get_settings
-from fiscocheck_api.db.base import Base
+from fiscalcheck_api.core.config import get_settings
+from fiscalcheck_api.db.base import Base
 
 config = context.config
 

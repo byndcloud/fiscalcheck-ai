@@ -1,5 +1,5 @@
 -- ============================================================
--- FiscoCheck AI — Inicialização do Apache AGE (OPT-IN, dev local)
+-- FiscalCheck AI — Inicialização do Apache AGE (OPT-IN, dev local)
 --
 -- Este arquivo NÃO é aplicado por padrão. É carregado apenas pelo
 -- perfil `graph` do docker-compose, ou manualmente por desenvolvedores
@@ -10,16 +10,16 @@
 -- disponível no ambiente gerenciado.
 -- ============================================================
 
-\c fiscocheck
+\c fiscalcheck
 
 CREATE EXTENSION IF NOT EXISTS "age";
 LOAD 'age';
 SET search_path = ag_catalog, "$user", public;
-SELECT create_graph('fisco_graph');
+SELECT create_graph('fiscal_graph');
 
-\c fiscocheck_test
+\c fiscalcheck_test
 
 CREATE EXTENSION IF NOT EXISTS "age";
 LOAD 'age';
 SET search_path = ag_catalog, "$user", public;
-SELECT create_graph('fisco_graph');
+SELECT create_graph('fiscal_graph');

@@ -1,11 +1,11 @@
-# Conformidade — FiscoCheck AI
+# Conformidade — FiscalCheck AI
 
 Documentos de aderência a **LGPD (Lei nº 13.709/2018)** e **sigilo fiscal (art. 198 do CTN — Lei nº 5.172/1966)**.
 
 ## Documentos
 
 | Doc | Finalidade |
-|---|---|
+| --- | --- |
 | [`lgpd.md`](./lgpd.md) | Visão geral LGPD aplicada ao projeto |
 | [`sigilo-fiscal-art-198-ctn.md`](./sigilo-fiscal-art-198-ctn.md) | Regras do sigilo fiscal incidentes |
 | [`ripd-template.md`](./ripd-template.md) | Template de Relatório de Impacto à Proteção de Dados |
