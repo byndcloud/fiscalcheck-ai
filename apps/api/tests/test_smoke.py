@@ -12,7 +12,11 @@ from fiscalcheck_api.core.config import (
     PSEUDONYM_SALT_PLACEHOLDER,
     Settings,
 )
-from fiscalcheck_api.core.security import pseudonymize
+from fiscalcheck_api.core.security import (
+    hash_password,
+    pseudonymize,
+    verify_password,
+)
 
 if TYPE_CHECKING:
     from httpx import AsyncClient
@@ -57,6 +61,18 @@ def test_pseudonymize_is_deterministic() -> None:
 
 def test_pseudonymize_diverges_for_different_values() -> None:
     assert pseudonymize("12345678900") != pseudonymize("12345678901")
+
+
+def test_verify_password_roundtrip() -> None:
+    hashed = hash_password("senha-forte-123")
+    assert verify_password("senha-forte-123", hashed)
+    assert not verify_password("senha-errada", hashed)
+
+
+def test_verify_password_malformed_hash_is_auth_failure() -> None:
+    """Hash corrompido no banco vira False, não ValueError/500 no login."""
+    assert not verify_password("qualquer-senha", "nao-e-um-hash-bcrypt")
+    assert not verify_password("qualquer-senha", "")
 
 
 def test_settings_allows_placeholders_in_development() -> None:

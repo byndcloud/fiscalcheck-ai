@@ -88,7 +88,7 @@ Não temos bug bounty no momento (fase de piloto). Reportes legítimos serão:
 - **Autorização**: RBAC com mínimo privilégio.
 - **Auditoria**: logs imutáveis (append-only) de toda ação com efeito sobre contribuinte.
 - **LGPD**: pseudonimização antes de treino de modelos; resposta a incidente ≤ 24h.
-- **Dependências**: Dependabot security updates (alertas + patches de CVE). Version updates automáticos foram desligados no MVP; bumps são manuais.
+- **Dependências**: Dependabot **security updates** habilitados na configuração do repositório no GitHub (alertas + PRs de patch de CVE — não dependem de `dependabot.yml`). Version updates automáticos foram desligados no MVP; bumps são manuais.
 - **Análise estática**: lint (Biome/Ruff) + typecheck (tsc/Pyright) no CI. CodeQL será reativado quando o volume de código justificar.
 - **Secret scanning**: GitHub Secret Scanning + Push Protection habilitados.
 

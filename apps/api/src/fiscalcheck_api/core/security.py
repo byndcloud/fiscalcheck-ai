@@ -25,8 +25,16 @@ def hash_password(plain: str) -> str:
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    """Verifica senha contra hash."""
-    return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
+    """Verifica senha contra hash.
+
+    Hash malformado/corrompido conta como falha de autenticação
+    (`False`), não como erro 500 — `bcrypt.checkpw` lança `ValueError`
+    quando o salt do hash armazenado é inválido.
+    """
+    try:
+        return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
+    except ValueError:
+        return False
 
 
 def create_access_token(
