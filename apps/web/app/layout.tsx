@@ -1,6 +1,8 @@
-import { Providers } from "@/components/providers";
 import type { Metadata } from "next";
 import { Montserrat, Raleway, Roboto_Mono } from "next/font/google";
+
+import { Providers } from "@/components/providers";
+
 import "./globals.css";
 
 /*
@@ -50,6 +52,21 @@ export const metadata: Metadata = {
   robots: {
     index: false,
     follow: false,
+  },
+  openGraph: {
+    title: "FiscalCheck AI",
+    description: "Inteligência fiscal agêntica — Secretaria da Fazenda · Brusque/SC",
+    siteName: "FiscalCheck AI",
+    locale: "pt_BR",
+    type: "website",
+    images: [
+      {
+        url: "/brand/logo-horizontal.png",
+        width: 1024,
+        height: 683,
+        alt: "FiscalCheck AI — Inteligência fiscal agêntica",
+      },
+    ],
   },
 };
 

@@ -133,6 +133,20 @@ pnpm dev
 
 No **Replit**, basta clicar em **Run** — o workflow `Dev (web + api)` sobe ambos.
 
+### Camada de mock (MSW) — T01
+
+Enquanto o backend não expõe endpoints reais, o frontend usa [MSW](https://mswjs.io/) para servir dados sintéticos (todos pseudonimizados) diretamente do service worker, respeitando o mesmo contrato dos schemas Zod em [`packages/shared-types`](./packages/shared-types).
+
+- Ativação/desativação em [`apps/web/.env.local`](./apps/web/.env.local):
+
+  ```env
+  NEXT_PUBLIC_MSW_ENABLED=true   # intercepta chamadas ao NEXT_PUBLIC_API_URL
+  NEXT_PUBLIC_MSW_ENABLED=false  # devolve o controle ao backend real
+  ```
+
+- Handlers, fixtures e bootstrap ficam em [`apps/web/mocks/`](./apps/web/mocks). O service worker (`public/mockServiceWorker.js`) é gerado por `pnpm exec msw init public/` e não deve ser editado à mão.
+- Detalhes de como consumir a camada de mock e o Design System em [`apps/web/README.md`](./apps/web/README.md).
+
 ## Scripts disponíveis
 
 | Comando | Descrição |

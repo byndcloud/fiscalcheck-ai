@@ -1,14 +1,16 @@
 /**
  * Tipos TS compartilhados entre apps/web e apps/api.
  *
- * Fase MVP: a geração via OpenAPI ainda NÃO está ativa — os tipos abaixo
- * são mantidos à mão e são a fonte da verdade temporária.
- *
- * Quando a API tiver endpoints reais, ative a geração:
- *   pnpm --filter @fiscalcheck/shared-types generate
- * e reexporte aqui (`export type { paths, components } from "./openapi"`).
- * A partir daí, o `openapi.d.ts` gerado não deve ser editado à mão.
+ * Fase MVP: a geração via OpenAPI ainda NÃO está ativa. Os schemas Zod em
+ * `./schemas` são a fonte da verdade temporária dos contratos entre a UI e
+ * a camada de mock (MSW). Quando a API tiver endpoints reais:
+ *   1. rodar `pnpm --filter @fiscalcheck/shared-types generate`;
+ *   2. gradualmente migrar os schemas Zod para gerados do OpenAPI;
+ *   3. reexportar `export type { paths, components } from "./openapi"`.
+ * O arquivo `openapi.d.ts` gerado nunca deve ser editado à mão.
  */
+
+import { z } from "zod";
 
 export type AuditableAction = {
   action: string;
@@ -17,4 +19,94 @@ export type AuditableAction = {
   timestamp: string;
 };
 
-export type Role = "auditor" | "supervisor" | "admin" | "cidadao" | "agente_sistema";
+export const AuditableActionSchema = z.object({
+  action: z.string(),
+  actor_id: z.string(),
+  correlation_id: z.string(),
+  timestamp: z.string(),
+}) satisfies z.ZodType<AuditableAction>;
+
+export {
+  RoleSchema,
+  type Role,
+} from "./schemas/role";
+
+export {
+  ContribuinteSchema,
+  RegimeTributarioSchema,
+  SituacaoCadastralSchema,
+  SocioSchema,
+  type Contribuinte,
+  type RegimeTributario,
+  type SituacaoCadastral,
+  type Socio,
+} from "./schemas/contribuinte";
+
+export {
+  NFSeSchema,
+  SituacaoNFSeSchema,
+  type NFSe,
+  type SituacaoNFSe,
+} from "./schemas/nfse";
+
+export {
+  DivergenciaSchema,
+  OrigemDivergenciaSchema,
+  SeveridadeSchema,
+  TipoDivergenciaSchema,
+  type Divergencia,
+  type OrigemDivergencia,
+  type Severidade,
+  type TipoDivergencia,
+} from "./schemas/divergencia";
+
+export {
+  FatorRiscoSchema,
+  NivelRiscoSchema,
+  ScoreSchema,
+  type FatorRisco,
+  type NivelRisco,
+  type Score,
+} from "./schemas/score";
+
+export {
+  CasoSchema,
+  StatusCasoSchema,
+  type Caso,
+  type StatusCaso,
+} from "./schemas/caso";
+
+export {
+  NotificacaoSchema,
+  TipoNotificacaoSchema,
+  type Notificacao,
+  type TipoNotificacao,
+} from "./schemas/notificacao";
+
+export {
+  AgenteSchema,
+  StatusAgenteSchema,
+  TipoAgenteSchema,
+  type Agente,
+  type StatusAgente,
+  type TipoAgente,
+} from "./schemas/agente";
+
+export {
+  KpiMoMSchema,
+  MonthlyRecoveryPointSchema,
+  MonthlyRecoverySeriesSchema,
+  PanelKpisSchema,
+  RiskDistributionEntrySchema,
+  RiskDistributionSchema,
+  SmartAlertKindSchema,
+  SmartAlertSchema,
+  type KpiMoM,
+  type MonthlyRecoveryPoint,
+  type MonthlyRecoverySeries,
+  type PanelKpis,
+  type RiskDistribution,
+  type RiskDistributionEntry,
+  type SmartAlert,
+  type SmartAlertKind,
+} from "./schemas/analytics";
