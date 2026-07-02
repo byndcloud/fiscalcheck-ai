@@ -1,0 +1,27 @@
+import type * as React from "react";
+
+import { cn } from "@/lib/utils";
+
+/*
+  FiscalCheck DS — Campo de texto (docs/design-system/design-system.md §7).
+  - Borda --n-300 (mapeada por --input), raio --r-sm (rounded-sm = 6px).
+  - Foco: borda --c-brand + halo --c-brand-050 (3px) sem deslocar layout.
+  - aria-invalid: borda --c-danger + halo de erro.
+*/
+function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+  return (
+    <input
+      type={type}
+      data-slot="input"
+      className={cn(
+        "h-9 w-full min-w-0 rounded-sm border border-input bg-surface px-3 py-1 text-base text-foreground shadow-[var(--e-1)] transition-[color,box-shadow,border-color] outline-none selection:bg-primary selection:text-primary-foreground file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:bg-input/30",
+        "focus-visible:border-brand focus-visible:ring-[3px] focus-visible:ring-brand-050",
+        "aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+export { Input };
