@@ -42,7 +42,7 @@ Entregas de backend que casam com o domínio fiscal: corretas, auditáveis, type
 
 **Domínio fiscal**
 
-- Toda regra fiscal nova tem **teste** (golden test para cruzamento e score). Veja a skill `qa-test-strategist`.
+- Toda regra fiscal nova tem **teste** (golden test para cruzamento e score).
 - Toda ação com efeito sobre o contribuinte tem **`auditor_id`** + **`correlation_id`** + **timestamp** registrados no audit log (append-only).
 - Antes de enviar qualquer dado identificável a um LLM externo, **pseudonimize** com `pseudonymize()` de [`core/security.py`](../../../apps/api/src/fiscalcheck_api/core/security.py).
 - Cite a **fonte legal** (artigo, inciso, anexo do edital) em docstrings de regras fiscais.
@@ -86,4 +86,4 @@ uv run alembic upgrade head
 
 - Decisão jurídica/fiscal? Pergunte ao usuário antes — não adivinhe.
 - Falta ADR para uma escolha grande? Proponha um em [`docs/adr/`](../../../docs/adr/) em vez de decidir silenciosamente.
-- Mudança toca compliance? Acione a skill `security-auditor` para revisão.
+- Mudança toca compliance? Exija revisão humana com foco em segurança/LGPD.

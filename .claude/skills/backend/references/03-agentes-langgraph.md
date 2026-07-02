@@ -166,7 +166,7 @@ Tools recebem **hashes**, retornam **hashes**. PII descriptografada/des-hash-ead
 
 - **Nó isolado**: cada node é função pura (entrada `State`, saída `State`). Teste com `unittest.mock` para LLM calls.
 - **Grafo completo**: use `MemorySaver` (in-memory checkpointer), simule input do auditor, verifique a sequência de nodes executados (`graph.get_state(config).next`).
-- **Eval LLM**: para nodes que chamam LLM, dataset curado de casos com saída esperada (intervalo). Ver `qa-test-strategist/references/ai-evals.md`.
+- **Eval LLM**: para nodes que chamam LLM, dataset curado de casos com saída esperada (intervalo).
 
 ## 8. Anti-padrões
 

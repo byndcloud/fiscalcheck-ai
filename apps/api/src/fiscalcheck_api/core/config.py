@@ -39,8 +39,6 @@ class Settings(BaseSettings):
     database_url_sync: str = "postgresql+psycopg://postgres:postgres@localhost:5432/fiscalcheck"
     database_url_test: str | None = None
 
-    redis_url: str = "redis://localhost:6379/0"
-
     jwt_secret: SecretStr = SecretStr(JWT_SECRET_PLACEHOLDER)
     jwt_algorithm: str = "HS256"
     jwt_access_token_expires_minutes: int = 30

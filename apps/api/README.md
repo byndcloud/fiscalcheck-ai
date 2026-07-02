@@ -4,18 +4,19 @@ Backend **FastAPI** do FiscalCheck AI — agentes IA 24/7, ETL multifonte, ML pr
 
 ## Stack
 
+Instalado no MVP:
+
 - **Python 3.12** com type hints completos
 - **FastAPI 0.115+** (async)
 - **SQLAlchemy 2.0** (async) + **Alembic** para migrations
-- **PostgreSQL 16** + `pgvector` + `Apache AGE`
-- **Polars** para ETL (NFS-e, DIMP, PGDAS)
-- **LangGraph** + **LangChain Core** para agentes stateful
-- **scikit-learn** + **NetworkX** para score de risco e grafos
+- **PostgreSQL 16** + `pgvector` (Apache AGE adiado — ver [ADR-0002](../../docs/adr/0002-database-mvp-replit.md))
 - **structlog** para logging estruturado com correlation-id
-- **Redis** para cache, fila e sessões
+- **bcrypt** + **PyJWT** para hashing de senha e tokens
 - **Ruff** (lint + format) + **Pyright** (typecheck)
 - **pytest** + **pytest-asyncio** + **httpx** para testes
 - **uv** para dependências (substitui pip/poetry)
+
+Entra junto com os módulos correspondentes (stack decidida em [ADR-0001](../../docs/adr/0001-stack-inicial.md), mas não instalada até ser usada): **Polars** (ETL), **LangGraph** (agentes), **scikit-learn** + **NetworkX** (score/grafos), **Redis** (cache/fila), **pgvector** client, **pyotp** (MFA).
 
 ## Setup
 
@@ -88,7 +89,7 @@ alembic/                   # migrations
 tests/                     # pytest
 ```
 
-Cada módulo segue o padrão:
+Cada módulo seguirá o padrão abaixo quando for implementado (hoje as pastas contêm apenas `__init__.py` com a spec em docstring):
 
 ```text
 modules/<nome>/

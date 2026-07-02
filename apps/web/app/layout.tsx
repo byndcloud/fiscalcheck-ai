@@ -19,52 +19,50 @@ import "./globals.css";
   fallback declarativo em --font-ui (ver globals.css).
 */
 const raleway = Raleway({
-	subsets: ["latin"],
-	weight: ["400", "500", "600", "700", "800"],
-	variable: "--font-raleway",
-	display: "swap",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-raleway",
+  display: "swap",
 });
 
 const montserrat = Montserrat({
-	subsets: ["latin"],
-	weight: ["600", "700", "800"],
-	variable: "--font-montserrat",
-	display: "swap",
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  variable: "--font-montserrat",
+  display: "swap",
 });
 
 const robotoMono = Roboto_Mono({
-	subsets: ["latin"],
-	weight: ["400", "500", "600", "700"],
-	variable: "--font-roboto-mono",
-	display: "swap",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-roboto-mono",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-	title: {
-		default: "FiscalCheck AI",
-		template: "%s · FiscalCheck AI",
-	},
-	description:
-		"Plataforma de Inteligência Fiscal Agêntica — Secretaria Municipal da Fazenda de Brusque/SC",
-	applicationName: "FiscalCheck AI",
-	robots: {
-		index: false,
-		follow: false,
-	},
+  title: {
+    default: "FiscalCheck AI",
+    template: "%s · FiscalCheck AI",
+  },
+  description:
+    "Plataforma de Inteligência Fiscal Agêntica — Secretaria Municipal da Fazenda de Brusque/SC",
+  applicationName: "FiscalCheck AI",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
-export default function RootLayout({
-	children,
-}: Readonly<{ children: React.ReactNode }>) {
-	return (
-		<html
-			lang="pt-BR"
-			suppressHydrationWarning
-			className={`${raleway.variable} ${montserrat.variable} ${robotoMono.variable}`}
-		>
-			<body className="min-h-screen bg-background font-sans antialiased">
-				<Providers>{children}</Providers>
-			</body>
-		</html>
-	);
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html
+      lang="pt-BR"
+      suppressHydrationWarning
+      className={`${raleway.variable} ${montserrat.variable} ${robotoMono.variable}`}
+    >
+      <body className="min-h-screen bg-background font-sans antialiased">
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
 }

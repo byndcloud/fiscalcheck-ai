@@ -20,7 +20,7 @@ A plataforma é **agêntica**, mas o auditor é sempre o decisor.
 
 - Dados identificáveis (CPF, CNPJ, razão social, valores declarados) são **sigilosos** (art. 198 do CTN + LGPD).
 - Antes de qualquer treinamento de modelo ou envio a LLM externo, aplique **pseudonimização** (hashing com salt).
-- Nunca commitar dados reais. Use `docs/compliance/politica-retencao.md` como referência.
+- Nunca commitar dados reais. Use `docs/compliance/README.md` como referência.
 - Nunca logar dados identificáveis em níveis `INFO`/`DEBUG`. Use `audit` (estruturado) com correlation ID.
 
 ### 1.3 RBAC e MFA
@@ -54,6 +54,8 @@ Detalhes em [`docs/architecture/overview.md`](./docs/architecture/overview.md).
 
 ### 2.1 Onde colocar código
 
+> **Nota (MVP):** esta é a **estrutura alvo**. Hoje as pastas de módulos contêm apenas `__init__.py` com a spec em docstring — os arquivos `router.py`, `models.py` etc. são criados junto com a implementação de cada módulo.
+
 | Tipo de mudança | Lugar |
 | --- | --- |
 | Componente de UI reutilizável | `apps/web/components/ui/` (se shadcn) ou `apps/web/components/` |
@@ -62,7 +64,7 @@ Detalhes em [`docs/architecture/overview.md`](./docs/architecture/overview.md).
 | Modelo SQLAlchemy | `apps/api/src/fiscalcheck_api/modules/<modulo>/models.py` |
 | Agente LangGraph | `apps/api/src/fiscalcheck_api/agents/<nome>/graph.py` |
 | Migration | `apps/api/alembic/versions/` (gerado por `alembic revision --autogenerate`) |
-| Tipo TS compartilhado | `packages/shared-types/` (gerado do OpenAPI, **não editar à mão**) |
+| Tipo TS compartilhado | `packages/shared-types/` (tipos manuais são aceitos até a geração OpenAPI ser ativada; depois disso, **não editar à mão**) |
 
 ### 2.2 Mapa dos 7 módulos → pastas
 
@@ -108,7 +110,7 @@ uv run pytest -q
 - **TanStack Query v5** para todo fetch de dados do servidor. Sem `useEffect` para fetch.
 - **Zustand** apenas para estado de UI local (sidebars, modais, filtros globais). Estado de servidor é Query.
 - **Tipagem estrita**: `noImplicitAny`, `strict: true`. Nunca usar `any` em código novo.
-- **Tipos do backend**: importar de `@fiscalcheck/shared-types` (gerados do OpenAPI, não editar à mão).
+- **Tipos do backend**: importar de `@fiscalcheck/shared-types`. No MVP os tipos são manuais (`src/index.ts`); quando a geração OpenAPI for ativada, o `openapi.d.ts` gerado não deve ser editado à mão.
 - **Path aliases**: `@/*` aponta para `apps/web/`.
 
 ### 4.2 Python / FastAPI (apps/api)
@@ -117,7 +119,7 @@ uv run pytest -q
 - **Pydantic v2** para schemas (request/response).
 - **SQLAlchemy 2.0** com sintaxe nova (`select()`, `Mapped[]`, `mapped_column()`).
 - **async/await** em endpoints; `sync_to_async` para libs bloqueantes.
-- **Estrutura por módulo**: cada pasta em `modules/` tem `router.py`, `schemas.py`, `service.py`, `models.py`, `repository.py`.
+- **Estrutura por módulo** (alvo): cada pasta em `modules/` terá `router.py`, `schemas.py`, `service.py`, `models.py`, `repository.py` — criados junto com a implementação do módulo.
 - **Sem `# type: ignore`** sem comentário explicando o motivo.
 - **Sem prints**. Use `structlog` (configurado em `core/logging.py`).
 - **Lint:** Ruff (regras em `apps/api/ruff.toml`). `uv run ruff check` deve passar.
@@ -143,8 +145,8 @@ uv run pytest -q
 
 - **Nunca commitar:** `.env`, dumps de banco, dados reais, chaves privadas, tokens.
 - **Antes de pedir code review:** rodar `pnpm lint && pnpm typecheck && pnpm test`.
-- **Pre-commit hook (Husky) já bloqueia** lint quebrado e mensagem de commit fora do padrão.
-- **CI bloqueia merge** se `web-lint`, `web-typecheck`, `web-build`, `web-test`, `api-lint`, `api-typecheck`, `api-test` falharem.
+- **Não há hooks de pre-commit no MVP** — a validação acontece no CI; rode os comandos acima localmente antes do PR.
+- **CI bloqueia merge** se os jobs `web` (lint + typecheck + test + build) ou `api` (ruff + pyright + pytest) falharem.
 
 ---
 
@@ -164,7 +166,7 @@ uv run pytest -q
 - ❌ Executar ação com efeito sobre o contribuinte sem aprovação registrada.
 - ❌ Logar CPF/CNPJ/valor em nível INFO/DEBUG.
 - ❌ Mandar dados identificáveis para LLM externo sem pseudonimização.
-- ❌ Editar arquivos em `packages/shared-types/` à mão (regenerar do OpenAPI).
+- ❌ Editar o `openapi.d.ts` de `packages/shared-types/` à mão quando a geração OpenAPI estiver ativa (tipos manuais em `src/index.ts` são aceitos no MVP).
 - ❌ Adicionar dependência pesada sem ADR justificando.
 - ❌ Usar `any` em TS ou `# type: ignore` em Python sem justificativa.
 - ❌ Fazer `force push` em `main` ou `develop`.

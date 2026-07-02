@@ -8,7 +8,7 @@
 | --- | --- |
 | [`architecture/`](./architecture/) | Visão arquitetural, modelo de dados, diagramas |
 | [`adr/`](./adr/) | Architecture Decision Records (decisões auditáveis) |
-| [`compliance/`](./compliance/) | LGPD, sigilo fiscal, RIPD, ROPA, retenção, incidentes |
+| [`compliance/`](./compliance/) | LGPD, sigilo fiscal, retenção e incidentes (resumo consolidado para o MVP) |
 | [`design-system/`](./design-system/) | Design system (a popular pelo time) |
 | [`modules/`](./modules/) | Especificações dos 7 módulos do edital |
 
@@ -22,7 +22,7 @@
 ## Convenções de docs
 
 - **pt-BR** em prosa; identificadores e blocos de código em inglês.
-- **Markdownlint** valida formatação no CI (config em [`../.markdownlint.json`](../.markdownlint.json)).
+- Formatação de Markdown é responsabilidade do autor (sem lint automático no MVP).
 - **Mermaid** preferencial para diagramas (renderiza nativo no GitHub).
 - **ADRs imutáveis após `Accepted`** — para revogar, use status `Superseded by ADR-XXXX`.
 

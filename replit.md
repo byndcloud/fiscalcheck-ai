@@ -1,6 +1,6 @@
 # Replit — Guia de execução
 
-Este projeto roda **direto no Replit** sem ajustes manuais: o [`replit.nix`](./replit.nix) provisiona Node 22, Python 3.12, PostgreSQL 16 e Redis; o [`.replit`](./.replit) configura portas e workflows.
+Este projeto roda **direto no Replit** sem ajustes manuais: os `modules` do [`.replit`](./.replit) provisionam Node 22, Python 3.12 e o **Postgres gerenciado** do Replit; o [`replit.nix`](./replit.nix) complementa com `pnpm`, `uv` e utilitários de CLI.
 
 > Para leitura do agent (Claude Code / Replit Agent), o [`CLAUDE.md`](./CLAUDE.md) é o ponto de partida. Este arquivo trata da operação humana no Replit.
 
@@ -9,7 +9,7 @@ Este projeto roda **direto no Replit** sem ajustes manuais: o [`replit.nix`](./r
 ## 1. Criar o Repl
 
 1. **Create Repl → Import from GitHub** → selecione o repositório `fiscalcheck-ai`.
-2. Aguarde o Replit baixar dependências do Nix (primeira vez leva 3–5 minutos).
+2. Aguarde o Replit baixar dependências (primeira vez leva 3–5 minutos).
 3. O botão **Run** já está configurado para subir o workflow `Dev (web + api)`.
 
 ---
@@ -20,18 +20,19 @@ No painel **Secrets** do Replit, configure pelo menos:
 
 | Chave | Origem |
 | --- | --- |
-| `DATABASE_URL` | Replit Postgres (ou seu próprio) |
-| `REDIS_URL` | Replit Redis (ou seu próprio) |
+| `DATABASE_URL` | Replit Postgres (aba Database) |
 | `JWT_SECRET` | `openssl rand -hex 32` |
 | `NEXTAUTH_SECRET` | `openssl rand -hex 32` |
 | `NEXTAUTH_URL` | URL pública do Repl (ex.: `https://fiscalcheck-ai.<usuario>.repl.co`) |
 | `NEXT_PUBLIC_API_URL` | URL pública da API |
-| `OPENAI_API_KEY` | OpenAI (módulos 3 e 7) |
+| `OPENAI_API_KEY` | OpenAI (módulos 3 e 7, quando implementados) |
 | `PSEUDONYMIZATION_SALT` | `openssl rand -hex 32` (não compartilhar com JWT_SECRET) |
 
 A lista completa está em [`.env.example`](./.env.example).
 
 > **NUNCA** cole valores reais em arquivos versionados. Tudo entra pelo painel Secrets.
+
+> **Redis não faz parte do MVP.** O Replit não oferece Redis gerenciado; quando cache/fila for necessário (módulos futuros), a opção será um provedor externo (ex.: Upstash) ou a migração para nuvem nacional — registrar em ADR na ocasião.
 
 ---
 
@@ -62,7 +63,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS vector;
 ```
 
-Para experimentar a stack completa com `Apache AGE` (útil ao preparar a migração para nuvem nacional), use o `docker-compose` em [`infra/docker-compose.yml`](./infra/docker-compose.yml) **fora** do Replit — a imagem `apache/age:PG16_latest` já inclui o pacote de extensões e o init em [`infra/postgres-init-age.sql`](./infra/postgres-init-age.sql) cria o grafo `fiscal_graph`.
+Para experimentar a stack completa com `Apache AGE` (útil ao preparar a migração para nuvem nacional), use o `docker-compose` em [`infra/docker-compose.yml`](./infra/docker-compose.yml) **fora** do Replit — perfil `graph` (ver [`infra/README.md`](./infra/README.md)).
 
 ---
 
@@ -73,16 +74,16 @@ Para experimentar a stack completa com `Apache AGE` (útil ao preparar a migraç
 | 3000 | 80 (HTTPS público) | Next.js (frontend) |
 | 8000 | 8000 | FastAPI (backend) |
 
-PostgreSQL e Redis são serviços **gerenciados pelo Replit** — o app conecta neles pela URL injetada em Secrets (`DATABASE_URL`, `REDIS_URL`), e por isso eles não aparecem como `localPort` no [`.replit`](./.replit). Para dev local fora do Replit, suba o Postgres/Redis via [`infra/docker-compose.yml`](./infra/docker-compose.yml).
+O PostgreSQL é serviço **gerenciado pelo Replit** — o app conecta pela URL injetada em Secrets (`DATABASE_URL`), por isso 5432 não aparece como `localPort` no [`.replit`](./.replit). Para dev local fora do Replit, suba o Postgres via [`infra/docker-compose.yml`](./infra/docker-compose.yml).
 
 ---
 
 ## 6. Always On (piloto)
 
-Os agentes do módulo 1 (ingestão) e 2 (cruzamento) operam **24/7**. Para o piloto:
+Os agentes do módulo 1 (ingestão) e 2 (cruzamento) operarão **24/7** quando implementados. Para o piloto:
 
 1. Vá em **Repl Settings → Always On** e ative.
-2. Configure scheduled tasks dentro do FastAPI (Celery beat ou APScheduler).
+2. Configure scheduled tasks dentro do FastAPI (APScheduler).
 3. Para produção real, **migrar para AWS/Azure Brasil** — o Replit não tem certificação LGPD adequada para dados fiscais em produção.
 
 ---
@@ -91,8 +92,8 @@ Os agentes do módulo 1 (ingestão) e 2 (cruzamento) operam **24/7**. Para o pil
 
 | Sintoma | Provável causa | Solução |
 | --- | --- | --- |
-| `pnpm: command not found` | Corepack não inicializado | `corepack enable && corepack prepare pnpm@latest --activate` |
-| `uv: command not found` | `replit.nix` não foi rebuildado | Stop Repl → Run novamente (rebuilda Nix) |
+| `pnpm: command not found` | Nix não rebuildado | Stop Repl → Run novamente (rebuilda o ambiente) |
+| `uv: command not found` | `replit.nix` não foi rebuildado | Idem |
 | `Postgres: connection refused` | Serviço Postgres do Replit não iniciou | Reabra a aba **Database** no Replit |
 | `pgvector: extension does not exist` | Extensão não instalada | Rodar `CREATE EXTENSION vector` no Postgres |
 | Next.js 504 no `localhost:3000` | API caiu | `pnpm api:dev` para reiniciar só a API |
@@ -100,9 +101,9 @@ Os agentes do módulo 1 (ingestão) e 2 (cruzamento) operam **24/7**. Para o pil
 
 ---
 
-## 8. Deploy (produção)
+## 8. Deploy (piloto/demo)
 
-O `.replit` já tem a seção `[deployment]` configurada para **Replit Deployments → Cloud Run**, com `run = "pnpm dev"` (sobe web + api em paralelo). Isso é adequado apenas para a fase de **piloto/demo**.
+A seção `[deployment]` do [`.replit`](./.replit) roda **build de produção**: `pnpm build` + `uv sync` no build, e `next start` + `uvicorn` (sem `--reload`) no run. Nunca use os dev servers em deployment.
 
 > **Atenção LGPD:** dados fiscais reais exigem **localização nacional** dos dados. Replit hospeda em US; para produção, migrar para **AWS São Paulo**, **Azure Brazil South** ou nuvem do TCE/SC. Replit Deployments é adequado apenas para a fase de piloto.
 
@@ -114,7 +115,7 @@ Veja [`docs/adr/0001-stack-inicial.md`](./docs/adr/0001-stack-inicial.md) e [`do
 
 Atualize quando:
 
-- Mudar o `replit.nix` (novas deps Nix)
+- Mudar o `replit.nix` ou os `modules` do `.replit`
 - Mudar portas no `.replit`
 - Adicionar workflow novo
-- Trocar provedor de banco/cache no Replit
+- Trocar provedor de banco no Replit

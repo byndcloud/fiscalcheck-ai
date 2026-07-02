@@ -94,7 +94,7 @@ flowchart TB
 | Agentes | LangGraph |
 | ML | scikit-learn + NetworkX |
 | Banco | PostgreSQL 16 + pgvector (Apache AGE adiado — ver [ADR-0002](../adr/0002-database-mvp-replit.md)) |
-| Cache/fila | Redis 7 |
+| Cache/fila | Redis 7 (pós-MVP — fora do escopo do piloto no Replit) |
 | Lint/format | Biome (web) + Ruff (api) |
 | Typecheck | tsc + Pyright |
 | Testes | Vitest + pytest |

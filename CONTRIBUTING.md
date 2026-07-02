@@ -16,23 +16,22 @@ Obrigado pelo interesse. Este projeto trata dados fiscais sensíveis e tem requi
 ## Fluxo de branches
 
 ```text
-main         ←── apenas releases (PR obrigatório + reviews + CI verde)
-└── develop  ←── integração contínua (PR obrigatório + CI verde, self-merge ok)
+develop      ←── branch default (integração contínua; PR + CI verde, self-merge ok)
     ├── feat/<curto-descritivo>
     ├── fix/<curto-descritivo>
     ├── chore/<curto-descritivo>
     └── docs/<curto-descritivo>
 ```
 
-- **Nunca** comitar direto em `main` ou `develop`. Sempre via PR.
+- **Nunca** comitar direto em `develop`. Sempre via PR.
 - Branches de feature partem de `develop`.
-- Releases (`develop` → `main`) são feitas em janela controlada após validação.
+- A branch `main` (releases) **ainda não existe no remoto** — será criada na primeira release, em janela controlada após validação. A partir daí, releases seguem `develop` → `main`.
 
 ---
 
 ## Convenção de commits
 
-Usamos [Conventional Commits](https://www.conventionalcommits.org/pt-br/). O `commitlint` (via Husky) **bloqueia** mensagens fora do padrão.
+Usamos [Conventional Commits](https://www.conventionalcommits.org/pt-br/) como **convenção recomendada**. No MVP não há validação automática (commitlint/Husky foram removidos para agilizar commits) — siga o padrão por disciplina; ele volta a ser obrigatório quando o time crescer.
 
 ```text
 <tipo>(<escopo opcional>): <descrição imperativa>
@@ -67,7 +66,7 @@ Usamos [Conventional Commits](https://www.conventionalcommits.org/pt-br/). O `co
 ```text
 feat(crossing): adicionar deteccao de subdeclarante via grafo
 fix(auth): corrigir validacao de MFA expirada
-docs(compliance): atualizar template RIPD com novos campos
+docs(compliance): atualizar resumo de retencao LGPD
 chore(deps): subir Next.js para 15.1.0
 ```
 
@@ -117,15 +116,15 @@ pnpm build          # apenas se mudou apps/web
 
 A CI vai rodar isso de novo, mas falhar local é mais rápido.
 
-O **pre-commit hook** (Husky + lint-staged) já roda `lint:fix` nos arquivos staged. Se ele bloquear, não passe por cima com `--no-verify` — corrija.
+> Não há hooks de pre-commit no MVP — a validação é sua responsabilidade local + CI no PR.
 
 ---
 
 ## Code review
 
 - PR para `develop`: 0 ou 1 reviewer (self-merge aceito após CI verde).
-- PR para `main`: 1 reviewer mínimo + todos os checks de CI obrigatórios.
-- PRs que mexem em `docs/compliance/` ou `apps/api/.../compliance/` exigem revisão da skill `security-auditor`.
+- PR para `main` (quando existir): 1 reviewer mínimo + todos os checks de CI obrigatórios.
+- PRs que mexem em `docs/compliance/` ou `apps/api/.../compliance/` exigem revisão humana com foco em segurança/LGPD.
 
 ---
 

@@ -31,7 +31,7 @@ Se sim, descrever:
 - Quais dados identificáveis são tocados (CPF, CNPJ, valor, etc.)?
 - Há pseudonimização antes de logging/treinamento/LLM?
 - Há mudança em RBAC ou audit log?
-- Mudança requer revisão da skill `security-auditor`?
+- Mudança requer revisão humana focada em segurança/conformidade?
 -->
 
 - [ ] Sem impacto em LGPD / sigilo fiscal

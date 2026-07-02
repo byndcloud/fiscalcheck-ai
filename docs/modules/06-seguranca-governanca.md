@@ -67,7 +67,7 @@ async def decidir(
 ## Métricas / SLA
 
 - **100%** das ações com efeito sobre contribuinte com `auditor_id` + `correlation_id` no audit log.
-- **Resposta a incidente** ≤ 24h após confirmação ([`../compliance/runbook-incidente-24h.md`](../compliance/runbook-incidente-24h.md)).
+- **Resposta a incidente** ≤ 24h após confirmação (ver [`../compliance/README.md`](../compliance/README.md)).
 - **0** entradas mutáveis em `audit_log` (verificado por trigger).
 - **MFA**: 100% dos auditores ativos com MFA habilitado.
 

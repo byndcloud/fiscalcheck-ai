@@ -63,7 +63,7 @@ Especificações detalhadas em [`docs/modules/`](./docs/modules/).
 | ETL | Polars | 5–10x mais rápido que Pandas para volumes fiscais |
 | Agentes IA | LangGraph | Máquinas de estado com human-in-the-loop nativo |
 | Banco | PostgreSQL 16 + pgvector (AGE adiado — ver [ADR-0002](./docs/adr/0002-database-mvp-replit.md)) | Relacional + embeddings num só banco; grafo do Módulo 2 em NetworkX in-memory no MVP |
-| Cache/fila | Redis 7 | Cache, filas Celery/Arq, sessões |
+| Cache/fila | Redis 7 (pós-MVP) | Fora do MVP — Replit não oferece Redis gerenciado; entra com os módulos que precisarem de fila/cache |
 | Runtime | Node 22, Python 3.12, pnpm 9 | LTS estáveis exigidos pelo Replit |
 | Lint/format | Biome (web) + Ruff (api) | Latência baixa, formatação rápida |
 | Hospedagem | Replit (piloto) → AWS/Azure Brasil (produção) | LGPD recomenda localização nacional |
@@ -83,10 +83,10 @@ fiscalcheck-ai/
 │   ├── design-system/        # ← coloque seu DS aqui
 │   ├── architecture/         # ADRs, diagramas, data model
 │   ├── adr/                  # decisões arquiteturais
-│   ├── compliance/           # LGPD, sigilo fiscal, RIPD, ROPA
+│   ├── compliance/           # LGPD e sigilo fiscal (resumo p/ MVP)
 │   └── modules/              # spec dos 7 módulos
 ├── infra/
-│   └── docker-compose.yml    # dev local (postgres + redis)
+│   └── docker-compose.yml    # dev local (postgres + pgvector)
 ├── .claude/skills/           # skills do Claude Code
 ├── .github/workflows/        # CI: lint, typecheck, build, test
 └── .replit + replit.nix      # runtime no Replit
@@ -98,10 +98,10 @@ fiscalcheck-ai/
 - **pnpm** ≥ 9.0.0 (`corepack enable && corepack prepare pnpm@latest --activate`)
 - **Python** 3.12.x ([pyenv-win](https://github.com/pyenv-win/pyenv-win) recomendado)
 - **uv** (`pip install uv` ou via [winget](https://github.com/astral-sh/uv))
-- **Docker Desktop** (opcional, para subir Postgres + Redis localmente)
+- **Docker Desktop** (opcional, para subir o Postgres localmente)
 - **PowerShell 7+** (Windows) ou Bash 5+ (Linux/macOS)
 
-No Replit, tudo isso já vem provisionado pelo [`replit.nix`](./replit.nix).
+No Replit, tudo isso já vem provisionado pelos `modules` do [`.replit`](./.replit) + [`replit.nix`](./replit.nix).
 
 ## Quickstart
 
@@ -116,7 +116,7 @@ copy .env.example .env
 copy apps\web\.env.example apps\web\.env.local
 copy apps\api\.env.example apps\api\.env
 
-# 3. Subir Postgres + Redis (Docker)
+# 3. Subir Postgres com pgvector (Docker)
 docker compose -f infra/docker-compose.yml up -d
 
 # 4. Instalar dependências Python
@@ -150,12 +150,12 @@ No **Replit**, basta clicar em **Run** — o workflow `Dev (web + api)` sobe amb
 ## Convenções
 
 - **Idioma:** documentação, comentários e mensagens de UI em **pt-BR**; identificadores de código em inglês (`riskScore`, não `pontuacaoDeRisco`).
-- **Commits:** [Conventional Commits](https://www.conventionalcommits.org/pt-br/) (validado por commitlint).
+- **Commits:** [Conventional Commits](https://www.conventionalcommits.org/pt-br/) como convenção recomendada (sem validação automática no MVP).
   - Tipos: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`.
   - Exemplo: `feat(crossing): adicionar deteccao de subdeclarante via grafo`.
-- **Branches:** `main` (produção) ← `develop` (integração) ← `feat/*`, `fix/*`, `chore/*`.
+- **Branches:** `develop` (default/integração) ← `feat/*`, `fix/*`, `chore/*`. A branch `main` será criada na primeira release.
 - **PRs:** título em Conventional Commits, descrição com contexto + checklist de testes.
-- **Lint:** Biome (web) + Ruff (api). `pnpm lint` deve passar antes do commit (Husky bloqueia).
+- **Lint:** Biome (web) + Ruff (api). `pnpm lint` deve passar antes do PR (validado no CI).
 - **Tipos:** sem `any` em código novo; sem `# type: ignore` sem justificativa em comentário.
 
 Veja [`CONTRIBUTING.md`](./CONTRIBUTING.md) para o fluxo completo.
@@ -164,7 +164,7 @@ Veja [`CONTRIBUTING.md`](./CONTRIBUTING.md) para o fluxo completo.
 
 Este projeto trata dados fiscais e identificáveis sob:
 
-- **Lei nº 13.709/2018 (LGPD)** — pseudonimização, RIPD, ROPA, retenção, resposta a incidente ≤ 24h
+- **Lei nº 13.709/2018 (LGPD)** — pseudonimização, retenção, resposta a incidente ≤ 24h
 - **Art. 198 do CTN** — sigilo fiscal, segregação por papel
 - **Edital CPSI Brusque/SC** — cadeia de custódia auditável, MFA, RBAC, logs imutáveis
 

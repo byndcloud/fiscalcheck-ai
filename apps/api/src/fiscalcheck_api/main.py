@@ -5,7 +5,9 @@ Ponto de entrada do backend. Configura:
 - Middleware de correlation-id (cadeia de custódia — requisito do edital).
 - Logging estruturado (structlog).
 - Endpoint /health (probes do Replit Always On).
-- Inclusão de routers dos 7 módulos (placeholders nesta etapa).
+
+Os routers dos 7 módulos serão incluídos aqui conforme cada módulo
+for implementado (hoje `modules/` contém apenas as specs em docstring).
 """
 
 from collections.abc import AsyncIterator

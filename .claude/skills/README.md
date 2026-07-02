@@ -8,10 +8,10 @@ Esta pasta contém **skills** que o Claude Code (e Replit Agent) deve consultar 
 |---|---|---|
 | [`frontend/`](./frontend/) | `frontend` | Qualquer mudança em `apps/web/**` — componentes, páginas, layout, a11y, performance, design tokens, animação |
 | [`backend/`](./backend/) | `backend` | Qualquer mudança em `apps/api/**` — endpoints, modelos SQLAlchemy, ETL, agentes LangGraph, migrations Alembic |
-| [`qa-test-strategist/`](./qa-test-strategist/) | `qa-test-strategist` | Planejar testes, decidir mix (unit / integração / contract / e2e / property / evals de LLM), auditar suíte |
-| [`security-auditor/`](./security-auditor/) | `security-auditor` | Revisar PR/diff/módulo por segurança (LGPD, sigilo fiscal, RBAC, IDOR, injeção, segredos, etc.) |
 
 Cada skill carrega o contexto FiscalCheck em `references/00-fiscalcheck-context.md` (leitura obrigatória antes das demais referências da mesma skill).
+
+> Na simplificação para o MVP (jul/2026), as skills `qa-test-strategist` e `security-auditor` e as references genéricas da skill `frontend` foram removidas do repo (disponíveis no histórico do git). Serão reintroduzidas quando o volume de código justificar.
 
 ## Formato esperado de cada skill
 
@@ -39,7 +39,7 @@ Quando o usuário pede uma tarefa que case com o `description` de uma skill, o C
 - **Idioma**: `references/00-fiscalcheck-context.md` e qualquer conteúdo novo deste repo em pt-BR. Skills genéricas podem manter referências em inglês quando vieram prontas (são documentos de boa qualidade que não duplicaremos).
 - **Escopo**: o contexto FiscalCheck mora em `references/00-fiscalcheck-context.md`. As outras referências podem ser genéricas — o agente combina as duas camadas.
 - **Referências**: cite arquivos do repo com caminho relativo (`apps/api/...`).
-- **LGPD e sigilo**: skills de `backend` e `security-auditor` reforçam pseudonimização, RBAC, audit log append-only.
+- **LGPD e sigilo**: a skill `backend` reforça pseudonimização, RBAC, audit log append-only.
 
 ## Adicionando uma skill nova
 

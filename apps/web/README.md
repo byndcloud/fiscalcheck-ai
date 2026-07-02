@@ -10,7 +10,7 @@ Frontend Next.js 15 (App Router) do **FiscalCheck AI** — a UI dos auditores fi
 - **shadcn/ui** (New York style, base color `neutral`)
 - **TanStack Query v5** para fetch de dados do servidor
 - **Zustand 5** para estado de UI local
-- **React Hook Form + Zod** para formulários
+- **React Hook Form + Zod** para formulários (entram junto com as primeiras telas de formulário — não instalados no MVP)
 - **Biome** para lint/format
 - **Vitest** + **Testing Library** para testes
 
