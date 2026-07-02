@@ -16,8 +16,8 @@ Skills neste projeto:
 | --- | --- | --- | --- |
 | `frontend/` | `frontend` | Ativa | Next.js 15, Tailwind v4, shadcn/ui, TanStack Query, Zustand |
 | `backend/` | `backend` | Ativa | FastAPI, SQLAlchemy 2.0, Polars (ETL), LangGraph (agentes), Alembic |
-| `qa-test-strategist/` | `qa-test-strategist` | Ativa | Estratégia de testes; Vitest, pytest, golden tests fiscais, evals de LLM |
-| `security-auditor/` | `security-auditor` | Ativa | Revisão LGPD, sigilo fiscal (art. 198 CTN), RBAC, cadeia de custódia |
+
+> As skills `qa-test-strategist` e `security-auditor` foram removidas na simplificação para o MVP (disponíveis no histórico do git); serão reintroduzidas quando o volume de código justificar.
 
 **Como usar uma skill:** quando o usuário pedir uma tarefa que case com a `description` do `SKILL.md`, **leia o `SKILL.md` correspondente** e siga suas instruções. Cada skill tem em `references/00-fiscalcheck-context.md` o contexto **obrigatório** do projeto — leia-o antes de qualquer outra referência da mesma skill.
 
@@ -46,7 +46,7 @@ Mapa pasta → módulo está em [`AGENTS.md` § 2.2](./AGENTS.md).
 > **Antes de tocar nestes arquivos, pare e considere o impacto.**
 
 - **`.env`**, **`*.local`**, **`secrets/`** — segredos; **nunca** ler/expor/commitar conteúdo.
-- **`docs/compliance/*`** — base legal e procedimentos LGPD/sigilo fiscal; mudanças exigem revisão da `security-auditor` skill.
+- **`docs/compliance/*`** — base legal e procedimentos LGPD/sigilo fiscal; mudanças exigem revisão humana com foco em segurança/conformidade.
 - **`docs/adr/*`** — decisões arquiteturais imutáveis após "Accepted". Use `Superseded` em vez de editar.
 - **`apps/api/src/fiscalcheck_api/modules/compliance/`** — código de auditoria, logs imutáveis, RBAC. Quebrar isto = quebrar a defensabilidade legal da plataforma.
 - **`apps/api/alembic/versions/*`** — migrations já aplicadas em produção **nunca** são editadas; gere uma nova.
@@ -95,7 +95,7 @@ Quando você gerar PR:
 
 - **Não rodar `force push`** em `main` ou `develop`.
 - **Não criar arquivo `LICENSE`** sem confirmação explícita do mantenedor — a definição de licenciamento será tratada em sprint dedicado.
-- **Não desabilitar** Husky, commitlint, lint-staged ou checks de CI.
+- **Não desabilitar** checks de CI.
 - **Não baixar/instalar** binários externos sem ADR.
 - **Não modificar** `.env.example` para incluir valores reais.
 

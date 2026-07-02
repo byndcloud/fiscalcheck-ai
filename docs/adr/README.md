@@ -7,7 +7,7 @@ Cada decisão arquitetural relevante vira um ADR numerado. Uma vez `Accepted`, *
 1. Copie [`template.md`](./template.md) para `XXXX-titulo-curto.md` (próximo número sequencial).
 2. Preencha contexto, decisão, consequências, alternativas.
 3. Comece com `Status: Proposed`. Após discussão, mude para `Accepted` (ou `Rejected`).
-4. Faça PR pedindo revisão dos owners do `CODEOWNERS` para `docs/adr/**`.
+4. Faça PR pedindo revisão do tech lead / arquiteto.
 
 ## Índice
 

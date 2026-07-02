@@ -8,6 +8,9 @@ authors = [
   { name = "Beyond / Aurora" },
 ]
 
+# Dependências enxutas para o MVP (ver CHANGELOG). Libs de módulos ainda
+# não implementados (polars, langgraph, scikit-learn, redis, pgvector etc.)
+# serão adicionadas junto com o código que as usa.
 dependencies = [
   # Web framework
   "fastapi>=0.115.0,<0.116",
@@ -15,43 +18,18 @@ dependencies = [
   "pydantic>=2.9.0,<3",
   "pydantic-settings>=2.6.0,<3",
 
-  # Banco
+  # Banco (asyncpg no runtime; psycopg sync apenas para migrations Alembic)
   "sqlalchemy[asyncio]>=2.0.36,<3",
   "alembic>=1.14.0,<2",
   "asyncpg>=0.30.0,<0.31",
-  "psycopg[binary,pool]>=3.2.0,<4",
-  "pgvector>=0.3.0,<0.4",
-
-  # Cache / fila
-  "redis>=5.2.0,<6",
+  "psycopg[binary]>=3.2.0,<4",
 
   # Auth e segurança
-  "passlib[bcrypt]>=1.7.4,<2",
-  "python-jose[cryptography]>=3.3.0,<4",
-  "pyotp>=2.9.0,<3",
+  "bcrypt>=4.2.0,<5",
+  "pyjwt>=2.10.0,<3",
 
   # Observabilidade / logging estruturado
   "structlog>=24.4.0,<25",
-  "python-json-logger>=2.0.7,<3",
-
-  # ETL
-  "polars>=1.17.0,<2",
-  "pyarrow>=18.1.0,<19",
-  "httpx>=0.28.0,<0.29",
-
-  # ML / IA
-  "scikit-learn>=1.5.0,<2",
-  "numpy>=2.1.0,<3",
-  "networkx>=3.4.0,<4",
-
-  # Agentes (LangGraph)
-  "langgraph>=0.2.55,<0.3",
-  "langchain-core>=0.3.20,<0.4",
-
-  # Utilitários
-  "python-multipart>=0.0.19,<0.0.20",
-  "email-validator>=2.2.0,<3",
-  "tenacity>=9.0.0,<10",
 ]
 
 [dependency-groups]
@@ -62,7 +40,6 @@ dev = [
   "httpx>=0.28.0,<0.29",
   "ruff>=0.8.0,<0.9",
   "pyright>=1.1.390,<2",
-  "ipython>=8.30.0,<9",
 ]
 
 [build-system]

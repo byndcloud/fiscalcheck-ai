@@ -9,17 +9,18 @@ channel = "stable-24_05"
 
 # Deploy: Replit Deployments destina-se ao piloto/demo. Produção real
 # vai para nuvem nacional (AWS São Paulo / Azure Brazil South / nuvem
-# TCE-SC) — ver ADR-0001. O `run` abaixo sobe web + api em paralelo
-# usando o workflow padrão.
+# TCE-SC) — ver ADR-0001. O deploy roda build de produção (Next.js
+# `next start` + uvicorn sem --reload), nunca os dev servers.
 [deployment]
-run = ["sh", "-c", "pnpm dev"]
+build = ["sh", "-c", "pnpm install --frozen-lockfile && pnpm build && cd apps/api && uv sync --frozen"]
+run = ["sh", "-c", "pnpm -r --parallel start"]
 deploymentTarget = "cloudrun"
 ignorePorts = false
 
 # Apenas as portas que o próprio Repl expõe são listadas aqui.
-# Postgres e Redis no MVP são serviços gerenciados pelo Replit
-# (não rodam em localhost dentro do Repl), por isso 5432 e 6379
-# não aparecem como localPort.
+# O Postgres do MVP é o serviço gerenciado do Replit (módulo
+# postgresql-16), acessado via DATABASE_URL — por isso 5432 não
+# aparece como localPort.
 
 [[ports]]
 localPort = 3000

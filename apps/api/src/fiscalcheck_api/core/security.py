@@ -13,22 +13,28 @@ import hmac
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from jose import jwt
-from passlib.context import CryptContext
+import bcrypt
+import jwt
 
 from fiscalcheck_api.core.config import get_settings
-
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def hash_password(plain: str) -> str:
     """Faz hash bcrypt da senha em texto puro."""
-    return _pwd_context.hash(plain)
+    return bcrypt.hashpw(plain.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    """Verifica senha contra hash."""
-    return _pwd_context.verify(plain, hashed)
+    """Verifica senha contra hash.
+
+    Hash malformado/corrompido conta como falha de autenticação
+    (`False`), não como erro 500 — `bcrypt.checkpw` lança `ValueError`
+    quando o salt do hash armazenado é inválido.
+    """
+    try:
+        return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
+    except ValueError:
+        return False
 
 
 def create_access_token(

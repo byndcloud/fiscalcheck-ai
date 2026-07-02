@@ -1,28 +1,20 @@
 /**
  * Tipos TS compartilhados entre apps/web e apps/api.
  *
- * O arquivo `openapi.d.ts` é gerado automaticamente do schema OpenAPI
- * exposto em `http://localhost:8000/openapi.json` — NÃO editar à mão.
+ * Fase MVP: a geração via OpenAPI ainda NÃO está ativa — os tipos abaixo
+ * são mantidos à mão e são a fonte da verdade temporária.
  *
- * Para regenerar:
+ * Quando a API tiver endpoints reais, ative a geração:
  *   pnpm --filter @fiscalcheck/shared-types generate
- *
- * Tipos manuais (não-OpenAPI) podem ficar abaixo neste arquivo, mas
- * a preferência é o backend ser a fonte da verdade.
+ * e reexporte aqui (`export type { paths, components } from "./openapi"`).
+ * A partir daí, o `openapi.d.ts` gerado não deve ser editado à mão.
  */
 
-// export type { paths, components, operations } from "./openapi";
-
 export type AuditableAction = {
-	action: string;
-	actor_id: string;
-	correlation_id: string;
-	timestamp: string;
+  action: string;
+  actor_id: string;
+  correlation_id: string;
+  timestamp: string;
 };
 
-export type Role =
-	| "auditor"
-	| "supervisor"
-	| "admin"
-	| "cidadao"
-	| "agente_sistema";
+export type Role = "auditor" | "supervisor" | "admin" | "cidadao" | "agente_sistema";

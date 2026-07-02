@@ -132,7 +132,7 @@ Use **sempre** antes de:
 | [`core/security.py`](../../../../apps/api/src/fiscalcheck_api/core/security.py) | Auth + pseudonimização. Bug = vazamento sistêmico. |
 | [`core/config.py`](../../../../apps/api/src/fiscalcheck_api/core/config.py) | Segredos, validator de placeholders. |
 | [`core/logging.py`](../../../../apps/api/src/fiscalcheck_api/core/logging.py) | Cadeia de custódia. |
-| `modules/compliance/**` | RBAC, MFA, audit log append-only. Exige revisão da skill `security-auditor`. |
+| `modules/compliance/**` | RBAC, MFA, audit log append-only. Exige revisão humana com foco em segurança. |
 | [`alembic/versions/*`](../../../../apps/api/alembic/versions/) | **Imutável** depois de aplicado. Sempre uma migration nova. |
 | [`alembic/env.py`](../../../../apps/api/alembic/env.py) | URL sync, metadata. |
 

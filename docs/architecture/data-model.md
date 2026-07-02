@@ -105,7 +105,7 @@ A tabela `audit_log` é **append-only**:
 
 - Não há `UPDATE` nem `DELETE` em produção.
 - Triggers no Postgres podem bloquear esses statements como guardrail adicional.
-- Retenção mínima: `audit_log_retention_days` (default: 1825 dias / 5 anos), conforme [`../compliance/politica-retencao.md`](../compliance/politica-retencao.md).
+- Retenção mínima: `audit_log_retention_days` (default: 1825 dias / 5 anos), conforme [`../compliance/README.md`](../compliance/README.md).
 
 ## Grafo (Apache AGE)
 

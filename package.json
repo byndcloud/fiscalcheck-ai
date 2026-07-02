@@ -18,16 +18,10 @@
 		"format": "pnpm -r format",
 		"format:check": "pnpm -r format:check",
 		"api:dev": "pnpm --filter @fiscalcheck/api dev",
-		"web:dev": "pnpm --filter @fiscalcheck/web dev",
-		"prepare": "husky"
+		"web:dev": "pnpm --filter @fiscalcheck/web dev"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
-		"@commitlint/cli": "^19.6.0",
-		"@commitlint/config-conventional": "^19.6.0",
-		"husky": "^9.1.7",
-		"lint-staged": "^15.2.10",
-		"markdownlint-cli": "^0.49.0",
 		"typescript": "^5.7.2"
 	}
 }

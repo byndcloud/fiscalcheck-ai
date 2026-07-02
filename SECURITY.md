@@ -42,7 +42,7 @@ Você também pode usar o **[Private vulnerability reporting](https://docs.githu
 | Avaliação inicial e classificação de severidade | 5 dias úteis |
 | Patch ou mitigação | Conforme severidade (ver tabela abaixo) |
 | Comunicação ao reportante | Contínua até a correção |
-| Notificação à ANPD (se houver vazamento de dado pessoal) | **≤ 24 horas** após confirmação (conforme [`docs/compliance/runbook-incidente-24h.md`](./docs/compliance/runbook-incidente-24h.md)) |
+| Notificação à ANPD (se houver vazamento de dado pessoal) | **≤ 24 horas** após confirmação (conforme [`docs/compliance/README.md`](./docs/compliance/README.md)) |
 
 ### Classificação de severidade
 
@@ -88,12 +88,12 @@ Não temos bug bounty no momento (fase de piloto). Reportes legítimos serão:
 - **Autorização**: RBAC com mínimo privilégio.
 - **Auditoria**: logs imutáveis (append-only) de toda ação com efeito sobre contribuinte.
 - **LGPD**: pseudonimização antes de treino de modelos; resposta a incidente ≤ 24h.
-- **Dependências**: Dependabot semanal + `pnpm audit` + `pip-audit` no CI.
-- **Análise estática**: CodeQL semanal.
+- **Dependências**: Dependabot **security updates** habilitados na configuração do repositório no GitHub (alertas + PRs de patch de CVE — não dependem de `dependabot.yml`). Version updates automáticos foram desligados no MVP; bumps são manuais.
+- **Análise estática**: lint (Biome/Ruff) + typecheck (tsc/Pyright) no CI. CodeQL será reativado quando o volume de código justificar.
 - **Secret scanning**: GitHub Secret Scanning + Push Protection habilitados.
 
 ---
 
 ## Contato alternativo
 
-Se o e-mail acima não estiver acessível, contate qualquer mantenedor listado em [`.github/CODEOWNERS`](./.github/CODEOWNERS) via canal privado.
+Se o e-mail acima não estiver acessível, contate qualquer mantenedor do repositório via canal privado.

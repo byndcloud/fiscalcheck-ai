@@ -1,23 +1,19 @@
 name: fiscalcheck-ai
 
-# Convenção de perfis (ver ADR-0002):
-#   default → postgres (com pgvector) + redis. Cobre o MVP e bate com Replit.
-#   graph   → postgres-age (com pgvector + Apache AGE). Dev local que precisa
-#             validar a futura implementação AgeGraphStore.
-#   dev     → utilitários auxiliares (mailhog).
+# Convenção (ver ADR-0002):
+#   sem perfil → postgres com pgvector. Cobre o MVP e bate com o Replit Postgres.
+#   graph      → postgres-age (pgvector + Apache AGE) no lugar do postgres
+#                default, para validar a futura implementação AgeGraphStore.
 # Ative com:
-#   docker compose up -d                         # default
-#   docker compose --profile graph up -d         # com AGE
-#   docker compose --profile dev up -d           # com mailhog
+#   docker compose up -d                    # MVP (postgres + pgvector)
+#   docker compose --profile graph up -d    # com AGE (não subir junto do default)
 
 services:
   postgres:
-    # Imagem oficial 16 — equivalente ao Replit Postgres no que diz respeito
-    # a extensões disponíveis. pgvector é instalado via postgres-init.sql.
-    image: postgres:16-alpine
+    # pgvector/pgvector inclui a extensão vector pré-compilada — a imagem
+    # postgres:16 pura NÃO tem pgvector e o init falharia.
+    image: pgvector/pgvector:pg16
     container_name: fiscalcheck-postgres
-    profiles:
-      - default
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -50,7 +46,7 @@ services:
       POSTGRES_INITDB_ARGS: "--locale=pt_BR.UTF-8"
       LANG: pt_BR.UTF-8
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_age_data:/var/lib/postgresql/data
       - ./postgres-init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
@@ -62,35 +58,6 @@ services:
       retries: 10
     restart: unless-stopped
 
-  redis:
-    image: redis:7-alpine
-    container_name: fiscalcheck-redis
-    profiles:
-      - default
-      - graph
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-    restart: unless-stopped
-
-  # mailhog para testar notificações de e-mail em dev
-  mailhog:
-    image: mailhog/mailhog:latest
-    container_name: fiscalcheck-mailhog
-    profiles:
-      - dev
-    ports:
-      - "1025:1025"   # SMTP
-      - "8025:8025"   # UI web
-    restart: unless-stopped
-
 volumes:
   postgres_data:
   postgres_age_data:
-  redis_data:

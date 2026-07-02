@@ -1,41 +1,35 @@
 # Infra — desenvolvimento local
 
-Composição Docker para **dev fora do Replit**. No Replit, use o Postgres e o Redis gerenciados (ver [`replit.md`](../replit.md)).
+Composição Docker para **dev fora do Replit**. No Replit, use o Postgres gerenciado (ver [`replit.md`](../replit.md)).
 
-## Perfis disponíveis
+## Serviços
 
-| Perfil | Serviços | Quando usar |
+| Serviço | Como sobe | Quando usar |
 | --- | --- | --- |
-| `default` (sem flag) | `postgres` (`postgres:16-alpine` + `pgvector`) + `redis` | Espelha o MVP no Replit. Use no dia a dia. |
-| `graph` | `postgres-age` (`apache/age:PG16_latest` com `pgvector` + `Apache AGE`) + `redis` | Exercitar o `AgeGraphStore` em preparação à migração para nuvem nacional. **Não** é a topologia do MVP. |
-| `dev` | `mailhog` (1025 SMTP / 8025 UI) | Capturar e-mails de teste localmente. |
+| `postgres` (`pgvector/pgvector:pg16`) | `docker compose up -d` | Espelha o MVP no Replit (Postgres + pgvector). Use no dia a dia. |
+| `postgres-age` (`apache/age:PG16_latest`, porta **5433**) | `docker compose --profile graph up -d` | Exercitar o `AgeGraphStore` em preparação à migração para nuvem nacional. **Não** é a topologia do MVP. |
 
 Decisão de manter AGE como opt-in: [ADR-0002](../docs/adr/0002-database-mvp-replit.md).
 
 ## Subir
 
 ```powershell
-# Default (MVP): postgres + pgvector + redis
+# MVP: postgres + pgvector (porta 5432)
 docker compose -f infra/docker-compose.yml up -d
 
-# Com Apache AGE (em vez do postgres default)
+# Adicional com Apache AGE (porta 5433, pode coexistir com o default)
 docker compose -f infra/docker-compose.yml --profile graph up -d
-
-# Com mailhog
-docker compose -f infra/docker-compose.yml --profile dev up -d
 ```
-
-> Os serviços `postgres` (default) e `postgres-age` (graph) usam a **mesma porta 5432**. Não suba os dois ao mesmo tempo.
 
 ## Validar extensões
 
 ```sql
 \c fiscalcheck
 
--- pgvector (em ambos os perfis)
+-- pgvector (em ambos os serviços)
 SELECT '[1,2,3]'::vector;
 
--- Apache AGE (apenas no perfil graph)
+-- Apache AGE (apenas no postgres-age)
 LOAD 'age';
 SET search_path = ag_catalog, "$user", public;
 SELECT * FROM ag_catalog.ag_graph WHERE name = 'fiscal_graph';
@@ -47,7 +41,7 @@ SELECT * FROM ag_catalog.ag_graph WHERE name = 'fiscal_graph';
 docker compose -f infra/docker-compose.yml down -v
 ```
 
-Isso apaga **volumes** (banco e Redis ficam zerados). Para o dia a dia, prefira `down` sem `-v`.
+Isso apaga **volumes** (banco fica zerado). Para o dia a dia, prefira `down` sem `-v`.
 
 ## Aplicar migrations
 

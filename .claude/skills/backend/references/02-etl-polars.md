@@ -129,7 +129,7 @@ Linhas com schema válido mas valor inválido (CNPJ malformado, data fora de int
 
 Quem revisa rejeitados é o auditor, não o agente.
 
-## 7. Testes obrigatórios (acionar skill `qa-test-strategist`)
+## 7. Testes obrigatórios
 
 - **Idempotência**: chamar `load_nfse` 2x e verificar contagem final igual.
 - **Schema drift**: arquivo com coluna a mais → log de warning. Com coluna a menos → `ValueError`.

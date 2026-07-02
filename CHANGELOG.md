@@ -6,6 +6,31 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o 
 
 ## [Não publicado]
 
+### Changed — Simplificação para o MVP no Replit (2026-07-02)
+
+Enxugamento do repositório para o escopo real da fase de validação (MVP via Replit). Tudo o que foi removido permanece no histórico do git e volta quando o produto sair do piloto.
+
+- **Automação GitHub removida**: workflow CodeQL, `dependabot.yml` (version updates desligados; security updates continuam via configuração do repositório), `scripts/dependabot/` e `CODEOWNERS` (placeholders). Issue #26 e PR #34 fechados.
+- **Hooks de commit removidos**: Husky, commitlint, lint-staged e markdownlint saíram (arquivos + devDependencies + script `prepare`). Commits locais ficam instantâneos; a validação acontece no CI. Conventional Commits vira convenção recomendada (ver `CONTRIBUTING.md`).
+- **CI consolidado**: de 8 jobs para 2 (`web`: lint+typecheck+test+build; `api`: ruff+pyright+pytest), mantendo o paths-filter. Job `docs-lint` removido.
+- **Dependências Python podadas** (`apps/api/pyproject.toml`): removidos scikit-learn, numpy, networkx, polars, pyarrow, langgraph, langchain-core, redis, pgvector, pyotp, tenacity, email-validator, python-multipart e python-json-logger (não usados pelo código atual — voltam com os módulos que os usam). `passlib`+`python-jose` (sem manutenção) substituídos por `bcrypt`+`PyJWT` em `core/security.py`. `uv.lock` regravado (60 pacotes a menos).
+- **Dependências web podadas**: `react-hook-form`, `@hookform/resolvers`, `zod` e `@radix-ui/react-slot` removidos (não importados; voltam com as telas de formulário).
+- **Docs de compliance consolidadas**: os 6 documentos de `docs/compliance/` viraram um `README.md` único com o resumo LGPD/sigilo/retenção/incidente para o MVP.
+- **Skills enxugadas**: `qa-test-strategist/` e `security-auditor/` removidas; skill `frontend` reduzida a `SKILL.md` + contexto FiscalCheck (references genéricas, assets e scripts removidos); skill `backend` mantida integralmente.
+- **`config.py`**: campo `redis_url` removido (Redis está fora do MVP).
+
+### Fixed — Inconsistências identificadas no diagnóstico (2026-07-02)
+
+- **`infra/docker-compose.yml`**: o perfil `default` não subia com `docker compose up` (perfil "default" não é especial no Compose) — postgres agora é serviço sem perfil; imagem trocada de `postgres:16-alpine` (sem pgvector — o init falharia) para `pgvector/pgvector:pg16`; `redis` e `mailhog` removidos; `postgres-age` (perfil `graph`) movido para a porta 5433.
+- **Redis "gerenciado pelo Replit" não existe**: `replit.md`, `replit.nix` e `.replit` corrigidos — o Replit só oferece Postgres gerenciado; Redis fica documentado como decisão futura (provedor externo ou nuvem nacional, via ADR).
+- **`.replit [deployment]`** rodava `pnpm dev` (dev servers com `--reload`/`--turbo`) no Cloud Run — agora faz build de produção (`pnpm build` + `uv sync`) e roda `next start` + `uvicorn` sem reload.
+- **`replit.nix`** duplicava Node/Python já provisionados pelos `modules` do `.replit` — reduzido a pnpm, uv e utilitários.
+- **`.env.example` (raiz)** usava `postgresql://` sem driver, divergindo de `apps/api` — alinhado para `postgresql+asyncpg://`; `REDIS_URL` e blocos de provedores não usados removidos.
+- **`AGENTS.md`/`apps/api/README.md`** descreviam estrutura por módulo (`router.py`, `service.py`...) que não existe — marcada explicitamente como estrutura alvo.
+- **`packages/shared-types`** dizia "gerado do OpenAPI, não editar à mão" mas só continha tipos manuais com a geração comentada — documentação corrigida: tipos manuais são aceitos até a geração ser ativada. Adicionada dependência `@fiscalcheck/tsconfig` que faltava (typecheck falhava).
+- **`CONTRIBUTING.md`/`README.md`** documentavam fluxo `main` ← `develop`, mas `main` não existe no remoto — documentação alinhada à realidade (`develop` é default; `main` nasce na primeira release).
+- **`apps/web`** reformatado com `biome check --write` (15 arquivos com indentação/EOL fora do padrão do lint).
+
 ### Added
 
 - **Design System v2.0** documentado em `docs/design-system/design-system.md` (camada Aurora para IA, espectro de risco, foco visível 3px, motion respeitando `prefers-reduced-motion`).
