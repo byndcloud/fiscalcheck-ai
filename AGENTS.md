@@ -157,7 +157,8 @@ uv run pytest -q
 3. Consulte [`docs/modules/`](./docs/modules/) para spec do módulo correspondente.
 4. Para conformidade, consulte [`docs/compliance/`](./docs/compliance/).
 5. Para design, consulte [`docs/design-system/`](./docs/design-system/).
-6. Se ainda houver dúvida, **pergunte ao usuário antes de adivinhar** — especialmente em decisões com efeito jurídico, fiscal ou de privacidade.
+6. Para **armadilhas de runtime já mapeadas** (erros estranhos de ambiente, workarounds de plataforma), consulte [`.agents/memory/`](./.agents/memory/) — leia o [`README`](./.agents/memory/README.md) da pasta para entender o padrão. Grep por palavra-chave do sintoma normalmente basta.
+7. Se ainda houver dúvida, **pergunte ao usuário antes de adivinhar** — especialmente em decisões com efeito jurídico, fiscal ou de privacidade.
 
 ---
 
