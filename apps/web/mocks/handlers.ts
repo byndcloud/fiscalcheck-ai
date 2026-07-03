@@ -6,20 +6,27 @@ import {
   AuditableActionSchema,
   CasoSchema,
   DivergenciaSchema,
+  IngestionAgentEventSchema,
+  IngestionLoadSchema,
+  IntegrationSourceSchema,
   MonthlyRecoverySeriesSchema,
+  type Notificacao,
   NotificacaoSchema,
   PanelKpisSchema,
   RiskDistributionSchema,
   RoleSchema,
   ScoreSchema,
+  SimulateFailurePayloadSchema,
   SmartAlertSchema,
 } from "@fiscalcheck/shared-types";
 
 import { agentesFixture } from "./fixtures/agentes";
-import { ArquivoIngeridoSchema, arquivosFixture } from "./fixtures/arquivos";
 import { auditLogFixture } from "./fixtures/audit-log";
 import { casosFixture } from "./fixtures/casos";
 import { divergenciasFixture } from "./fixtures/divergencias";
+import { ingestionAgentEventsFixture } from "./fixtures/ingestion-agent-events";
+import { ingestionLoadsFixture } from "./fixtures/ingestion-loads";
+import { integrationSourcesFixture } from "./fixtures/integration-sources";
 import { KPIsAnalyticsSchema, kpisFixture } from "./fixtures/kpis";
 import { monthlyRecoveryFixture } from "./fixtures/monthly-recovery";
 import { notificacoesFixture } from "./fixtures/notificacoes";
@@ -70,10 +77,43 @@ function respondValidated<T>(schema: z.ZodType<T>, payload: unknown): Response {
 }
 
 export const handlers = [
-  // Módulo 1 — Ingestão
-  http.get(`${API_URL}/ingestion/files`, () =>
-    respondValidated(z.array(ArquivoIngeridoSchema), arquivosFixture),
+  // Módulo 1 — Integrações e Ingestão
+  http.get(`${API_URL}/ingestion/sources`, () =>
+    respondValidated(z.array(IntegrationSourceSchema), integrationSourcesFixture),
   ),
+  http.get(`${API_URL}/ingestion/agent-events`, () =>
+    respondValidated(z.array(IngestionAgentEventSchema), ingestionAgentEventsFixture),
+  ),
+  http.get(`${API_URL}/ingestion/loads`, () =>
+    respondValidated(z.array(IngestionLoadSchema), ingestionLoadsFixture),
+  ),
+  http.post(`${API_URL}/ingestion/simulate-failure`, async ({ request }) => {
+    const bodyRaw = await request.json().catch(() => ({}));
+    const body = SimulateFailurePayloadSchema.safeParse(bodyRaw);
+    if (!body.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_simulate_failure_body",
+          message: "Informe o `sourceId` da fonte que deve simular a falha.",
+          issues: body.error.issues,
+        },
+        { status: 400 },
+      );
+    }
+    const source = integrationSourcesFixture.find((s) => s.id === body.data.sourceId);
+    const nome = source?.nome ?? "Fonte desconhecida";
+    const nova: Notificacao = {
+      id: `nt-ing-${Date.now()}`,
+      tipo: "ingestao_falha",
+      titulo: `Falha crítica na ingestão · ${nome}`,
+      corpo: `O conector ${nome} sinalizou falha crítica na última tentativa de carga. Revise o pipeline e reprocesse quando saudável.`,
+      severidade: 5,
+      criadoEm: new Date().toISOString(),
+      lida: false,
+    };
+    notificacoesMutable.unshift(nova);
+    return respondValidated(NotificacaoSchema, nova);
+  }),
 
   // Módulo 2 — Cruzamento
   http.get(`${API_URL}/crossing/divergences`, () =>

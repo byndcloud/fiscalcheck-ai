@@ -63,8 +63,8 @@ const NAV_SECTIONS: readonly NavSection[] = [
       },
       {
         href: "/ingestion",
-        label: "Ingestão",
-        description: "NFS-e, DIMP, PGDAS, cadastro",
+        label: "Integrações",
+        description: "Fontes, cargas e conectores",
         icon: DatabaseIcon,
         roles: AUDITORIAL_ROLES,
       },

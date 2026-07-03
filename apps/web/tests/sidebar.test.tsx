@@ -10,7 +10,7 @@ vi.mock("next/navigation", () => ({
 
 const ALL_LABELS = [
   "Dashboard",
-  "Ingestão",
+  "Integrações",
   "Detecção",
   "Risco & IA",
   "Casos",
@@ -32,7 +32,14 @@ describe("Sidebar — filtragem por papel", () => {
   it("auditor não vê Governança nem Gerencial", () => {
     useSession.getState().setRole("auditor");
     render(<Sidebar />);
-    for (const label of ["Dashboard", "Ingestão", "Detecção", "Risco & IA", "Casos", "Cidadão"]) {
+    for (const label of [
+      "Dashboard",
+      "Integrações",
+      "Detecção",
+      "Risco & IA",
+      "Casos",
+      "Cidadão",
+    ]) {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
     expect(screen.queryByText("Governança")).toBeNull();

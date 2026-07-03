@@ -49,4 +49,14 @@ export const notificacoesFixture: Notificacao[] = [
     criadoEm: "2026-07-02T12:00:00Z",
     lida: false,
   },
+  {
+    id: "nt-005",
+    tipo: "ingestao_falha",
+    titulo: "Falha crítica na ingestão · Dados Abertos · Gov.BR",
+    corpo:
+      "Endpoint upstream retornou 503 na 6ª tentativa consecutiva. Última carga bem-sucedida em 28/06.",
+    severidade: 5,
+    criadoEm: "2026-07-02T12:00:12Z",
+    lida: false,
+  },
 ];

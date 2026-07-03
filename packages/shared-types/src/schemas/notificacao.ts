@@ -10,6 +10,7 @@ export const TipoNotificacaoSchema = z.enum([
   "prazo",
   "devolutiva",
   "meta_risco",
+  "ingestao_falha",
 ]);
 export type TipoNotificacao = z.infer<typeof TipoNotificacaoSchema>;
 
