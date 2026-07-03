@@ -59,7 +59,12 @@ export default function DashboardPage() {
   });
 
   const topCasos = (casos.data ?? [])
-    .filter((c) => c.status === "aberto" || c.status === "em_analise")
+    .filter(
+      (c) =>
+        c.status === "candidato" ||
+        c.status === "em_analise" ||
+        c.status === "aguardando_aprovacao",
+    )
     .sort((a, b) => (b.scoreValor ?? 0) - (a.scoreValor ?? 0))
     .slice(0, 3);
 
