@@ -84,20 +84,21 @@ flowchart TB
 
 ## Stack
 
-| Camada | Tecnologia |
-| --- | --- |
-| Frontend | Next.js 15 + TS + Tailwind v4 + shadcn/ui |
-| Estado | Zustand (UI) + TanStack Query v5 (servidor) |
-| Backend | FastAPI + Python 3.12 (async) |
-| ORM | SQLAlchemy 2.0 + Alembic |
-| ETL | Polars + PyArrow |
-| Agentes | LangGraph |
-| ML | scikit-learn + NetworkX |
-| Banco | PostgreSQL 16 + pgvector (Apache AGE adiado — ver [ADR-0002](../adr/0002-database-mvp-replit.md)) |
-| Cache/fila | Redis 7 (pós-MVP — fora do escopo do piloto no Replit) |
-| Lint/format | Biome (web) + Ruff (api) |
-| Typecheck | tsc + Pyright |
-| Testes | Vitest + pytest |
+| Camada | Tecnologia | Status MVP |
+| --- | --- | --- |
+| Frontend | Next.js 15 + TS + Tailwind v4 + shadcn/ui | Instalado |
+| Estado | Zustand (UI) + TanStack Query v5 (servidor) | Instalado |
+| Backend | FastAPI + Python 3.12 (async) | Instalado |
+| ORM | SQLAlchemy 2.0 + Alembic | Instalado |
+| Auth | bcrypt (direto) + PyJWT — MFA (pyotp) volta com o módulo 6 | Parcial (auth base pronto; MFA pendente) |
+| ETL | Polars + PyArrow | **Não instalado** — entra com o módulo 1 (ver [`apps/api/pyproject.toml`](../../apps/api/pyproject.toml)) |
+| Agentes | LangGraph | **Não instalado** — entra com o primeiro agente concreto |
+| ML | scikit-learn + NetworkX | **Não instalado** — entram com o módulo 3 (score) e o módulo 2 (grafo) |
+| Banco | PostgreSQL 16 + pgvector (Apache AGE adiado — ver [ADR-0002](../adr/0002-database-mvp-replit.md)) | Instalado (`pgvector`); AGE só via docker-compose perfil `graph` |
+| Cache/fila | Redis 7 | **Não instalado** — pós-MVP, fora do escopo do piloto no Replit |
+| Lint/format | Biome (web) + Ruff (api) | Instalado |
+| Typecheck | tsc + Pyright | Instalado |
+| Testes | Vitest + pytest | Instalado |
 
 Detalhes e justificativas em [`../adr/0001-stack-inicial.md`](../adr/0001-stack-inicial.md).
 
