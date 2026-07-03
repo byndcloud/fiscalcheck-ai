@@ -1,0 +1,3 @@
+- [Node/pnpm broken by replit.nix LD_LIBRARY_PATH](replit-env-ldlibrarypath.md) — every node/pnpm call fails with OPENSSL/CXXABI errors; can't edit replit.nix; prefix commands with `env -u LD_LIBRARY_PATH`.
+- [Preview model + how the Next.js app is served](fiscalcheck-preview-model.md) — classic webview workflow (not artifacts) on port 5000; next.config drops X-Frame-Options in dev.
+- [Test deps firewall-blocked](fiscalcheck-firewall-test-deps.md) — vitest tarball 403 from package-firewall; web test devDeps removed to let install succeed; `pnpm test` is intentionally non-functional.

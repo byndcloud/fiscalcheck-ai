@@ -1,0 +1,38 @@
+#5 - Corrigir preview do Next.js no Replit
+What & Why
+O frontend real (apps/web, Next.js 15) foi importado do GitHub mas nunca foi registrado como um artifact do Replit, então a preview (iframe __default_preview__) fica em branco. Além disso o Next.js está configurado de um jeito incompatível com o proxy de preview do Replit (porta fixa, X-Frame-Options: DENY, sem basePath, sem liberação de host). O objetivo é fazer a preview renderizar o frontend já construído sem alterar o código de UI — apenas configuração, registro de artifact e ajustes de servidor de dev.
+
+Done looks like
+A preview do Replit abre e renderiza o frontend Next.js (apps/web) sem tela em branco e sem bloqueio de iframe.
+O app aparece no seletor de artifacts da preview.
+O servidor de dev do Next.js escuta na porta dinâmica $PORT do Replit (não mais 3000 fixo).
+O frontend consegue falar com a API FastAPI através do proxy (não mais http://localhost:8000 fixo).
+Nenhuma tela, componente ou rota existente do frontend é alterada — apenas configuração.
+Out of scope
+Redesign ou mudanças de UI/UX de qualquer página.
+Implementar autenticação real, agentes de IA ou lógica de negócio novos.
+Deploy em produção / migração para nuvem nacional (LGPD) — continua sendo trabalho futuro.
+Migrar de Next.js para outro framework.
+Steps
+Instalar dependências do monorepo — garantir que pnpm install rode e que apps/web e apps/api fiquem com dependências instaladas (o apps/web/node_modules está ausente hoje).
+
+Ajustar o next.config.ts para o proxy de preview — remover/relaxar o header X-Frame-Options: DENY (que bloqueia o iframe) pelo menos em desenvolvimento; adicionar basePath/assetPrefix compatíveis com o previewPath do artifact; e garantir que o dev server aceite o host proxied do Replit (allowed hosts / origin). Manter os demais headers de segurança para produção.
+
+Fazer o Next.js escutar em $PORT — trocar a porta fixa 3000 dos scripts dev/start para a porta dinâmica injetada pelo Replit ($PORT), preservando o comportamento local.
+
+Registrar apps/web como artifact web — criar/ajustar a configuração de artifact (artifact.toml) para um serviço web que rode o dev command do Next.js no previewPath /, apontando para o pacote @fiscalcheck/web. Como Next.js não é um tipo nativo do createArtifact, será necessário montar/validar o artifact.toml manualmente via o fluxo de validação de artifact. Limpar as pastas de scaffold órfãs em artifacts/ (fiscalcheck, api-server, mockup-sandbox) que não são usadas, se atrapalharem.
+
+Expor a API FastAPI e conectar o frontend — registrar a API (apps/api, uvicorn) como serviço acessível e ajustar NEXT_PUBLIC_API_URL / lib/api-client.ts para usar o endpoint correto através do proxy em vez de http://localhost:8000 fixo.
+
+Iniciar os workflows e validar a preview — subir o(s) serviço(s), abrir a preview e confirmar visualmente que o frontend renderiza (ex.: a home redireciona para /login e a tela aparece). Ajustar replit.md (seção de portas/workflows) se necessário para refletir o novo modelo de artifact.
+
+Relevant files
+apps/web/next.config.ts
+apps/web/package.json
+apps/web/app/page.tsx
+apps/web/lib/api-client.ts:10,51
+apps/web/.env.example
+apps/api/package.json
+.replit
+replit.md
+pnpm-workspace.yaml
