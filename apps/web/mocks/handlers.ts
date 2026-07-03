@@ -3,13 +3,19 @@ import { z } from "zod";
 
 import {
   AgenteSchema,
+  type AtypicalAccess,
+  AtypicalAccessSchema,
+  type AuditLogEntry,
+  AuditLogEntrySchema,
   AuditableActionSchema,
+  BlockAtypicalRequestSchema,
   type CaseDecision,
   CaseDecisionSchema,
   type CaseDocument,
   CaseDocumentSchema,
   type Caso,
   CasoSchema,
+  ComplianceSealSchema,
   ComunicacaoSchema,
   ContribuinteSchema,
   DecisionRequestSchema,
@@ -29,16 +35,23 @@ import {
   RoleSchema,
   ScoreSchema,
   SmartAlertSchema,
+  type SystemUser,
+  SystemUserSchema,
+  UserCreateRequestSchema,
+  UserUpdateRequestSchema,
 } from "@fiscalcheck/shared-types";
 
 import { nextStatus, shouldEmitDocument } from "@/lib/case-transitions";
 
 import { agentesFixture } from "./fixtures/agentes";
 import { ArquivoIngeridoSchema, arquivosFixture } from "./fixtures/arquivos";
+import { atypicalAccessesFixture } from "./fixtures/atypical-accesses";
 import { auditLogFixture } from "./fixtures/audit-log";
+import { auditLogExtendedFixture } from "./fixtures/audit-log-extended";
 import { caseDecisionsFixture } from "./fixtures/case-decisions";
 import { caseDocumentsFixture } from "./fixtures/case-documents";
 import { casosFixture } from "./fixtures/casos";
+import { complianceSealsFixture } from "./fixtures/compliance-seals";
 import { comunicacoesFixture } from "./fixtures/comunicacoes";
 import { contribuintesFixture } from "./fixtures/contribuintes";
 import { divergenciasFixture } from "./fixtures/divergencias";
@@ -50,6 +63,7 @@ import { riskDistributionFixture } from "./fixtures/risk-distribution";
 import { riskModelConfigFixture, riskModelHistoryFixture } from "./fixtures/risk-model";
 import { scoresFixture } from "./fixtures/scores";
 import { smartAlertsFixture } from "./fixtures/smart-alerts";
+import { systemUsersFixture } from "./fixtures/system-users";
 
 /*
   Handlers MSW — 1 endpoint por módulo funcional.
@@ -91,6 +105,35 @@ function bumpRiskModelVersion(current: string): string {
     return `v${majorStr}.${minorStr}.${Number(patchStr) + 1}`;
   }
   return `v${majorStr}.${Number(minorStr) + 1}`;
+}
+
+/*
+  Estado in-memory do módulo 6 (T19 · Governança/Conformidade).
+  A trilha e o cadastro de usuários são append-only (updates viram
+  novo evento). "Delete" de usuário é rebatido para status=inativo —
+  jamais splice — pra preservar a cadeia de custódia (AGENTS.md §1.1).
+*/
+const auditLogMutable: AuditLogEntry[] = [...auditLogExtendedFixture];
+const atypicalAccessesMutable: AtypicalAccess[] = [...atypicalAccessesFixture];
+const systemUsersMutable: SystemUser[] = systemUsersFixture.map((u) => ({ ...u }));
+
+let auditLogSeq = auditLogMutable.length + 100;
+let userSeq = systemUsersMutable.length + 100;
+
+function pushAudit(
+  entry: Omit<AuditLogEntry, "id" | "correlationId"> & {
+    correlationId?: string;
+  },
+): AuditLogEntry {
+  const id = `aud-2026-${String(auditLogSeq).padStart(6, "0")}`;
+  auditLogSeq += 1;
+  const full: AuditLogEntry = {
+    ...entry,
+    id,
+    correlationId: entry.correlationId ?? generateCorrelationId(),
+  };
+  auditLogMutable.unshift(full);
+  return full;
 }
 
 const ROLE_DISPLAY: Record<Role, string> = {
@@ -484,10 +527,353 @@ export const handlers = [
     respondValidated(z.array(SmartAlertSchema), smartAlertsFixture),
   ),
 
-  // Módulo 6 — Governança
+  // Módulo 6 — Governança (contrato legado — minimal)
   http.get(`${API_URL}/compliance/audit-log`, () =>
     respondValidated(z.array(AuditableActionSchema), auditLogFixture),
   ),
+
+  // Módulo 6 — Trilha estendida (T19)
+  http.get(`${API_URL}/compliance/audit-log-v2`, ({ request }) => {
+    const url = new URL(request.url);
+    const actor = url.searchParams.get("actor")?.toLowerCase();
+    const action = url.searchParams.get("action")?.toLowerCase();
+    const result = url.searchParams.get("result");
+    const roleFilter = url.searchParams.get("role");
+    const atypicalOnly = url.searchParams.get("atypical") === "true";
+    const from = url.searchParams.get("from");
+    const to = url.searchParams.get("to");
+    const q = url.searchParams.get("q")?.toLowerCase();
+
+    const filtered = auditLogMutable.filter((entry) => {
+      if (actor && !`${entry.actorId} ${entry.actorName}`.toLowerCase().includes(actor)) {
+        return false;
+      }
+      if (action && !entry.action.toLowerCase().includes(action)) return false;
+      if (result && entry.result !== result) return false;
+      if (roleFilter && entry.actorRole !== roleFilter) return false;
+      if (atypicalOnly && !entry.atypical) return false;
+      if (from && entry.timestamp < from) return false;
+      if (to && entry.timestamp > to) return false;
+      if (q) {
+        const haystack = [
+          entry.id,
+          entry.actorName,
+          entry.actorId,
+          entry.action,
+          entry.resource,
+          entry.ipAddress,
+          entry.details,
+          entry.dadosAcessados ?? "",
+          entry.atypicalReason ?? "",
+        ]
+          .join(" ")
+          .toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    });
+
+    return respondValidated(z.array(AuditLogEntrySchema), filtered);
+  }),
+
+  http.post(`${API_URL}/compliance/audit-log-v2/export`, async ({ request }) => {
+    const roleHeader = request.headers.get("X-Actor-Role");
+    const roleParsed = RoleSchema.safeParse(roleHeader);
+    const atorPapel: Role = roleParsed.success ? roleParsed.data : "auditor";
+    if (atorPapel !== "admin") {
+      return HttpResponse.json(
+        { error_code: "forbidden_role", message: "Apenas Admin pode exportar a trilha." },
+        { status: 403 },
+      );
+    }
+    const nomeHeader = request.headers.get("X-Actor-Name") ?? ROLE_DISPLAY[atorPapel];
+    const idHeader = request.headers.get("X-Actor-Id") ?? `mock-${atorPapel}`;
+    const bodyRaw = await request.json().catch(() => ({}));
+    const body = z
+      .object({ format: z.enum(["csv", "json"]).default("csv"), total: z.number().int().min(0) })
+      .safeParse(bodyRaw);
+    if (!body.success) {
+      return HttpResponse.json(
+        { error_code: "invalid_export_body", message: "Payload de export inválido." },
+        { status: 400 },
+      );
+    }
+
+    const entry = pushAudit({
+      timestamp: new Date().toISOString(),
+      action: "trilha.export",
+      actorId: idHeader,
+      actorName: nomeHeader,
+      actorRole: atorPapel,
+      ipAddress: "10.20.30.11",
+      resource: "compliance:audit-log",
+      result: "sucesso",
+      atypical: false,
+      details: `Export ${body.data.format.toUpperCase()} da trilha (${body.data.total} eventos) para órgão de controle.`,
+    });
+
+    return respondValidated(AuditLogEntrySchema, entry);
+  }),
+
+  http.get(`${API_URL}/compliance/atypical-accesses`, () => {
+    const ordered = [...atypicalAccessesMutable].sort((a, b) =>
+      a.detectedAt < b.detectedAt ? 1 : -1,
+    );
+    return respondValidated(z.array(AtypicalAccessSchema), ordered);
+  }),
+
+  http.post(`${API_URL}/compliance/atypical-accesses/:id/block`, async ({ params, request }) => {
+    const { id } = params as { id: string };
+    const roleHeader = request.headers.get("X-Actor-Role");
+    const roleParsed = RoleSchema.safeParse(roleHeader);
+    const atorPapel: Role = roleParsed.success ? roleParsed.data : "auditor";
+    if (atorPapel !== "admin") {
+      return HttpResponse.json(
+        { error_code: "forbidden_role", message: "Apenas Admin pode bloquear acessos." },
+        { status: 403 },
+      );
+    }
+
+    const bodyRaw = await request.json().catch(() => ({}));
+    const parsed = BlockAtypicalRequestSchema.safeParse(bodyRaw);
+    if (!parsed.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_block_body",
+          message: "Justificativa inválida.",
+          issues: parsed.error.issues,
+        },
+        { status: 400 },
+      );
+    }
+
+    const idx = atypicalAccessesMutable.findIndex((a) => a.id === id);
+    const current = idx >= 0 ? atypicalAccessesMutable[idx] : undefined;
+    if (!current || idx < 0) {
+      return HttpResponse.json(
+        { error_code: "atypical_not_found", message: "Acesso atípico não encontrado." },
+        { status: 404 },
+      );
+    }
+
+    const nomeHeader = request.headers.get("X-Actor-Name") ?? ROLE_DISPLAY[atorPapel];
+    const idHeader = request.headers.get("X-Actor-Id") ?? `mock-${atorPapel}`;
+    const now = new Date().toISOString();
+    const updated: AtypicalAccess = {
+      ...current,
+      blocked: true,
+      blockedBy: `${nomeHeader} (${ROLE_DISPLAY[atorPapel]})`,
+      blockedAt: now,
+    };
+    atypicalAccessesMutable[idx] = updated;
+
+    pushAudit({
+      timestamp: now,
+      action: "atypical.bloqueado",
+      actorId: idHeader,
+      actorName: nomeHeader,
+      actorRole: atorPapel,
+      ipAddress: "10.20.30.11",
+      resource: `atypical:${id}`,
+      result: "sucesso",
+      atypical: false,
+      details: `Acesso atípico ${id} bloqueado. Justificativa: ${parsed.data.justificativa}`,
+    });
+
+    return respondValidated(AtypicalAccessSchema, updated);
+  }),
+
+  http.get(`${API_URL}/compliance/seals`, () =>
+    respondValidated(z.array(ComplianceSealSchema), complianceSealsFixture),
+  ),
+
+  // Módulo 6 — Cadastro operacional de usuários (T19, admin only)
+  http.get(`${API_URL}/users`, () =>
+    respondValidated(z.array(SystemUserSchema), systemUsersMutable),
+  ),
+
+  http.post(`${API_URL}/users`, async ({ request }) => {
+    const roleHeader = request.headers.get("X-Actor-Role");
+    const roleParsed = RoleSchema.safeParse(roleHeader);
+    const atorPapel: Role = roleParsed.success ? roleParsed.data : "auditor";
+    if (atorPapel !== "admin") {
+      return HttpResponse.json(
+        { error_code: "forbidden_role", message: "Apenas Admin pode criar usuários." },
+        { status: 403 },
+      );
+    }
+    const bodyRaw = await request.json().catch(() => ({}));
+    const parsed = UserCreateRequestSchema.safeParse(bodyRaw);
+    if (!parsed.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_user_body",
+          message: "Dados do usuário inválidos.",
+          issues: parsed.error.issues,
+        },
+        { status: 400 },
+      );
+    }
+
+    if (systemUsersMutable.some((u) => u.email.toLowerCase() === parsed.data.email.toLowerCase())) {
+      return HttpResponse.json(
+        { error_code: "user_email_conflict", message: "E-mail já cadastrado." },
+        { status: 409 },
+      );
+    }
+    if (systemUsersMutable.some((u) => u.matricula === parsed.data.matricula)) {
+      return HttpResponse.json(
+        { error_code: "user_matricula_conflict", message: "Matrícula já cadastrada." },
+        { status: 409 },
+      );
+    }
+
+    const nomeHeader = request.headers.get("X-Actor-Name") ?? ROLE_DISPLAY[atorPapel];
+    const idHeader = request.headers.get("X-Actor-Id") ?? `mock-${atorPapel}`;
+    const now = new Date().toISOString();
+    const newId = `u-${String(userSeq).padStart(3, "0")}`;
+    userSeq += 1;
+
+    const created: SystemUser = {
+      id: newId,
+      nome: parsed.data.nome,
+      email: parsed.data.email,
+      matricula: parsed.data.matricula,
+      role: parsed.data.role,
+      status: "ativo",
+      mfaHabilitado: parsed.data.mfaHabilitado,
+      criadoEm: now,
+      observacoes: parsed.data.observacoes,
+    };
+    systemUsersMutable.unshift(created);
+
+    pushAudit({
+      timestamp: now,
+      action: "usuario.criado",
+      actorId: idHeader,
+      actorName: nomeHeader,
+      actorRole: atorPapel,
+      ipAddress: "10.20.30.11",
+      resource: `usuario:${newId}`,
+      result: "sucesso",
+      atypical: false,
+      details: `Novo usuário criado (${created.nome}) com papel '${created.role}' e MFA ${created.mfaHabilitado ? "habilitado" : "desabilitado"}.`,
+      dadosAcessados: `Servidor ${created.nome} (matrícula ${created.matricula}).`,
+    });
+
+    return respondValidated(SystemUserSchema, created);
+  }),
+
+  http.patch(`${API_URL}/users/:id`, async ({ params, request }) => {
+    const { id } = params as { id: string };
+    const roleHeader = request.headers.get("X-Actor-Role");
+    const roleParsed = RoleSchema.safeParse(roleHeader);
+    const atorPapel: Role = roleParsed.success ? roleParsed.data : "auditor";
+    if (atorPapel !== "admin") {
+      return HttpResponse.json(
+        { error_code: "forbidden_role", message: "Apenas Admin pode editar usuários." },
+        { status: 403 },
+      );
+    }
+    const bodyRaw = await request.json().catch(() => ({}));
+    const parsed = UserUpdateRequestSchema.safeParse(bodyRaw);
+    if (!parsed.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_user_body",
+          message: "Dados do usuário inválidos.",
+          issues: parsed.error.issues,
+        },
+        { status: 400 },
+      );
+    }
+
+    const idx = systemUsersMutable.findIndex((u) => u.id === id);
+    const current = idx >= 0 ? systemUsersMutable[idx] : undefined;
+    if (!current || idx < 0) {
+      return HttpResponse.json(
+        { error_code: "user_not_found", message: "Usuário não encontrado." },
+        { status: 404 },
+      );
+    }
+
+    const changed: string[] = [];
+    for (const key of Object.keys(parsed.data) as (keyof typeof parsed.data)[]) {
+      const nextValue = parsed.data[key];
+      if (nextValue !== undefined && nextValue !== current[key]) {
+        changed.push(key);
+      }
+    }
+
+    const updated: SystemUser = {
+      ...current,
+      ...parsed.data,
+    };
+    systemUsersMutable[idx] = updated;
+
+    const nomeHeader = request.headers.get("X-Actor-Name") ?? ROLE_DISPLAY[atorPapel];
+    const idHeader = request.headers.get("X-Actor-Id") ?? `mock-${atorPapel}`;
+    const now = new Date().toISOString();
+
+    pushAudit({
+      timestamp: now,
+      action: "usuario.editado",
+      actorId: idHeader,
+      actorName: nomeHeader,
+      actorRole: atorPapel,
+      ipAddress: "10.20.30.11",
+      resource: `usuario:${id}`,
+      result: "sucesso",
+      atypical: false,
+      details: `Usuário ${current.nome} atualizado — campos alterados: ${changed.join(", ") || "nenhum"}.`,
+      dadosAcessados: `Servidor ${current.nome} (matrícula ${current.matricula}).`,
+    });
+
+    return respondValidated(SystemUserSchema, updated);
+  }),
+
+  http.post(`${API_URL}/users/:id/deactivate`, async ({ params, request }) => {
+    const { id } = params as { id: string };
+    const roleHeader = request.headers.get("X-Actor-Role");
+    const roleParsed = RoleSchema.safeParse(roleHeader);
+    const atorPapel: Role = roleParsed.success ? roleParsed.data : "auditor";
+    if (atorPapel !== "admin") {
+      return HttpResponse.json(
+        { error_code: "forbidden_role", message: "Apenas Admin pode desativar usuários." },
+        { status: 403 },
+      );
+    }
+
+    const idx = systemUsersMutable.findIndex((u) => u.id === id);
+    const current = idx >= 0 ? systemUsersMutable[idx] : undefined;
+    if (!current || idx < 0) {
+      return HttpResponse.json(
+        { error_code: "user_not_found", message: "Usuário não encontrado." },
+        { status: 404 },
+      );
+    }
+
+    const updated: SystemUser = { ...current, status: "inativo" };
+    systemUsersMutable[idx] = updated;
+
+    const nomeHeader = request.headers.get("X-Actor-Name") ?? ROLE_DISPLAY[atorPapel];
+    const idHeader = request.headers.get("X-Actor-Id") ?? `mock-${atorPapel}`;
+
+    pushAudit({
+      timestamp: new Date().toISOString(),
+      action: "usuario.inativado",
+      actorId: idHeader,
+      actorName: nomeHeader,
+      actorRole: atorPapel,
+      ipAddress: "10.20.30.11",
+      resource: `usuario:${id}`,
+      result: "sucesso",
+      atypical: false,
+      details: `Usuário ${current.nome} marcado como inativo (histórico preservado — cadeia de custódia).`,
+    });
+
+    return respondValidated(SystemUserSchema, updated);
+  }),
 
   // Notificações in-app
   http.get(`${API_URL}/notifications`, () =>

@@ -164,3 +164,34 @@ export {
   type RiskModelRule,
   type RiskModelWeights,
 } from "./schemas/risk-model";
+
+export {
+  AtypicalAccessSchema,
+  AuditLogEntrySchema,
+  AuditLogResultSchema,
+  BlockAtypicalRequestSchema,
+  type AtypicalAccess,
+  type AuditLogEntry,
+  type AuditLogResult,
+  type BlockAtypicalRequest,
+} from "./schemas/audit-log";
+
+export {
+  SystemUserSchema,
+  SystemUserStatusSchema,
+  UserCreateRequestSchema,
+  UserUpdateRequestSchema,
+  type SystemUser,
+  type SystemUserStatus,
+  type UserCreateRequest,
+  type UserUpdateRequest,
+} from "./schemas/system-user";
+
+export {
+  ComplianceSealCodeSchema,
+  ComplianceSealSchema,
+  ComplianceSealStatusSchema,
+  type ComplianceSeal,
+  type ComplianceSealCode,
+  type ComplianceSealStatus,
+} from "./schemas/compliance-seal";
