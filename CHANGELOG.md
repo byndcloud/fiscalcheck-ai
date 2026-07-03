@@ -6,6 +6,20 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o 
 
 ## [Não publicado]
 
+### Changed — Reconciliação pós-simplificação e sprints T01–T19 (2026-07-03)
+
+Fecha vestígios que a simplificação do MVP (2026-07-02) e as sprints T01–T19 deixaram na documentação. Nenhum código de runtime alterado (apenas 1 docstring).
+
+- **Deps web reintroduzidas em T01**: `react-hook-form`, `zod` (v4) e `@hookform/resolvers` **voltaram** ao [`apps/web/package.json`](./apps/web/package.json) junto com a tela de login (T01) e são usadas em [`components/auth/login-form.tsx`](./apps/web/components/auth/login-form.tsx), [`components/ui/form.tsx`](./apps/web/components/ui/form.tsx) e telas subsequentes (T02, T19). A bullet "Dependências web podadas" da simplificação abaixo cobria o estado exato do commit `d7146a0`; a partir de T01 (commit `74428c3`) essas três deps voltaram. Apenas `@radix-ui/react-slot` continua fora (substituído por `radix-ui`).
+- **Links quebrados de compliance**: [`docs/README.md`](./docs/README.md) e [`CONTRIBUTING.md`](./CONTRIBUTING.md) apontavam para `docs/compliance/lgpd.md` e `sigilo-fiscal-art-198-ctn.md` (consolidados em `docs/compliance/README.md`). Corrigido.
+- **Menções a skills removidas**: [`README.md`](./README.md) mencionava "coding agents (frontend, backend, QA, security)" e o docstring de [`modules/compliance/__init__.py`](./apps/api/src/fiscalcheck_api/modules/compliance/__init__.py) apontava para a skill `security-auditor` que não existe mais. Corrigido para listar apenas skills ativas (`frontend`, `backend`) e apontar para revisão humana + `docs/compliance/README.md`.
+- **Skill `backend`**: linha `Auth` de [`references/00-fiscalcheck-context.md`](./.claude/skills/backend/references/00-fiscalcheck-context.md) atualizada para refletir a substituição `passlib`/`python-jose`/`pyotp` → `bcrypt` (direto) + PyJWT (com nota de MFA voltando no módulo 6).
+- **Skill `frontend`**: [`references/00-fiscalcheck-context.md`](./.claude/skills/frontend/references/00-fiscalcheck-context.md) removeu ponteiros para references genéricas já excluídas (`01-component-patterns.md`, `06-design-tokens.md`) e corrigiu a linha "Tipos do backend" — no MVP são manuais (contradizia [`AGENTS.md` §4.1](./AGENTS.md)).
+- **[`replit.md`](./replit.md)** alinhado ao [ADR-0003](./docs/adr/0003-preview-replit.md): workflow default é `Project` (Next.js + MSW em `PORT=5000`), não `Dev (web + api)`; tabela de portas atualizada para `5000/8080/23345/8000` (o antigo `3000 → 80` foi removido para evitar colisão com `8080 → 80`); §Troubleshooting ganhou linhas sobre `LD_LIBRARY_PATH` e o firewall do Replit (com pointer para `.agents/memory/`). **`.replit`, `.pnpmfile.cjs`, `apps/web/next.config.ts` e scripts `dev`/`start` não foram tocados.**
+- **[`apps/web/README.md`](./apps/web/README.md)** §Estrutura completada com as telas de T04 (`ingestion` timeline), T10 (`esteira-de-agentes` + `hooks/use-agents-feed.ts`), T13 (`cases` + `lib/case-transitions.ts`), T15 (`comunicacoes`), T02 (`modelo-de-risco` + `lib/risk-model/simulate.ts`) e T19 (`compliance/{trilha,usuarios}` + `components/compliance/` + `lib/masks.ts` + `lib/compliance/export-audit.ts`).
+- **Claims de stack não instalada** qualificados: [`AGENTS.md` §2](./AGENTS.md) e [`docs/architecture/overview.md` §Stack](./docs/architecture/overview.md) marcam LangGraph/Polars/scikit-learn/NetworkX/Redis como "não instalado — entra com o módulo que usa". [`modules/crossing/__init__.py`](./apps/api/src/fiscalcheck_api/modules/crossing/__init__.py) alinhado ao ADR-0002 (NetworkX in-memory, AGE adiado).
+- **[`ADR-0001`](./docs/adr/0001-stack-inicial.md)** ganha nota curta datada `2026-07-02` esclarecendo que a mitigação "Renovate/Dependabot semanal" foi desativada (pointer para este CHANGELOG e [`SECURITY.md`](./SECURITY.md)).
+
 ### Changed — Simplificação para o MVP no Replit (2026-07-02)
 
 Enxugamento do repositório para o escopo real da fase de validação (MVP via Replit). Tudo o que foi removido permanece no histórico do git e volta quando o produto sair do piloto.

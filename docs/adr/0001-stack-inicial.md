@@ -6,6 +6,8 @@
 - **Revisores:** @owner-architect, @owner-backend, @owner-frontend
 
 > **Nota (2026-06-29):** a estratégia de banco para o **MVP no Replit** foi revisitada em [ADR-0002](./0002-database-mvp-replit.md). MVP usa Postgres do Replit + `pgvector` apenas; **Apache AGE é adiado** para a migração à nuvem nacional. O restante desta ADR permanece inalterado.
+>
+> **Nota (2026-07-02):** a mitigação _"Renovate/Dependabot semanal"_ mencionada na seção `## Riscos` foi **desativada** na simplificação para o MVP no Replit. Version updates automáticos foram desligados; apenas **security updates** do Dependabot permanecem via configuração do repositório. Ver `## Simplificação para o MVP no Replit (2026-07-02)` no [`CHANGELOG.md`](../../CHANGELOG.md) e [`SECURITY.md`](../../SECURITY.md) §Vulnerabilidades para o estado atual.
 
 ## Contexto
 
