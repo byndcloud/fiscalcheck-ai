@@ -21,11 +21,14 @@ ignorePorts = false
 # O Postgres do MVP é o serviço gerenciado do Replit (módulo
 # postgresql-16), acessado via DATABASE_URL — por isso 5432 não
 # aparece como localPort.
-
-[[ports]]
-localPort = 3000
-externalPort = 80
-description = "Next.js web (frontend do auditor)"
+#
+# NOTA: as portas do preview do Replit (5000/8080/23345) sao
+# declaradas no final deste arquivo, apos os workflows. Aqui deixamos
+# apenas a porta 8000 (FastAPI) para quando o usuario rodar a workflow
+# "Dev (web + api)" ou "API only" manualmente. A porta 3000 nao esta
+# declarada porque colidiria com o mapeamento externo 80 do preview
+# (usado pela workflow "Start application" via PORT=5000 -> external
+# 5000, mas o webview do Replit tambem exige localPort 8080 -> ext 80).
 
 [[ports]]
 localPort = 8000
@@ -38,7 +41,12 @@ PNPM_HOME = "/home/runner/.local/share/pnpm"
 PATH = "$PNPM_HOME:$PATH"
 
 [workflows]
-runButton = "Dev (web + api)"
+# runButton = "Project" faz o botao Run subir apenas o Next.js com MSW,
+# que e o unico workflow com outputType = "webview" e portanto o unico
+# que aparece no preview do Replit. As demais workflows continuam
+# disponiveis na lista para uso manual (ex.: Dev (web + api) para rodar
+# front + back juntos localmente/no repl).
+runButton = "Project"
 
   [[workflows.workflow]]
   name = "Dev (web + api)"
@@ -83,3 +91,56 @@ runButton = "Dev (web + api)"
     [[workflows.workflow.tasks]]
     task = "shell.exec"
     args = "pnpm --filter @fiscalcheck/api migrate"
+
+# --------------------------------------------------------------------
+# Workflows adicionais para o preview do Replit (adicionados no fix
+# `fix/replit-preview-env`). Motivo:
+#  1. Preview do Replit serve o app dentro de um iframe cross-origin;
+#     precisa de allowedDevOrigins no next.config e sem X-Frame-Options:
+#     DENY em dev (ver apps/web/next.config.ts).
+#  2. O `replit.nix` deste template define LD_LIBRARY_PATH apontando
+#     para libs (libcrypto/libstdc++) incompativeis com o Node modular,
+#     quebrando qualquer `node`/`pnpm`/`next`. Workaround por processo:
+#     `env -u LD_LIBRARY_PATH <cmd>`.
+#  3. NEXT_PUBLIC_MSW_ENABLED=true faz o front rodar sozinho com os
+#     mocks MSW, sem depender do FastAPI subir no preview.
+# --------------------------------------------------------------------
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "env -u LD_LIBRARY_PATH PORT=5000 NEXT_PUBLIC_MSW_ENABLED=true pnpm --filter @fiscalcheck/web dev"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+# Portas usadas pelo preview do Replit (localPort 5000 = webview).
+# Mantemos tambem as portas classicas (3000/8000) acima para quem
+# roda o app fora do preview.
+[[ports]]
+localPort = 5000
+externalPort = 5000
+
+[[ports]]
+localPort = 8080
+externalPort = 80
+
+[[ports]]
+localPort = 23345
+externalPort = 3000
+
+[agent]
+expertMode = true
