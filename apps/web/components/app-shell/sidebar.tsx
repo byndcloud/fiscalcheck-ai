@@ -9,6 +9,7 @@ import {
   ScanSearchIcon,
   SendIcon,
   ShieldCheckIcon,
+  SlidersHorizontalIcon,
   SparklesIcon,
   UsersIcon,
   WorkflowIcon,
@@ -124,6 +125,13 @@ const NAV_SECTIONS: readonly NavSection[] = [
         label: "Gerencial",
         description: "KPIs e monitoramento",
         icon: BarChart3Icon,
+        roles: ["supervisor", "admin"] as const,
+      },
+      {
+        href: "/modelo-de-risco",
+        label: "Modelo de risco",
+        description: "Pesos, faixas e regras (T02)",
+        icon: SlidersHorizontalIcon,
         roles: ["supervisor", "admin"] as const,
       },
       {

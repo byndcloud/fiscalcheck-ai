@@ -145,3 +145,22 @@ export {
   type SmartAlert,
   type SmartAlertKind,
 } from "./schemas/analytics";
+
+export {
+  RiskFactorOriginSchema,
+  RiskModelBandsSchema,
+  RiskModelChangeSchema,
+  RiskModelConfigSchema,
+  RiskModelPublishRequestSchema,
+  RiskModelPublishResponseSchema,
+  RiskModelRuleSchema,
+  RiskModelWeightsSchema,
+  type RiskFactorOrigin,
+  type RiskModelBands,
+  type RiskModelChange,
+  type RiskModelConfig,
+  type RiskModelPublishRequest,
+  type RiskModelPublishResponse,
+  type RiskModelRule,
+  type RiskModelWeights,
+} from "./schemas/risk-model";
