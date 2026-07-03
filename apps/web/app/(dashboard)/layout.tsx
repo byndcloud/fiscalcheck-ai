@@ -1,32 +1,46 @@
-import Link from "next/link";
+"use client";
 
-import { NotificationBell } from "@/components/notification-bell";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
+import type * as React from "react";
 
-/**
- * Header mínimo do grupo (dashboard) — 62px, borda inferior, conforme
- * docs/design-system/design-system.md §7. Não é o topbar completo da spec
- * (sem busca, sem botão Copilot): cobre só o essencial para hospedar o sino
- * (T01) exigido pelo critério de aceite do T10. Sidebar completa fica para
- * quando houver mais de duas rotas de produto.
- */
-export default function DashboardGroupLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex min-h-screen flex-col">
-      <header className="flex h-[62px] shrink-0 items-center justify-between border-b bg-surface px-6">
-        <nav className="flex items-center gap-6">
-          <span className="font-display text-lg font-bold text-brand-deep">FiscalCheck</span>
-          <div className="flex items-center gap-4 text-sm font-medium text-muted-foreground">
-            <Link href="/dashboard" className="transition-colors hover:text-text-strong">
-              Painel do auditor
-            </Link>
-            <Link href="/esteira-de-agentes" className="transition-colors hover:text-text-strong">
-              Esteira de agentes
-            </Link>
-          </div>
-        </nav>
-        <NotificationBell />
-      </header>
-      <div className="flex-1">{children}</div>
-    </div>
-  );
+import { AppShell } from "@/components/app-shell/app-shell";
+import { useSession } from "@/stores/session-store";
+
+/*
+  Guard client-side (MVP mock). Se não houver `role`, volta ao /login.
+  Cidadão que caia em rota do dashboard vai automaticamente para /citizen.
+  T03 substituirá pelo middleware NextAuth real.
+*/
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const role = useSession((s) => s.role);
+
+  useEffect(() => {
+    if (!role) {
+      router.replace("/login");
+      return;
+    }
+    if (role === "cidadao" && pathname !== "/citizen") {
+      router.replace("/citizen");
+    }
+  }, [role, pathname, router]);
+
+  if (!role) {
+    return (
+      <output
+        aria-live="polite"
+        className="grid min-h-svh place-items-center text-sm text-muted-foreground"
+      >
+        Redirecionando para o login…
+      </output>
+    );
+  }
+
+  return <AppShell>{children}</AppShell>;
 }

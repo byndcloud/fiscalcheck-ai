@@ -1,0 +1,63 @@
+import type { Caso } from "@fiscalcheck/shared-types";
+
+export const casosFixture: Caso[] = [
+  {
+    id: "cs-2026-0142",
+    contribuinteId: "ct-001",
+    status: "em_analise",
+    criadoEm: "2026-07-01T10:00:00Z",
+    atualizadoEm: "2026-07-02T14:22:00Z",
+    atribuidoA: "mock-auditor",
+    prazoLimite: "2026-07-16",
+    scoreValor: 82,
+    divergenciaIds: ["dv-001", "dv-005"],
+    proximaAcaoRecomendada:
+      "Solicitar comprovantes das NFS-e nº 1041/1042/1043 e ata societária vigente.",
+  },
+  {
+    id: "cs-2026-0139",
+    contribuinteId: "ct-003",
+    status: "aberto",
+    criadoEm: "2026-06-29T09:20:00Z",
+    atualizadoEm: "2026-07-01T09:20:00Z",
+    prazoLimite: "2026-07-14",
+    scoreValor: 91,
+    divergenciaIds: ["dv-002"],
+    proximaAcaoRecomendada: "Emitir comunicação formal de exclusão do Simples Nacional.",
+  },
+  {
+    id: "cs-2026-0128",
+    contribuinteId: "ct-002",
+    status: "aguardando_contribuinte",
+    criadoEm: "2026-06-20T08:00:00Z",
+    atualizadoEm: "2026-06-30T18:14:00Z",
+    atribuidoA: "mock-auditor",
+    prazoLimite: "2026-07-05",
+    scoreValor: 44,
+    divergenciaIds: ["dv-003"],
+    proximaAcaoRecomendada:
+      "Aguardar retorno do contribuinte com comprovantes de exportação de serviço.",
+    observacoes: "Contribuinte respondeu à notificação amigável — aguardando documentos.",
+  },
+  {
+    id: "cs-2026-0121",
+    contribuinteId: "ct-005",
+    status: "em_analise",
+    criadoEm: "2026-06-15T10:30:00Z",
+    atualizadoEm: "2026-07-01T15:22:00Z",
+    scoreValor: 62,
+    divergenciaIds: ["dv-004"],
+    proximaAcaoRecomendada: "Diligência de campo para confirmar operação no endereço declarado.",
+  },
+  {
+    id: "cs-2026-0087",
+    contribuinteId: "ct-002",
+    status: "autorregularizado",
+    criadoEm: "2026-05-10T09:00:00Z",
+    atualizadoEm: "2026-05-22T17:30:00Z",
+    atribuidoA: "mock-auditor",
+    scoreValor: 32,
+    divergenciaIds: [],
+    observacoes: "Contribuinte reapresentou apuração e recolheu ISS complementar em 8 dias.",
+  },
+];

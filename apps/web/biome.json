@@ -2,7 +2,14 @@
   "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
   "extends": ["../../packages/biome-config/biome.json"],
   "files": {
-    "ignore": [".next", "node_modules", "dist", "coverage", "next-env.d.ts"]
+    "ignore": [
+      ".next",
+      "node_modules",
+      "dist",
+      "coverage",
+      "next-env.d.ts",
+      "public/mockServiceWorker.js"
+    ]
   },
   "linter": {
     "rules": {
