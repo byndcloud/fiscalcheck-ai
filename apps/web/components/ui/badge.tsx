@@ -7,9 +7,11 @@ import { cn } from "@/lib/utils";
 /*
   FiscalCheck DS — Badge genérico (docs/design-system/design-system.md §7).
   Variantes semânticas alinhadas aos tokens de superfície.
+  Foco visível e estado aria-invalid herdam o padrão shadcn/DS para permitir
+  uso em botões/links (asChild) e em campos de formulário.
 */
 const badgeVariants = cva(
-  "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap [&>svg]:size-3 [&>svg]:pointer-events-none",
+  "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:size-3 [&>svg]:pointer-events-none",
   {
     variants: {
       variant: {

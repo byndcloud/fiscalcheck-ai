@@ -29,6 +29,7 @@
   --c-aurora-mid: #2d8fe0;
   --c-aurora-to: #19d3e8;
   --grad-aurora: linear-gradient(100deg, #1351b4 0%, #2d8fe0 52%, #19d3e8 100%);
+  --grad-aurora-tile: linear-gradient(135deg, #1351b4 0%, #19d3e8 110%);
 
   /* === DS · Espectro de risco (assinatura semântica, §3.3) === */
   --c-risk-1: #168821;
@@ -286,4 +287,42 @@
       scroll-behavior: auto !important;
     }
   }
+}
+
+/*
+  §6 do DS — "Pulso ao vivo": anel de sombra que expande e some, usado em
+  indicadores de agente ativo e status operacional. fc-pulse (ciano) é o
+  genérico; fc-pulse-green é a variante específica de agente ativo (§8).
+  Duração e supressão por prefers-reduced-motion seguem a regra global acima.
+*/
+@keyframes fc-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(14, 165, 196, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(14, 165, 196, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(14, 165, 196, 0);
+  }
+}
+
+@keyframes fc-pulse-green {
+  0% {
+    box-shadow: 0 0 0 0 rgba(22, 136, 33, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(22, 136, 33, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(22, 136, 33, 0);
+  }
+}
+
+.fc-pulse {
+  animation: fc-pulse 2s var(--ease) infinite;
+}
+
+.fc-pulse-green {
+  animation: fc-pulse-green 2.4s var(--ease) infinite;
 }

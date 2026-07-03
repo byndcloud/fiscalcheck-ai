@@ -13,6 +13,7 @@ const ALL_LABELS = [
   "Ingestão",
   "Detecção",
   "Risco & IA",
+  "Esteira de agentes",
   "Casos",
   "Cidadão",
   "Gerencial",
@@ -32,7 +33,15 @@ describe("Sidebar — filtragem por papel", () => {
   it("auditor não vê Governança nem Gerencial", () => {
     useSession.getState().setRole("auditor");
     render(<Sidebar />);
-    for (const label of ["Dashboard", "Ingestão", "Detecção", "Risco & IA", "Casos", "Cidadão"]) {
+    for (const label of [
+      "Dashboard",
+      "Ingestão",
+      "Detecção",
+      "Risco & IA",
+      "Esteira de agentes",
+      "Casos",
+      "Cidadão",
+    ]) {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
     expect(screen.queryByText("Governança")).toBeNull();

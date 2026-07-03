@@ -10,6 +10,7 @@ import {
   ShieldCheckIcon,
   SparklesIcon,
   UsersIcon,
+  WorkflowIcon,
 } from "lucide-react";
 import type { Route } from "next";
 import Image from "next/image";
@@ -82,6 +83,13 @@ const NAV_SECTIONS: readonly NavSection[] = [
         icon: SparklesIcon,
         roles: AUDITORIAL_ROLES,
         aurora: true,
+      },
+      {
+        href: "/esteira-de-agentes",
+        label: "Esteira de agentes",
+        description: "Observabilidade dos agentes (FA01–FA11)",
+        icon: WorkflowIcon,
+        roles: AUDITORIAL_ROLES,
       },
       {
         href: "/cases",
