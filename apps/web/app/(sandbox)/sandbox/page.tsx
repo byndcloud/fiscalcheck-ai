@@ -157,10 +157,12 @@ export default function SandboxPage() {
             <StatusBadge kind="risk" level="critico" />
           </div>
           <div className="flex flex-wrap gap-2">
-            <StatusBadge kind="status" status="aberto" />
+            <StatusBadge kind="status" status="candidato" />
             <StatusBadge kind="status" status="em_analise" />
-            <StatusBadge kind="status" status="aguardando_contribuinte" />
-            <StatusBadge kind="status" status="autorregularizado" />
+            <StatusBadge kind="status" status="aguardando_aprovacao" />
+            <StatusBadge kind="status" status="notificado" />
+            <StatusBadge kind="status" status="em_autorregularizacao" />
+            <StatusBadge kind="status" status="fiscalizacao" />
             <StatusBadge kind="status" status="encerrado" />
           </div>
           <div className="flex flex-wrap gap-2">

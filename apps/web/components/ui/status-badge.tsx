@@ -43,21 +43,23 @@ const RISK_CLASSES: Record<RiskLevel, string> = {
 };
 
 const STATUS_TO_TOKEN: Record<StatusCaso, RiskLevel | "neutral" | "info"> = {
-  aberto: "info",
+  candidato: "info",
   em_analise: "risk-3",
-  aguardando_contribuinte: "risk-3",
-  autorregularizado: "risk-1",
+  aguardando_aprovacao: "risk-4",
+  notificado: "risk-3",
+  em_autorregularizacao: "risk-2",
+  fiscalizacao: "risk-5",
   encerrado: "neutral",
-  arquivado: "neutral",
 };
 
 const STATUS_LABEL_PT: Record<StatusCaso, string> = {
-  aberto: "Aberto",
+  candidato: "Candidato",
   em_analise: "Em análise",
-  aguardando_contribuinte: "Aguardando contribuinte",
-  autorregularizado: "Autorregularizado",
+  aguardando_aprovacao: "Aguardando aprovação",
+  notificado: "Notificado",
+  em_autorregularizacao: "Em autorregularização",
+  fiscalizacao: "Fiscalização",
   encerrado: "Encerrado",
-  arquivado: "Arquivado",
 };
 
 const NEUTRAL_CLASSES = "bg-n-50 text-text-muted border-border";

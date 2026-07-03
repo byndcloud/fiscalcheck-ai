@@ -71,10 +71,30 @@ export {
 
 export {
   CasoSchema,
+  RecomendacaoAcaoSchema,
+  RecomendacaoAgenteSchema,
   StatusCasoSchema,
   type Caso,
+  type RecomendacaoAcao,
+  type RecomendacaoAgente,
   type StatusCaso,
 } from "./schemas/caso";
+
+export {
+  CaseDecisionSchema,
+  DecisionActionSchema,
+  DecisionRequestSchema,
+  type CaseDecision,
+  type DecisionAction,
+  type DecisionRequest,
+} from "./schemas/case-decision";
+
+export {
+  CaseDocumentKindSchema,
+  CaseDocumentSchema,
+  type CaseDocument,
+  type CaseDocumentKind,
+} from "./schemas/case-document";
 
 export {
   NotificacaoSchema,
