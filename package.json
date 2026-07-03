@@ -1,16 +1,27 @@
 {
-  "name": "workspace",
-  "version": "0.0.0",
-  "license": "MIT",
-  "scripts": {
-    "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
-    "build": "pnpm run typecheck && pnpm -r --if-present run build",
-    "typecheck:libs": "tsc --build",
-    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
-  },
-  "private": true,
-  "devDependencies": {
-    "prettier": "^3.8.4",
-    "typescript": "~5.9.3"
-  }
+	"name": "fiscalcheck-ai",
+	"version": "0.1.0",
+	"private": true,
+	"description": "FiscalCheck AI — Plataforma de Inteligência Fiscal Agêntica (Brusque/SC)",
+	"engines": {
+		"node": ">=22.0.0",
+		"pnpm": ">=9.0.0"
+	},
+	"packageManager": "pnpm@9.15.0",
+	"scripts": {
+		"dev": "pnpm -r --parallel dev",
+		"build": "pnpm -r build",
+		"lint": "pnpm -r lint",
+		"lint:fix": "pnpm -r lint:fix",
+		"typecheck": "pnpm -r typecheck",
+		"test": "pnpm -r test",
+		"format": "pnpm -r format",
+		"format:check": "pnpm -r format:check",
+		"api:dev": "pnpm --filter @fiscalcheck/api dev",
+		"web:dev": "pnpm --filter @fiscalcheck/web dev"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"typescript": "^5.7.2"
+	}
 }
