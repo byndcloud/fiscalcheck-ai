@@ -1,0 +1,152 @@
+import type { Score } from "@fiscalcheck/shared-types";
+
+export const scoresFixture: Score[] = [
+  {
+    contribuinteId: "ct-001",
+    valor: 82,
+    nivel: "alto",
+    calculadoEm: "2026-07-02T06:30:00Z",
+    modeloVersao: "risk-model-v2.4",
+    proximaAcaoRecomendada:
+      "Abrir caso de fiscalização e notificar autorregularização em 15 dias úteis.",
+    fatores: [
+      {
+        nome: "Subdeclaração recorrente ISS",
+        peso: 0.4,
+        contribuicao: 33,
+        evidencia: "3 competências abaixo da média setorial (2026-03 a 2026-05).",
+        origem: "cruzamento",
+      },
+      {
+        nome: "Sócio vinculado a contribuinte suspenso",
+        peso: 0.25,
+        contribuicao: 20,
+        evidencia: "Sócio comum entre CT-001 e CT-004.",
+        origem: "grafo",
+      },
+      {
+        nome: "Regime tributário compatível",
+        peso: 0.1,
+        contribuicao: -5,
+        evidencia: "Lucro presumido condizente com faturamento anual.",
+        origem: "cadastro",
+      },
+      {
+        nome: "Histórico de autuações últimos 24 meses",
+        peso: 0.25,
+        contribuicao: 34,
+        evidencia: "2 autuações fiscais anteriores, ambas mantidas em recurso.",
+        origem: "historico",
+      },
+    ],
+  },
+  {
+    contribuinteId: "ct-002",
+    valor: 44,
+    nivel: "medio",
+    calculadoEm: "2026-07-02T06:30:00Z",
+    modeloVersao: "risk-model-v2.4",
+    proximaAcaoRecomendada: "Enviar orientação de autorregularização amigável — cidadão-primeiro.",
+    fatores: [
+      {
+        nome: "Omissão pontual em exportação de serviço",
+        peso: 0.35,
+        contribuicao: 22,
+        evidencia: "2 NFS-e para tomadores no exterior sem declaração.",
+        origem: "cruzamento",
+      },
+      {
+        nome: "Regularidade histórica",
+        peso: 0.2,
+        contribuicao: -10,
+        evidencia: "Sem autuações nos últimos 36 meses.",
+        origem: "historico",
+      },
+      {
+        nome: "Setor têxtil — variabilidade típica",
+        peso: 0.15,
+        contribuicao: 8,
+        evidencia: "Setor com sazonalidade alta na apuração.",
+        origem: "historico",
+      },
+    ],
+  },
+  {
+    contribuinteId: "ct-003",
+    valor: 91,
+    nivel: "critico",
+    calculadoEm: "2026-07-02T06:30:00Z",
+    modeloVersao: "risk-model-v2.4",
+    proximaAcaoRecomendada: "Exclusão do Simples e comunicação formal — pauta prioritária.",
+    fatores: [
+      {
+        nome: "Faturamento acima do teto do Simples",
+        peso: 0.5,
+        contribuicao: 45,
+        evidencia: "R$ 5,3M acumulados nos últimos 12 meses (teto R$ 4,8M).",
+        origem: "cadastro",
+      },
+      {
+        nome: "Alta volatilidade de emissão de NFS-e",
+        peso: 0.2,
+        contribuicao: 15,
+        evidencia: "Picos concentrados em fim de trimestre.",
+        origem: "cruzamento",
+      },
+      {
+        nome: "Complexidade societária",
+        peso: 0.15,
+        contribuicao: 12,
+        evidencia: "Sócios com participação em outras 4 PJs do mesmo setor.",
+        origem: "grafo",
+      },
+    ],
+  },
+  {
+    contribuinteId: "ct-004",
+    valor: 15,
+    nivel: "baixo",
+    calculadoEm: "2026-07-02T06:30:00Z",
+    modeloVersao: "risk-model-v2.4",
+    fatores: [
+      {
+        nome: "Situação cadastral suspensa",
+        peso: 0.5,
+        contribuicao: 15,
+        evidencia: "Contribuinte inativo — score congelado.",
+        origem: "cadastro",
+      },
+    ],
+  },
+  {
+    contribuinteId: "ct-005",
+    valor: 62,
+    nivel: "alto",
+    calculadoEm: "2026-07-02T06:30:00Z",
+    modeloVersao: "risk-model-v2.4",
+    proximaAcaoRecomendada: "Revisar endereço declarado e confirmar operação.",
+    fatores: [
+      {
+        nome: "Endereço coincide com CT-004 (suspenso)",
+        peso: 0.4,
+        contribuicao: 28,
+        evidencia: "Rua Fictícia, 123, sala 2 e sala 3 — mesmo bloco.",
+        origem: "grafo",
+      },
+      {
+        nome: "Regularidade tributária declarada",
+        peso: 0.2,
+        contribuicao: -8,
+        evidencia: "Sem inconsistência entre declarado e NFS-e.",
+        origem: "cruzamento",
+      },
+      {
+        nome: "Atividade compatível com CNAE",
+        peso: 0.1,
+        contribuicao: -3,
+        evidencia: "Autoescola operando dentro do CNAE registrado.",
+        origem: "cadastro",
+      },
+    ],
+  },
+];
