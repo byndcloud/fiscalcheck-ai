@@ -20,7 +20,10 @@ import {
   ContribuinteSchema,
   DecisionRequestSchema,
   DivergenciaSchema,
+  DossieExportRequestSchema,
+  DossieExportResponseSchema,
   MonthlyRecoverySeriesSchema,
+  NFSeSchema,
   type Notificacao,
   NotificacaoSchema,
   PanelKpisSchema,
@@ -57,6 +60,7 @@ import { contribuintesFixture } from "./fixtures/contribuintes";
 import { divergenciasFixture } from "./fixtures/divergencias";
 import { KPIsAnalyticsSchema, kpisFixture } from "./fixtures/kpis";
 import { monthlyRecoveryFixture } from "./fixtures/monthly-recovery";
+import { nfseFixture } from "./fixtures/nfse";
 import { notificacoesFixture } from "./fixtures/notificacoes";
 import { panelKpisFixture } from "./fixtures/panel-kpis";
 import { riskDistributionFixture } from "./fixtures/risk-distribution";
@@ -206,6 +210,9 @@ export const handlers = [
   http.get(`${API_URL}/crossing/divergences`, () =>
     respondValidated(z.array(DivergenciaSchema), divergenciasFixture),
   ),
+
+  // Módulo 1/2 — NFS-e (evidências primárias das divergências e do dossiê T13/T28)
+  http.get(`${API_URL}/nfse`, () => respondValidated(z.array(NFSeSchema), nfseFixture)),
 
   // Módulo 3 — IA Preditiva
   http.get(`${API_URL}/ai/scores`, () => respondValidated(z.array(ScoreSchema), scoresFixture)),
@@ -488,6 +495,70 @@ export const handlers = [
         notificacao: notificacaoEmitida,
       },
     );
+  }),
+
+  // Módulo 4 — Exportação do dossiê em PDF (T28)
+  http.post(`${API_URL}/cases/:id/dossie/export`, async ({ params, request }) => {
+    const { id } = params as { id: string };
+    const roleHeader = request.headers.get("X-Actor-Role");
+    const roleParsed = RoleSchema.safeParse(roleHeader);
+    const atorPapel: Role = roleParsed.success ? roleParsed.data : "auditor";
+
+    /*
+      RBAC: cidadão não pode exportar peça processual (art. 198 CTN).
+      Auditor/Supervisor/Admin sim — o auditor é o dono operacional
+      do caso e é ele quem anexa o PDF como peça de instrução.
+    */
+    if (atorPapel !== "auditor" && atorPapel !== "supervisor" && atorPapel !== "admin") {
+      return HttpResponse.json(
+        {
+          error_code: "forbidden_role",
+          message: "Apenas Auditor, Gestor ou Administrador podem exportar o dossiê.",
+        },
+        { status: 403 },
+      );
+    }
+
+    const casoAtual = casosMutable.find((c) => c.id === id);
+    if (!casoAtual) {
+      return HttpResponse.json(
+        { error_code: "case_not_found", message: "Caso não encontrado." },
+        { status: 404 },
+      );
+    }
+
+    const bodyRaw = await request.json().catch(() => ({}));
+    const parsed = DossieExportRequestSchema.safeParse(bodyRaw);
+    if (!parsed.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_export_body",
+          message: "Payload de export de dossiê inválido.",
+          issues: parsed.error.issues,
+        },
+        { status: 400 },
+      );
+    }
+
+    const nomeHeader = request.headers.get("X-Actor-Name") ?? ROLE_DISPLAY[atorPapel];
+    const idHeader = request.headers.get("X-Actor-Id") ?? `mock-${atorPapel}`;
+
+    const entry = pushAudit({
+      timestamp: new Date().toISOString(),
+      action: "caso.dossie.export",
+      actorId: idHeader,
+      actorName: nomeHeader,
+      actorRole: atorPapel,
+      ipAddress: "10.20.30.11",
+      resource: `caso:${id}`,
+      result: "sucesso",
+      atypical: false,
+      correlationId: parsed.data.correlationId,
+      details: `Exportação do dossiê em PDF do caso ${id} (${parsed.data.totalDivergencias} divergências${parsed.data.scoreValor !== undefined ? `, score ${parsed.data.scoreValor}` : ""}).`,
+      dadosAcessados: `Caso ${id} · contribuinte ${casoAtual.contribuinteId}.`,
+    });
+
+    return respondValidated(DossieExportResponseSchema, { entry });
   }),
 
   // Módulo 4 — Central de Notificações Eletrônicas (T15)

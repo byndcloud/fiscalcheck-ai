@@ -30,11 +30,7 @@ export type StatusCaso = z.infer<typeof StatusCasoSchema>;
   (justificativa + confiança + divergências que embasam a decisão) e
   encadeamento na máquina de transição (`apps/web/lib/case-transitions.ts`).
 */
-export const RecomendacaoAcaoSchema = z.enum([
-  "intimacao",
-  "autorregularizacao",
-  "fiscalizacao",
-]);
+export const RecomendacaoAcaoSchema = z.enum(["intimacao", "autorregularizacao", "fiscalizacao"]);
 export type RecomendacaoAcao = z.infer<typeof RecomendacaoAcaoSchema>;
 
 export const RecomendacaoAgenteSchema = z.object({

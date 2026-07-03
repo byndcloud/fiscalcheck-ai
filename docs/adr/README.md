@@ -16,6 +16,7 @@ Cada decisão arquitetural relevante vira um ADR numerado. Uma vez `Accepted`, *
 | [0001](./0001-stack-inicial.md) | Stack inicial — monorepo pnpm, Next.js 15, FastAPI, PostgreSQL único | Accepted (revisitado em parte por ADR-0002) |
 | [0002](./0002-database-mvp-replit.md) | Estratégia de banco para o MVP no Replit — pgvector sim, Apache AGE adiado | Accepted |
 | [0003](./0003-preview-replit.md) | Estratégia de preview no Replit — webview web-only com MSW | Proposed |
+| [0004](./0004-pdf-dossie-react-pdf.md) | Geração de PDF do dossiê no cliente com `@react-pdf/renderer` | Accepted |
 
 ## Padrões de qualidade
 

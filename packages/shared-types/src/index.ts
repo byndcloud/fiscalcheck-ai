@@ -195,3 +195,12 @@ export {
   type ComplianceSealCode,
   type ComplianceSealStatus,
 } from "./schemas/compliance-seal";
+
+export {
+  DossieExportFormatSchema,
+  DossieExportRequestSchema,
+  DossieExportResponseSchema,
+  type DossieExportFormat,
+  type DossieExportRequest,
+  type DossieExportResponse,
+} from "./schemas/dossie-export";
