@@ -104,6 +104,21 @@ export {
 } from "./schemas/notificacao";
 
 export {
+  CanalComunicacaoSchema,
+  ComunicacaoSchema,
+  DestinatarioSchema,
+  EventoProbatorioSchema,
+  StatusComunicacaoSchema,
+  TipoEventoProbatorioSchema,
+  type CanalComunicacao,
+  type Comunicacao,
+  type Destinatario,
+  type EventoProbatorio,
+  type StatusComunicacao,
+  type TipoEventoProbatorio,
+} from "./schemas/comunicacao";
+
+export {
   AgenteSchema,
   StatusAgenteSchema,
   TipoAgenteSchema,
@@ -130,3 +145,22 @@ export {
   type SmartAlert,
   type SmartAlertKind,
 } from "./schemas/analytics";
+
+export {
+  RiskFactorOriginSchema,
+  RiskModelBandsSchema,
+  RiskModelChangeSchema,
+  RiskModelConfigSchema,
+  RiskModelPublishRequestSchema,
+  RiskModelPublishResponseSchema,
+  RiskModelRuleSchema,
+  RiskModelWeightsSchema,
+  type RiskFactorOrigin,
+  type RiskModelBands,
+  type RiskModelChange,
+  type RiskModelConfig,
+  type RiskModelPublishRequest,
+  type RiskModelPublishResponse,
+  type RiskModelRule,
+  type RiskModelWeights,
+} from "./schemas/risk-model";

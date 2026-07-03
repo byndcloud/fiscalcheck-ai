@@ -10,6 +10,7 @@ import {
   CaseDocumentSchema,
   type Caso,
   CasoSchema,
+  ComunicacaoSchema,
   ContribuinteSchema,
   DecisionRequestSchema,
   DivergenciaSchema,
@@ -18,6 +19,12 @@ import {
   NotificacaoSchema,
   PanelKpisSchema,
   RiskDistributionSchema,
+  type RiskModelChange,
+  RiskModelChangeSchema,
+  type RiskModelConfig,
+  RiskModelConfigSchema,
+  RiskModelPublishRequestSchema,
+  RiskModelPublishResponseSchema,
   type Role,
   RoleSchema,
   ScoreSchema,
@@ -32,6 +39,7 @@ import { auditLogFixture } from "./fixtures/audit-log";
 import { caseDecisionsFixture } from "./fixtures/case-decisions";
 import { caseDocumentsFixture } from "./fixtures/case-documents";
 import { casosFixture } from "./fixtures/casos";
+import { comunicacoesFixture } from "./fixtures/comunicacoes";
 import { contribuintesFixture } from "./fixtures/contribuintes";
 import { divergenciasFixture } from "./fixtures/divergencias";
 import { KPIsAnalyticsSchema, kpisFixture } from "./fixtures/kpis";
@@ -39,6 +47,7 @@ import { monthlyRecoveryFixture } from "./fixtures/monthly-recovery";
 import { notificacoesFixture } from "./fixtures/notificacoes";
 import { panelKpisFixture } from "./fixtures/panel-kpis";
 import { riskDistributionFixture } from "./fixtures/risk-distribution";
+import { riskModelConfigFixture, riskModelHistoryFixture } from "./fixtures/risk-model";
 import { scoresFixture } from "./fixtures/scores";
 import { smartAlertsFixture } from "./fixtures/smart-alerts";
 
@@ -63,6 +72,26 @@ const caseDocumentsMutable: CaseDocument[] = [...caseDocumentsFixture];
 
 let decisionSeq = caseDecisionsMutable.length + 1;
 let documentSeq = caseDocumentsMutable.length + 1;
+
+/*
+  Estado in-memory do módulo 3 (T02 · Configuração do Modelo de Risco).
+  A configuração vigente é substituída a cada publish; o histórico é
+  append-only (unshift) e reflete o critério de aceite "histórico de
+  alterações de parâmetros (quem/quando)".
+*/
+let riskModelConfigMutable: RiskModelConfig = { ...riskModelConfigFixture };
+const riskModelHistoryMutable: RiskModelChange[] = [...riskModelHistoryFixture];
+let riskModelChangeSeq = riskModelHistoryMutable.length + 1;
+
+function bumpRiskModelVersion(current: string): string {
+  const match = /^v(\d+)\.(\d+)(?:\.(\d+))?$/.exec(current);
+  if (!match) return `${current}+1`;
+  const [, majorStr, minorStr, patchStr] = match;
+  if (patchStr !== undefined) {
+    return `v${majorStr}.${minorStr}.${Number(patchStr) + 1}`;
+  }
+  return `v${majorStr}.${Number(minorStr) + 1}`;
+}
 
 const ROLE_DISPLAY: Record<Role, string> = {
   auditor: "Auditor Fiscal",
@@ -138,6 +167,109 @@ export const handlers = [
   // Módulo 3 — IA Preditiva
   http.get(`${API_URL}/ai/scores`, () => respondValidated(z.array(ScoreSchema), scoresFixture)),
   http.get(`${API_URL}/ai/agents`, () => respondValidated(z.array(AgenteSchema), agentesFixture)),
+
+  // Módulo 3 — Configuração do Modelo de Risco (T02)
+  http.get(`${API_URL}/ai/risk-model/config`, () =>
+    respondValidated(RiskModelConfigSchema, riskModelConfigMutable),
+  ),
+
+  http.get(`${API_URL}/ai/risk-model/history`, () => {
+    const ordered = [...riskModelHistoryMutable].sort((a, b) =>
+      a.timestamp < b.timestamp ? 1 : -1,
+    );
+    return respondValidated(z.array(RiskModelChangeSchema), ordered);
+  }),
+
+  http.post(`${API_URL}/ai/risk-model/config`, async ({ request }) => {
+    const bodyRaw = await request.json().catch(() => ({}));
+    const parsed = RiskModelPublishRequestSchema.safeParse(bodyRaw);
+    if (!parsed.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_risk_model_body",
+          message: "Corpo da publicação de modelo inválido.",
+          issues: parsed.error.issues,
+        },
+        { status: 400 },
+      );
+    }
+
+    /*
+      Regra de negócio dos limiares: 0 < baixo < medio < alto < critico ≤ 100.
+      O front já valida antes de enviar, mas replicamos aqui para blindar o
+      contrato — o mesmo check será exigido do serviço real.
+    */
+    const { baixo, medio, alto, critico } = parsed.data.bands;
+    if (!(0 < baixo && baixo < medio && medio < alto && alto < critico && critico <= 100)) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_risk_bands",
+          message: "As faixas de score precisam seguir 0 < baixo < médio < alto < crítico ≤ 100.",
+        },
+        { status: 422 },
+      );
+    }
+
+    const roleHeader = request.headers.get("X-Actor-Role");
+    const nomeHeader = request.headers.get("X-Actor-Name");
+    const idHeader = request.headers.get("X-Actor-Id");
+    const roleParsed = RoleSchema.safeParse(roleHeader);
+    const atorPapel: Role = roleParsed.success ? roleParsed.data : "supervisor";
+
+    /*
+      RBAC do MSW replica o guard client-side: apenas Gestor/Admin podem
+      publicar. Se o header não vier ou vier de auditor/cidadão, recusamos —
+      alinhado ao critério de aceite "Auditor Fiscal e Contribuinte não
+      acessam a tela".
+    */
+    if (atorPapel !== "supervisor" && atorPapel !== "admin") {
+      return HttpResponse.json(
+        {
+          error_code: "forbidden_role",
+          message: "Apenas Gestor e Administrador podem publicar o modelo de risco.",
+        },
+        { status: 403 },
+      );
+    }
+
+    const atorId = idHeader ?? `mock-${atorPapel}`;
+    const atorNome = nomeHeader ?? ROLE_DISPLAY[atorPapel];
+    const now = new Date();
+    const correlationId = generateCorrelationId();
+    const fromVersion = riskModelConfigMutable.version;
+    const toVersion = bumpRiskModelVersion(fromVersion);
+
+    const nextConfig: RiskModelConfig = {
+      version: toVersion,
+      updatedAt: now.toISOString(),
+      updatedBy: atorNome,
+      updatedByRole: atorPapel,
+      weights: parsed.data.weights,
+      bands: parsed.data.bands,
+      rules: parsed.data.rules,
+    };
+
+    const change: RiskModelChange = {
+      id: `rmc-${now.getFullYear()}-${String(riskModelChangeSeq).padStart(6, "0")}`,
+      timestamp: now.toISOString(),
+      actorId: atorId,
+      actorName: atorNome,
+      actorRole: atorPapel,
+      correlationId,
+      fromVersion,
+      toVersion,
+      summary: parsed.data.summary,
+      fieldsChanged: parsed.data.fieldsChanged,
+    };
+    riskModelChangeSeq += 1;
+    riskModelHistoryMutable.unshift(change);
+    riskModelConfigMutable = nextConfig;
+
+    return respondValidated(RiskModelPublishResponseSchema, {
+      config: nextConfig,
+      change,
+    });
+  }),
 
   // Contribuintes — usado para enriquecer dossiê (razão social, CNAE, regime)
   http.get(`${API_URL}/taxpayers`, () =>
@@ -313,6 +445,22 @@ export const handlers = [
         notificacao: notificacaoEmitida,
       },
     );
+  }),
+
+  // Módulo 4 — Central de Notificações Eletrônicas (T15)
+  http.get(`${API_URL}/communications`, () =>
+    respondValidated(z.array(ComunicacaoSchema), comunicacoesFixture),
+  ),
+  http.get(`${API_URL}/communications/:id`, ({ params }) => {
+    const { id } = params as { id: string };
+    const found = comunicacoesFixture.find((c) => c.id === id);
+    if (!found) {
+      return HttpResponse.json(
+        { error_code: "communication_not_found", message: "Comunicação não encontrada." },
+        { status: 404 },
+      );
+    }
+    return respondValidated(ComunicacaoSchema, found);
   }),
 
   // Portal do cidadão — subconjunto dos casos
