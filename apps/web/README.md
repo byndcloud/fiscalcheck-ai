@@ -32,35 +32,54 @@ pnpm test         # vitest run
 ## Estrutura
 
 ```text
-app/                          # rotas (App Router)
-├── (auth)/login              # split-screen com <LoginForm/>
-├── (dashboard)/              # área autenticada — <AppShell/> + guard
-│   ├── dashboard             # visão geral (KPIs + top casos)
-│   ├── ingestion             # módulo 1
-│   ├── crossing              # módulo 2
-│   ├── ai                    # módulo 3 (scores + agentes)
-│   ├── cases                 # módulo 4
-│   ├── citizen               # portal do cidadão
-│   ├── analytics             # módulo 5
-│   └── compliance            # módulo 6
-├── (sandbox)/sandbox         # catálogo do Design System
-├── layout.tsx                # RootLayout
-├── page.tsx                  # redirect → /login
-└── globals.css               # Tailwind v4 + tokens DS
+app/                                    # rotas (App Router)
+├── (auth)/login                        # split-screen com <LoginForm/> (T01)
+├── (dashboard)/                        # área autenticada — <AppShell/> + guard
+│   ├── dashboard                       # visão geral (KPIs + top casos) — T01
+│   ├── ingestion                       # módulo 1 — timeline + monitor de cargas (T04)
+│   ├── crossing                        # módulo 2
+│   ├── ai                              # módulo 3 (scores + agentes)
+│   ├── cases                           # módulo 4 — fila, dossiê, workflow (T13)
+│   ├── citizen                         # portal do cidadão
+│   ├── analytics                       # módulo 5
+│   ├── comunicacoes                    # central de notificações eletrônicas (T15)
+│   ├── esteira-de-agentes              # painel da esteira de agentes (T10)
+│   ├── modelo-de-risco                 # config do modelo de risco (T02)
+│   └── compliance                      # módulo 6 — visão geral + subrotas T19
+│       ├── trilha                      # trilha de auditoria (admin only) — T19
+│       └── usuarios                    # admin de servidores + step-up MFA — T19
+├── (sandbox)/sandbox                   # catálogo do Design System
+├── layout.tsx                          # RootLayout
+├── page.tsx                            # redirect → /login
+└── globals.css                         # Tailwind v4 + tokens DS
 components/
-├── app-shell/                # sidebar, header, banner, sino de notificações
-├── auth/                     # AuthLayout, InstitutionalPanel, LoginForm
-├── providers.tsx             # QueryClient + MSW bootstrap + Toaster
-└── ui/                       # shadcn primitives + componentes DS custom
+├── app-shell/                          # sidebar, header, banner, sino de notificações
+├── auth/                               # AuthLayout, InstitutionalPanel, LoginForm
+├── agents/                             # cards e sheet da esteira de agentes (T10)
+├── cases/                              # fila, dossiê e workflow de decisão (T13)
+├── communications/                     # central de notificações (T15)
+├── compliance/                         # trilha, agente de conformidade, admin (T19)
+├── dashboard/                          # widgets do painel gerencial (T01)
+├── risk-model/                         # editor + simulador do modelo de risco (T02)
+├── providers.tsx                       # QueryClient + MSW bootstrap + Toaster
+└── ui/                                 # shadcn primitives + componentes DS custom
 lib/
-├── utils.ts                  # cn() helper
-├── api-client.ts             # fetch client com correlation-id
-└── roles.ts                  # labels e helpers de papel
+├── api-client.ts                       # fetch client com correlation-id
+├── case-transitions.ts                 # regras de estado dos casos (T13)
+├── compliance/export-audit.ts          # export CSV/JSON da trilha (T19)
+├── format-relative-time.ts             # "há 5 min" etc.
+├── masks.ts                            # máscara de CPF/CNPJ/IP (T19)
+├── mocks/agents.ts                     # fixtures dos agentes (T10)
+├── risk-model/simulate.ts              # simulação do modelo (T02)
+├── roles.ts                            # labels e helpers de papel
+└── utils.ts                            # cn() helper
+hooks/
+└── use-agents-feed.ts                  # stream/pooling dos eventos da esteira (T10)
 stores/
-├── ui-store.ts               # sidebar collapse
-└── session-store.ts          # papel + usuário mock (T01)
-mocks/                        # MSW: handlers + fixtures pseudonimizadas
-tests/                        # Vitest + Testing Library
+├── ui-store.ts                         # sidebar collapse
+└── session-store.ts                    # papel + usuário mock (T01)
+mocks/                                  # MSW: handlers + fixtures pseudonimizadas
+tests/                                  # Vitest + Testing Library
 ```
 
 ## Aliases
