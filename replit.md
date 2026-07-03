@@ -1,121 +1,45 @@
-# Replit — Guia de execução
+# [Project name]
 
-Este projeto roda **direto no Replit** sem ajustes manuais: os `modules` do [`.replit`](./.replit) provisionam Node 22, Python 3.12 e o **Postgres gerenciado** do Replit; o [`replit.nix`](./replit.nix) complementa com `pnpm`, `uv` e utilitários de CLI.
+_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
 
-> Para leitura do agent (Claude Code / Replit Agent), o [`CLAUDE.md`](./CLAUDE.md) é o ponto de partida. Este arquivo trata da operação humana no Replit.
+## Run & Operate
 
----
+- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm run typecheck` — full typecheck across all packages
+- `pnpm run build` — typecheck + build all packages
+- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
+- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
+- Required env: `DATABASE_URL` — Postgres connection string
 
-## 1. Criar o Repl
+## Stack
 
-1. **Create Repl → Import from GitHub** → selecione o repositório `fiscalcheck-ai`.
-2. Aguarde o Replit baixar dependências (primeira vez leva 3–5 minutos).
-3. O botão **Run** já está configurado para subir o workflow `Dev (web + api)`.
+- pnpm workspaces, Node.js 24, TypeScript 5.9
+- API: Express 5
+- DB: PostgreSQL + Drizzle ORM
+- Validation: Zod (`zod/v4`), `drizzle-zod`
+- API codegen: Orval (from OpenAPI spec)
+- Build: esbuild (CJS bundle)
 
----
+## Where things live
 
-## 2. Secrets (variáveis sensíveis)
+_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
 
-No painel **Secrets** do Replit, configure pelo menos:
+## Architecture decisions
 
-| Chave | Origem |
-| --- | --- |
-| `DATABASE_URL` | Replit Postgres (aba Database) |
-| `JWT_SECRET` | `openssl rand -hex 32` |
-| `NEXTAUTH_SECRET` | `openssl rand -hex 32` |
-| `NEXTAUTH_URL` | URL pública do Repl (ex.: `https://fiscalcheck-ai.<usuario>.repl.co`) |
-| `NEXT_PUBLIC_API_URL` | URL pública da API |
-| `OPENAI_API_KEY` | OpenAI (módulos 3 e 7, quando implementados) |
-| `PSEUDONYMIZATION_SALT` | `openssl rand -hex 32` (não compartilhar com JWT_SECRET) |
+_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
 
-A lista completa está em [`.env.example`](./.env.example).
+## Product
 
-> **NUNCA** cole valores reais em arquivos versionados. Tudo entra pelo painel Secrets.
+_Describe the high-level user-facing capabilities of this app once they exist._
 
-> **Redis não faz parte do MVP.** O Replit não oferece Redis gerenciado; quando cache/fila for necessário (módulos futuros), a opção será um provedor externo (ex.: Upstash) ou a migração para nuvem nacional — registrar em ADR na ocasião.
+## User preferences
 
----
+_Populate as you build — explicit user instructions worth remembering across sessions._
 
-## 3. Workflows configurados
+## Gotchas
 
-| Workflow | Comando | Quando usar |
-| --- | --- | --- |
-| `Dev (web + api)` | `pnpm dev` | Default. Sobe Next.js (porta 3000) e FastAPI (porta 8000) em paralelo. |
-| `Web only` | `pnpm web:dev` | Trabalhando só no frontend. |
-| `API only` | `pnpm api:dev` | Trabalhando só no backend / agentes. |
-| `Tests (all)` | `pnpm test` | Validar antes de PR. |
-| `DB migrate` | `pnpm --filter @fiscalcheck/api migrate` | Aplicar migrations Alembic (`alembic upgrade head`). |
+_Populate as you build — sharp edges, "always run X before Y" rules._
 
-Trocar de workflow: clique na seta ao lado do botão **Run** → escolha.
+## Pointers
 
----
-
-## 4. Banco e extensões
-
-O Replit Postgres (gerenciado, backend Neon) **suporta `pgvector`** mas **não suporta Apache AGE**. Por isso, no MVP usamos só `pgvector` — o grafo do Módulo 2 vive em **NetworkX in-memory** no `apps/api`. Decisão completa em [ADR-0002](./docs/adr/0002-database-mvp-replit.md).
-
-Para habilitar as extensões mínimas:
-
-```sql
--- Conecte no DB pela aba Database do Replit (psql) e rode:
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-CREATE EXTENSION IF NOT EXISTS vector;
-```
-
-Para experimentar a stack completa com `Apache AGE` (útil ao preparar a migração para nuvem nacional), use o `docker-compose` em [`infra/docker-compose.yml`](./infra/docker-compose.yml) **fora** do Replit — perfil `graph` (ver [`infra/README.md`](./infra/README.md)).
-
----
-
-## 5. Portas expostas
-
-| Porta interna | Porta externa | Serviço |
-| --- | --- | --- |
-| 3000 | 80 (HTTPS público) | Next.js (frontend) |
-| 8000 | 8000 | FastAPI (backend) |
-
-O PostgreSQL é serviço **gerenciado pelo Replit** — o app conecta pela URL injetada em Secrets (`DATABASE_URL`), por isso 5432 não aparece como `localPort` no [`.replit`](./.replit). Para dev local fora do Replit, suba o Postgres via [`infra/docker-compose.yml`](./infra/docker-compose.yml).
-
----
-
-## 6. Always On (piloto)
-
-Os agentes do módulo 1 (ingestão) e 2 (cruzamento) operarão **24/7** quando implementados. Para o piloto:
-
-1. Vá em **Repl Settings → Always On** e ative.
-2. Configure scheduled tasks dentro do FastAPI (APScheduler).
-3. Para produção real, **migrar para AWS/Azure Brasil** — o Replit não tem certificação LGPD adequada para dados fiscais em produção.
-
----
-
-## 7. Troubleshooting
-
-| Sintoma | Provável causa | Solução |
-| --- | --- | --- |
-| `pnpm: command not found` | Nix não rebuildado | Stop Repl → Run novamente (rebuilda o ambiente) |
-| `uv: command not found` | `replit.nix` não foi rebuildado | Idem |
-| `Postgres: connection refused` | Serviço Postgres do Replit não iniciou | Reabra a aba **Database** no Replit |
-| `pgvector: extension does not exist` | Extensão não instalada | Rodar `CREATE EXTENSION vector` no Postgres |
-| Next.js 504 no `localhost:3000` | API caiu | `pnpm api:dev` para reiniciar só a API |
-| Logs misturados no console | Workflow paralelo | Use **Shell** separado: `pnpm web:dev` em um e `pnpm api:dev` em outro |
-
----
-
-## 8. Deploy (piloto/demo)
-
-A seção `[deployment]` do [`.replit`](./.replit) roda **build de produção**: `pnpm build` + `uv sync` no build, e `next start` + `uvicorn` (sem `--reload`) no run. Nunca use os dev servers em deployment.
-
-> **Atenção LGPD:** dados fiscais reais exigem **localização nacional** dos dados. Replit hospeda em US; para produção, migrar para **AWS São Paulo**, **Azure Brazil South** ou nuvem do TCE/SC. Replit Deployments é adequado apenas para a fase de piloto.
-
-Veja [`docs/adr/0001-stack-inicial.md`](./docs/adr/0001-stack-inicial.md) e [`docs/adr/0002-database-mvp-replit.md`](./docs/adr/0002-database-mvp-replit.md) para o registro dessas decisões.
-
----
-
-## 9. Quem mantém este arquivo
-
-Atualize quando:
-
-- Mudar o `replit.nix` ou os `modules` do `.replit`
-- Mudar portas no `.replit`
-- Adicionar workflow novo
-- Trocar provedor de banco no Replit
+- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details

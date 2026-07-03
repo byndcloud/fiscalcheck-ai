@@ -1,0 +1,85 @@
+run = "pnpm dev"
+entrypoint = "README.md"
+modules = ["nodejs-22", "python-3.12", "postgresql-16"]
+
+hidden = [".pnpm-store", "node_modules", ".venv", ".uv", ".next", "dist", "__pycache__"]
+
+[nix]
+channel = "stable-24_05"
+
+# Deploy: Replit Deployments destina-se ao piloto/demo. Produção real
+# vai para nuvem nacional (AWS São Paulo / Azure Brazil South / nuvem
+# TCE-SC) — ver ADR-0001. O deploy roda build de produção (Next.js
+# `next start` + uvicorn sem --reload), nunca os dev servers.
+[deployment]
+build = ["sh", "-c", "pnpm install --frozen-lockfile && pnpm build && cd apps/api && uv sync --frozen"]
+run = ["sh", "-c", "pnpm -r --parallel start"]
+deploymentTarget = "cloudrun"
+ignorePorts = false
+
+# Apenas as portas que o próprio Repl expõe são listadas aqui.
+# O Postgres do MVP é o serviço gerenciado do Replit (módulo
+# postgresql-16), acessado via DATABASE_URL — por isso 5432 não
+# aparece como localPort.
+
+[[ports]]
+localPort = 3000
+externalPort = 80
+description = "Next.js web (frontend do auditor)"
+
+[[ports]]
+localPort = 8000
+externalPort = 8000
+description = "FastAPI (backend / agentes IA)"
+
+[env]
+PYTHONUNBUFFERED = "1"
+PNPM_HOME = "/home/runner/.local/share/pnpm"
+PATH = "$PNPM_HOME:$PATH"
+
+[workflows]
+runButton = "Dev (web + api)"
+
+  [[workflows.workflow]]
+  name = "Dev (web + api)"
+  mode = "parallel"
+
+    [[workflows.workflow.tasks]]
+    task = "shell.exec"
+    args = "pnpm --filter @fiscalcheck/web dev"
+
+    [[workflows.workflow.tasks]]
+    task = "shell.exec"
+    args = "pnpm --filter @fiscalcheck/api dev"
+
+  [[workflows.workflow]]
+  name = "API only"
+  mode = "sequential"
+
+    [[workflows.workflow.tasks]]
+    task = "shell.exec"
+    args = "pnpm --filter @fiscalcheck/api dev"
+
+  [[workflows.workflow]]
+  name = "Web only"
+  mode = "sequential"
+
+    [[workflows.workflow.tasks]]
+    task = "shell.exec"
+    args = "pnpm --filter @fiscalcheck/web dev"
+
+  [[workflows.workflow]]
+  name = "Tests (all)"
+  mode = "sequential"
+
+    [[workflows.workflow.tasks]]
+    task = "shell.exec"
+    args = "pnpm test"
+
+  [[workflows.workflow]]
+  name = "DB migrate"
+  mode = "sequential"
+
+    [[workflows.workflow.tasks]]
+    task = "shell.exec"
+    args = "pnpm --filter @fiscalcheck/api migrate"
