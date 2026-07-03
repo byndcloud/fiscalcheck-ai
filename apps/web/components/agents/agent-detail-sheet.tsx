@@ -35,7 +35,7 @@ export function AgentDetailSheet({ agent, onOpenChange }: AgentDetailSheetProps)
               </SheetDescription>
             </SheetHeader>
 
-            <div className="flex min-h-0 flex-1 flex-col gap-4 px-4 pb-4">
+            <div className="flex min-h-0 flex-1 flex-col gap-4">
               <p className="text-sm text-muted-foreground">{agent.descricao}</p>
 
               <div className="flex items-center gap-2 rounded-md bg-n-25 px-3 py-2">
