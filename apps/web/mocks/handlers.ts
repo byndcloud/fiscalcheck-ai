@@ -10,6 +10,7 @@ import {
   CaseDocumentSchema,
   type Caso,
   CasoSchema,
+  ComunicacaoSchema,
   ContribuinteSchema,
   DecisionRequestSchema,
   DivergenciaSchema,
@@ -32,6 +33,7 @@ import { auditLogFixture } from "./fixtures/audit-log";
 import { caseDecisionsFixture } from "./fixtures/case-decisions";
 import { caseDocumentsFixture } from "./fixtures/case-documents";
 import { casosFixture } from "./fixtures/casos";
+import { comunicacoesFixture } from "./fixtures/comunicacoes";
 import { contribuintesFixture } from "./fixtures/contribuintes";
 import { divergenciasFixture } from "./fixtures/divergencias";
 import { KPIsAnalyticsSchema, kpisFixture } from "./fixtures/kpis";
@@ -313,6 +315,22 @@ export const handlers = [
         notificacao: notificacaoEmitida,
       },
     );
+  }),
+
+  // Módulo 4 — Central de Notificações Eletrônicas (T15)
+  http.get(`${API_URL}/communications`, () =>
+    respondValidated(z.array(ComunicacaoSchema), comunicacoesFixture),
+  ),
+  http.get(`${API_URL}/communications/:id`, ({ params }) => {
+    const { id } = params as { id: string };
+    const found = comunicacoesFixture.find((c) => c.id === id);
+    if (!found) {
+      return HttpResponse.json(
+        { error_code: "communication_not_found", message: "Comunicação não encontrada." },
+        { status: 404 },
+      );
+    }
+    return respondValidated(ComunicacaoSchema, found);
   }),
 
   // Portal do cidadão — subconjunto dos casos

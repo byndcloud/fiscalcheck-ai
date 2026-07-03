@@ -104,6 +104,21 @@ export {
 } from "./schemas/notificacao";
 
 export {
+  CanalComunicacaoSchema,
+  ComunicacaoSchema,
+  DestinatarioSchema,
+  EventoProbatorioSchema,
+  StatusComunicacaoSchema,
+  TipoEventoProbatorioSchema,
+  type CanalComunicacao,
+  type Comunicacao,
+  type Destinatario,
+  type EventoProbatorio,
+  type StatusComunicacao,
+  type TipoEventoProbatorio,
+} from "./schemas/comunicacao";
+
+export {
   AgenteSchema,
   StatusAgenteSchema,
   TipoAgenteSchema,

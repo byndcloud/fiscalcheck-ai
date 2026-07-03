@@ -9,7 +9,11 @@ import { useSession } from "@/stores/session-store";
 
 /*
   Guard client-side (MVP mock). Se não houver `role`, volta ao /login.
-  Cidadão que caia em rota do dashboard vai automaticamente para /citizen.
+  Segrega perfis:
+   - `cidadao` só pode ver /citizen → qualquer outra rota redireciona.
+   - Perfis auditoriais (auditor/supervisor/admin) NÃO acessam /citizen
+     — se caírem lá manualmente, voltam para /dashboard. Isso é
+     defense-in-depth: o sidebar já esconde o item, mas o guard reforça.
   T03 substituirá pelo middleware NextAuth real.
 */
 export default function DashboardLayout({
@@ -28,6 +32,10 @@ export default function DashboardLayout({
     }
     if (role === "cidadao" && pathname !== "/citizen") {
       router.replace("/citizen");
+      return;
+    }
+    if (role !== "cidadao" && pathname === "/citizen") {
+      router.replace("/dashboard");
     }
   }, [role, pathname, router]);
 
