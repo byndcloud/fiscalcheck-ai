@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
   - Legenda "Human-in-the-loop" reforça que o auditor decide (AGENTS §1.1).
   - 3 CTAs: Aprovar (aurora), Ajustar (secondary), Rejeitar (ghost + tom
     destrutivo) — nenhuma decisão sai daqui sem passar pelo ApprovalModal
-    com step-up MFA.
+    (revisão explícita ou justificativa obrigatória).
 */
 
 type Props = {

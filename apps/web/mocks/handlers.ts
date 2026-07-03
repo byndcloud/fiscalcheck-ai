@@ -181,16 +181,13 @@ export const handlers = [
     const bodyRaw = await request.json().catch(() => ({}));
     const parsed = DecisionRequestSchema.safeParse(bodyRaw);
     if (!parsed.success) {
-      const mfaIssue = parsed.error.issues.find((issue) => issue.path[0] === "mfaCode");
       return HttpResponse.json(
         {
-          error_code: mfaIssue ? "mfa_required" : "invalid_decision_body",
-          message: mfaIssue
-            ? "Passe o step-up MFA para registrar a decisão."
-            : "Corpo da decisão inválido.",
+          error_code: "invalid_decision_body",
+          message: "Corpo da decisão inválido.",
           issues: parsed.error.issues,
         },
-        { status: mfaIssue ? 401 : 400 },
+        { status: 400 },
       );
     }
     const idx = casosMutable.findIndex((c) => c.id === id);
@@ -258,7 +255,6 @@ export const handlers = [
       atorId,
       atorNome,
       atorPapel,
-      mfaVerified: true,
       correlationId,
       timestamp: now.toISOString(),
       justificativa: parsed.data.justificativa ?? parsed.data.observacoes,

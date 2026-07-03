@@ -1,4 +1,4 @@
-import { CheckCircle2Icon, PencilIcon, ShieldCheckIcon, XCircleIcon } from "lucide-react";
+import { CheckCircle2Icon, PencilIcon, XCircleIcon } from "lucide-react";
 
 import type { CaseDecision, DecisionAction, Role } from "@fiscalcheck/shared-types";
 
@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 /*
   Linha da cadeia decisória (T13). Renderizada dentro do dossiê em uma
   `ol` — ordem descendente por timestamp. Estrutura imutável: quem, quando,
-  o quê, transição de status, justificativa, MFA validado.
+  o quê, transição de status e justificativa.
 */
 
 type Props = {
@@ -80,14 +80,6 @@ export function DecisionChainEntry({ decision }: Props) {
             →
           </span>
           <StatusBadge kind="status" status={decision.statusPosterior} />
-          {decision.mfaVerified ? (
-            <span
-              className="inline-flex items-center gap-1 rounded-full border border-brand-200 bg-brand-050 px-2 py-0.5 text-[10px] font-medium text-brand"
-              title="Step-up MFA validado"
-            >
-              <ShieldCheckIcon aria-hidden className="size-3" /> MFA verificado
-            </span>
-          ) : null}
         </div>
         {decision.justificativa ? (
           <p className="text-xs italic text-muted-foreground">

@@ -9,10 +9,9 @@ import { RoleSchema } from "./role";
   apenas empilha novas entradas.
 
   T13 exige: quem (atorId/Nome/Papel), quando (timestamp), o quê (action
-  + status anterior/posterior + justificativa). `mfaVerified` sinaliza
-  que o step-up MFA foi validado antes da mutação — quando T26 chegar,
-  o campo passa a ser preenchido pelo motor real de MFA (não pelo
-  cliente).
+  + status anterior/posterior + justificativa). A defesa contra
+  usurpação de sessão fica a cargo do módulo de autenticação (fora do
+  escopo deste POC).
 */
 
 export const DecisionActionSchema = z.enum(["aprovar", "rejeitar", "ajustar"]);
@@ -25,7 +24,6 @@ export const CaseDecisionSchema = z.object({
   atorId: z.string().min(1),
   atorNome: z.string().min(1),
   atorPapel: RoleSchema,
-  mfaVerified: z.boolean(),
   correlationId: z.string().min(1),
   timestamp: z.string(),
   justificativa: z.string().optional(),
@@ -43,7 +41,6 @@ export type CaseDecision = z.infer<typeof CaseDecisionSchema>;
 export const DecisionRequestSchema = z
   .object({
     action: DecisionActionSchema,
-    mfaCode: z.string().regex(/^\d{6}$/u, "MFA deve conter 6 dígitos numéricos."),
     justificativa: z.string().min(20).optional(),
     observacoes: z.string().optional(),
   })

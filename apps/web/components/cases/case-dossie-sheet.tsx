@@ -68,7 +68,6 @@ type DecisionResponse = {
 
 type DecisionRequestBody = {
   action: DecisionAction;
-  mfaCode: string;
   justificativa?: string;
   observacoes?: string;
 };
@@ -156,8 +155,8 @@ export function CaseDossieSheet({ casoId, casos, taxpayerById, open, onOpenChang
     },
     onError: (error) => {
       const message =
-        error instanceof ApiError && error.code === "mfa_required"
-          ? "MFA inválido — informe os 6 dígitos numéricos."
+        error instanceof ApiError
+          ? error.message
           : error instanceof Error
             ? error.message
             : "Falha ao registrar decisão.";

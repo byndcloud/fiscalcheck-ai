@@ -14,7 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
@@ -22,8 +21,6 @@ import { cn } from "@/lib/utils";
   Modal único de decisão (T13) — cobre `aprovar | ajustar | rejeitar`.
 
   Regras:
-  - Step-up MFA obrigatório: 6 dígitos numéricos (mock leve — T26 troca
-    pela implementação real, mesma interface).
   - `aprovar` exige checkbox "revisei as evidências".
   - `rejeitar` exige `justificativa` (>= 20 caracteres).
   - `ajustar` aceita observações opcionais.
@@ -32,7 +29,6 @@ import { cn } from "@/lib/utils";
 
 type Payload = {
   action: DecisionAction;
-  mfaCode: string;
   justificativa?: string;
   observacoes?: string;
 };
@@ -53,7 +49,7 @@ const HEADLINE: Record<DecisionAction, string> = {
 
 const HELPER: Record<DecisionAction, string> = {
   aprovar:
-    "Aprovar move o caso para a próxima fase e, quando aplicável, emite o termo correspondente. Toda ação sobre o contribuinte exige MFA.",
+    "Aprovar move o caso para a próxima fase e, quando aplicável, emite o termo correspondente. A decisão fica registrada de forma imutável na cadeia decisória.",
   rejeitar:
     "Rejeitar devolve o caso para análise (ou encerra se estava em triagem). Informe uma justificativa para a cadeia decisória.",
   ajustar:
@@ -74,20 +70,17 @@ const CONFIRM_VARIANT: Record<DecisionAction, "aurora" | "destructive" | "defaul
 
 export function ApprovalModal({ action, caso, submitting, onCancel, onConfirm }: Props) {
   const open = action !== null;
-  const [mfaCode, setMfaCode] = useState("");
   const [justificativa, setJustificativa] = useState("");
   const [observacoes, setObservacoes] = useState("");
   const [reviewed, setReviewed] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const mfaFieldId = useId();
   const justificativaFieldId = useId();
   const observacoesFieldId = useId();
   const reviewedFieldId = useId();
 
   useEffect(() => {
     if (!open) return;
-    setMfaCode("");
     setJustificativa("");
     setObservacoes("");
     setReviewed(false);
@@ -98,10 +91,6 @@ export function ApprovalModal({ action, caso, submitting, onCancel, onConfirm }:
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!/^\d{6}$/u.test(mfaCode)) {
-      setError("Informe os 6 dígitos do MFA.");
-      return;
-    }
     if (action === "aprovar" && !reviewed) {
       setError("Confirme que revisou as evidências antes de aprovar.");
       return;
@@ -113,7 +102,6 @@ export function ApprovalModal({ action, caso, submitting, onCancel, onConfirm }:
     setError(null);
     await onConfirm({
       action,
-      mfaCode,
       justificativa: action === "rejeitar" ? justificativa.trim() : undefined,
       observacoes: action === "ajustar" ? observacoes.trim() || undefined : undefined,
     });
@@ -124,7 +112,7 @@ export function ApprovalModal({ action, caso, submitting, onCancel, onConfirm }:
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand">
-            <ShieldCheckIcon aria-hidden className="size-3.5" /> Step-up MFA obrigatório
+            <ShieldCheckIcon aria-hidden className="size-3.5" /> Decisão auditável
           </span>
           <DialogTitle>{HEADLINE[action]}</DialogTitle>
           <DialogDescription>
@@ -134,27 +122,6 @@ export function ApprovalModal({ action, caso, submitting, onCancel, onConfirm }:
         </DialogHeader>
 
         <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor={mfaFieldId}>Código MFA</Label>
-            <Input
-              id={mfaFieldId}
-              type="text"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              maxLength={6}
-              pattern="\\d{6}"
-              placeholder="000000"
-              value={mfaCode}
-              onChange={(event) => setMfaCode(event.target.value.replace(/\D/gu, ""))}
-              aria-describedby={`${mfaFieldId}-help`}
-              className="font-mono tracking-widest"
-              required
-            />
-            <p id={`${mfaFieldId}-help`} className="text-xs text-muted-foreground">
-              Simulação POC: qualquer 6 dígitos numéricos validam o step-up.
-            </p>
-          </div>
-
           {action === "rejeitar" ? (
             <div className="flex flex-col gap-1.5">
               <Label htmlFor={justificativaFieldId}>Justificativa da rejeição</Label>
