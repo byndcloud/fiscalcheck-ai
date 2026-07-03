@@ -188,14 +188,14 @@ Documentação detalhada em [`docs/compliance/`](./docs/compliance/).
 
 ## Documentação
 
-- [AGENTS.md](./AGENTS.md) — instruções para coding agents (frontend, backend, QA, security)
+- [AGENTS.md](./AGENTS.md) — instruções para coding agents (skills ativas: `frontend`, `backend`)
 - [CLAUDE.md](./CLAUDE.md) — específico para Claude Code / Replit Agent
 - [replit.md](./replit.md) — guia de execução no Replit
 - [CONTRIBUTING.md](./CONTRIBUTING.md) — fluxo de contribuição
 - [docs/architecture/](./docs/architecture/) — visão arquitetural e modelo de dados
 - [docs/adr/](./docs/adr/) — Architecture Decision Records
 - [docs/modules/](./docs/modules/) — especificações dos 7 módulos
-- [docs/compliance/](./docs/compliance/) — LGPD, sigilo fiscal, templates
+- [docs/compliance/](./docs/compliance/) — LGPD, sigilo fiscal, retenção e resposta a incidente (resumo consolidado do MVP)
 - [docs/design-system/](./docs/design-system/) — design system (a popular)
 
 ---

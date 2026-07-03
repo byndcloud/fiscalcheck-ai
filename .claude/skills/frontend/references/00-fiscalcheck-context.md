@@ -1,6 +1,6 @@
 # 00 — Contexto FiscalCheck AI (leitura obrigatória)
 
-> **Esta é a primeira referência da skill `frontend`.** Leia antes de qualquer outra referência (`01-component-patterns.md`, `06-design-tokens.md`, etc.). As demais são genéricas — este arquivo as restringe ao projeto.
+> **Esta é a referência oficial da skill `frontend` deste projeto.** Consulte-a antes de qualquer recomendação genérica que o agente traga da própria base — as regras deste arquivo têm precedência. As demais references da skill (genéricas, do template Cursor) foram removidas na simplificação MVP; se voltarem, siga a mesma hierarquia.
 
 ---
 
@@ -19,7 +19,7 @@ Não há decisão de stack a tomar. **Não introduza** alternativas sem ADR.
 | Forms | **react-hook-form** + **zod** + **@hookform/resolvers** |
 | Ícones | **lucide-react** |
 | Cliente HTTP | [`apps/web/lib/api-client.ts`](../../../../apps/web/lib/api-client.ts) — propaga `X-Correlation-Id` em toda chamada |
-| Tipos do backend | `@fiscalcheck/shared-types` (gerados do OpenAPI; **não editar à mão**) |
+| Tipos do backend | `@fiscalcheck/shared-types` — **tipos manuais no MVP** (`src/index.ts` + `schemas/*.ts` Zod); geração via OpenAPI volta quando o backend expuser as rotas reais (ver [`AGENTS.md` §4.1](../../../../AGENTS.md)) |
 | Lint/format | **Biome** (config em [`packages/biome-config/biome.json`](../../../../packages/biome-config/biome.json)) — `indentStyle: space, indentWidth: 2` |
 | Testes | **Vitest** + **@testing-library/react** + **jsdom** ([`vitest.config.ts`](../../../../apps/web/vitest.config.ts)) |
 
@@ -29,9 +29,9 @@ Path alias: `@/*` aponta para `apps/web/`. Use `import { ... } from "@/component
 
 A spec completa está em [`docs/design-system/design-system.md`](../../../../docs/design-system/design-system.md). Os tokens vivem em [`apps/web/app/globals.css`](../../../../apps/web/app/globals.css) (`:root` e `.dark`) e estão expostos como utilitários Tailwind via `@theme inline`.
 
-### 2.1 Sobre as recomendações genéricas em `01-component-patterns.md`
+### 2.1 Tipografia — regra dura do projeto
 
-A skill genérica diz "nunca use Inter/Roboto/Arial como escolha primária". **Aqui é diferente:**
+Recomendações genéricas (do template da skill ou de outras fontes) sobre "usar Inter/Roboto/Arial como escolha primária" **não valem aqui**. O DS v2.0 fixa três famílias:
 
 - **Raleway** (Google Fonts, 400–800) é a face canônica de UI — títulos, corpo, labels e botões. Utility Tailwind: `font-sans`.
 - **Montserrat** (Google Fonts, 600–800) é a face de *display numérico* — KPIs (25/700), score do medidor (48/800), valor hero (35/800), valor secundário (19–22/700), métricas de rede. Utility Tailwind: `font-display`.

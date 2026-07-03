@@ -9,7 +9,7 @@ Obrigado pelo interesse. Este projeto trata dados fiscais sensíveis e tem requi
 1. Leia [`AGENTS.md`](./AGENTS.md) — princípios não-negociáveis (human-in-the-loop, LGPD, RBAC, idioma).
 2. Leia o [`README.md`](./README.md) para entender a stack e rodar o projeto.
 3. Veja o [`docs/architecture/overview.md`](./docs/architecture/overview.md) para a visão arquitetural.
-4. Se sua mudança afeta dados de contribuintes, leia também [`docs/compliance/lgpd.md`](./docs/compliance/lgpd.md).
+4. Se sua mudança afeta dados de contribuintes, leia também o resumo consolidado em [`docs/compliance/README.md`](./docs/compliance/README.md) (LGPD, sigilo do art. 198 do CTN, retenção, resposta a incidente).
 
 ---
 

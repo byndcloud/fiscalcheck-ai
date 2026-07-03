@@ -63,7 +63,7 @@ Mapa módulo → pasta também em [`AGENTS.md` §2.2](../../../../AGENTS.md).
 | Grafo | **NetworkX in-memory** no MVP (ver [`ADR-0002`](../../../../docs/adr/0002-database-mvp-replit.md)); AGE em fase 2 |
 | ML clássico | **scikit-learn** | `modules/ai/` |
 | Logging | **structlog** estruturado JSON | [`core/logging.py`](../../../../apps/api/src/fiscalcheck_api/core/logging.py) |
-| Auth | bcrypt (passlib) + JWT (python-jose) + pyotp (MFA) | [`core/security.py`](../../../../apps/api/src/fiscalcheck_api/core/security.py) |
+| Auth | **bcrypt** (direto) + **PyJWT** — MFA (pyotp) volta com o módulo 6 | [`core/security.py`](../../../../apps/api/src/fiscalcheck_api/core/security.py) |
 | Lint/format | **Ruff** ([`ruff.toml`](../../../../apps/api/ruff.toml)) — regras `E,W,F,I,B,C4,UP,N,S,A,DTZ,EM,PIE,PL,RUF,SIM,TID,TCH` |
 | Type-check | **Pyright** standard mode |
 | Testes | **pytest** + `pytest-asyncio` (modo `auto`) + `httpx.AsyncClient` |

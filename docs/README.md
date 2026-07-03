@@ -16,7 +16,7 @@
 
 - Começando no projeto: leia [`../README.md`](../README.md) e [`../AGENTS.md`](../AGENTS.md).
 - Decisões arquiteturais: comece pelo ADR-0001 em [`adr/0001-stack-inicial.md`](./adr/0001-stack-inicial.md).
-- Conformidade: comece por [`compliance/lgpd.md`](./compliance/lgpd.md) e [`compliance/sigilo-fiscal-art-198-ctn.md`](./compliance/sigilo-fiscal-art-198-ctn.md).
+- Conformidade: comece pelo resumo consolidado em [`compliance/README.md`](./compliance/README.md) (LGPD, sigilo fiscal do art. 198 do CTN, retenção e resposta a incidente).
 - Cada módulo do edital tem seu doc em [`modules/`](./modules/).
 
 ## Convenções de docs

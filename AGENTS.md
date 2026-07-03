@@ -44,7 +44,7 @@ Monorepo `pnpm`:
 
 ```text
 apps/web    → Next.js 15 (App Router) + TS + Tailwind v4 + shadcn/ui
-apps/api    → FastAPI + Python 3.12 + LangGraph + Polars + SQLAlchemy
+apps/api    → FastAPI + Python 3.12 + SQLAlchemy 2.0 (LangGraph/Polars/scikit-learn entram com os módulos que os usam — ver ADR-0001)
 packages/*  → tipos TS compartilhados, configs Biome/TS
 docs/       → arquitetura, ADRs, compliance, módulos, design system
 infra/      → docker-compose para dev local
