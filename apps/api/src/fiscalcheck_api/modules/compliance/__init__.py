@@ -14,5 +14,7 @@ Responsabilidades:
   a incidente ≤ 24h, preferência por localização nacional.
 - Estrita observância ao art. 198 do CTN (sigilo fiscal).
 
-NÃO MODIFICAR sem revisão da skill `security-auditor`.
+NÃO MODIFICAR sem revisão humana com foco em segurança/LGPD
+(ver [`docs/compliance/README.md`](../../../../../docs/compliance/README.md)
+e [`AGENTS.md`](../../../../../AGENTS.md) §1.2).
 """
