@@ -77,7 +77,7 @@ export default function DashboardPage() {
           <p className="text-[13px] font-semibold text-[#54607a]">
             Painel Gerencial · Exercício 2026 · Piloto Brusque
           </p>
-          <h1 className="mt-1 font-display text-3xl font-extrabold tracking-[-0.02em] text-[#121826]">
+          <h1 className="mt-1 font-display text-3xl font-semibold tracking-[-0.02em] text-[#121826]">
             Visão geral da arrecadação
           </h1>
         </div>
