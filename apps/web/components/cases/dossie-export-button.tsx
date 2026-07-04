@@ -120,13 +120,22 @@ export function DossieExportButton({
       queryClient.invalidateQueries({ queryKey: ["compliance", "audit-log-v2"] });
     } catch (error) {
       toast.dismiss(dismissPending);
+      /*
+        Log completo no console para diagnóstico — o stack do
+        @react-pdf costuma ter a causa raiz (font/image/pdfkit) que
+        o toast trunca.
+      */
+      console.error("[T28] Falha ao exportar o dossiê:", error);
       const message =
         error instanceof ApiError
-          ? error.message
+          ? `${error.message} (${error.code})`
           : error instanceof Error
-            ? error.message
+            ? `${error.name}: ${error.message}`
             : "Falha ao exportar o dossiê.";
-      toast.error("Não foi possível gerar o PDF", { description: message });
+      toast.error("Não foi possível gerar o PDF", {
+        description: `${message} · Abra o console (F12) para o traceback completo.`,
+        duration: 8000,
+      });
     } finally {
       setGenerating(false);
     }

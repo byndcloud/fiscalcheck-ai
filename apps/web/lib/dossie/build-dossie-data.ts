@@ -46,6 +46,14 @@ export type DossieAuditor = {
 export type DossieData = {
   emittedAt: string;
   correlationId: string;
+  /*
+    Número da peça processual (PEC-<ano>-<seq>). Derivado de forma
+    determinística do id do caso + ano de emissão para permanecer
+    estável entre exportações — ainda que a assinatura oficial (com
+    protocolo real) fique a cargo do sistema de processo eletrônico
+    da Prefeitura, o número acima segue a peça em toda a auditoria.
+  */
+  numeroPeca: string;
   auditor: DossieAuditor;
   caso: Caso;
   contribuinte: Contribuinte | null;
@@ -95,6 +103,28 @@ const DECISION_ACTION_LABEL: Record<CaseDecision["action"], string> = {
 
 export function roleToLabel(role: string): string {
   return ROLE_LABEL[role] ?? role;
+}
+
+/*
+  Deriva o número da peça processual a partir do id do caso e do ano
+  de emissão. Determinístico (mesmo caso → mesmo número num dado ano)
+  e livre de dependências externas — o protocolo real fica com o
+  sistema de processo eletrônico da Prefeitura, este número serve de
+  referência interna do FiscalCheck AI para localizar a peça.
+
+  Formato: PEC-<ano>-<sequencial 6 dígitos>
+  Sequencial: hash simples djb2 dos caracteres do id do caso, módulo
+  1.000.000. Garante distribuição razoável sem colisões prováveis no
+  volume de casos previsto para o MVP.
+*/
+export function derivePecaProcessualNumber(casoId: string, emittedAt: Date): string {
+  const ano = emittedAt.getFullYear();
+  let hash = 5381;
+  for (let i = 0; i < casoId.length; i++) {
+    hash = (hash * 33) ^ casoId.charCodeAt(i);
+  }
+  const seq = Math.abs(hash) % 1_000_000;
+  return `PEC-${ano}-${seq.toString().padStart(6, "0")}`;
 }
 
 function buildTimeline(
@@ -155,6 +185,7 @@ export function buildDossieData(input: BuildDossieDataInput): DossieData {
   return {
     emittedAt: now.toISOString(),
     correlationId: input.correlationId,
+    numeroPeca: derivePecaProcessualNumber(input.caso.id, now),
     auditor: input.auditor,
     caso: input.caso,
     contribuinte: input.contribuinte,

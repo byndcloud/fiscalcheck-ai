@@ -35,6 +35,14 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   typedRoutes: true,
   allowedDevOrigins: replitDevOrigins,
+  /*
+    T28 (dossiê PDF): `@react-pdf/renderer` é uma lib Node-first
+    (usa `fs`, `zlib`, `stream` etc.). Isolamos ela em SSR aqui
+    para o Next não tentar pré-empacotar; no cliente, o import é
+    dinâmico dentro de `lib/dossie/export-dossie.tsx`, então a lib
+    só carrega quando o auditor clica em "Exportar PDF".
+  */
+  serverExternalPackages: ["@react-pdf/renderer"],
   async headers() {
     return [
       {

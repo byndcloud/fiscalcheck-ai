@@ -1,4 +1,4 @@
-import { Document, Font, Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import { Document, Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 
 import type { CaseDocument, Divergencia, NFSe, NivelRisco } from "@fiscalcheck/shared-types";
 
@@ -11,67 +11,20 @@ import type { DossieData } from "./build-dossie-data";
 
   Convenções obrigatórias:
   - Toda página carrega cabeçalho institucional + rodapé com correlation
-    id + marca d'água "AMBIENTE DE DEMONSTRAÇÃO" (art. 198 CTN veda uso
-    fora de demonstração).
+    id (art. 198 CTN — a peça é sob sigilo fiscal).
   - CNPJ e CPF já chegam mascarados do schema — nunca desmascarar aqui.
-  - Cores/tipografia espelham o DS v2.0 (docs/design-system).
+  - Cores espelham o DS v2.0 (docs/design-system).
+  - Tipografia: usamos as fontes internas do @react-pdf (Helvetica /
+    Courier) intencionalmente — evita fetch de Google Fonts em runtime
+    (bloqueado por CORS/AV em muitos ambientes corporativos e a causa
+    mais frequente de crash da geração). As famílias do DS
+    (Raleway/Montserrat) ficam reservadas para a UI web.
   - Componente é PURO: mesmo `DossieData` gera mesmo PDF byte-a-byte.
 */
 
-/*
-  Registro de fontes — feito uma vez por sessão. O `@react-pdf/renderer`
-  cacheia internamente; se o browser estiver offline, o motor faz
-  fallback para Helvetica sem quebrar o build (o PDF ainda é gerado,
-  só perde a identidade tipográfica).
-*/
-let fontsRegistered = false;
-export function ensureFontsRegistered(): void {
-  if (fontsRegistered) return;
-  fontsRegistered = true;
-  try {
-    Font.register({
-      family: "Raleway",
-      fonts: [
-        { src: "https://fonts.gstatic.com/s/raleway/v29/1Ptug8zYS_SKggPNyC0IT4ttDfA.ttf" },
-        {
-          src: "https://fonts.gstatic.com/s/raleway/v29/1Ptrg8zYS_SKggPNyCg4TYFq.ttf",
-          fontWeight: 600,
-        },
-        {
-          src: "https://fonts.gstatic.com/s/raleway/v29/1Ptrg8zYS_SKggPNyCAIT4Fq.ttf",
-          fontWeight: 700,
-        },
-      ],
-    });
-    Font.register({
-      family: "Montserrat",
-      fonts: [
-        {
-          src: "https://fonts.gstatic.com/s/montserrat/v25/JTUSjIg1_i6t8kCHKm459WlhyyTh89Y.ttf",
-          fontWeight: 600,
-        },
-        {
-          src: "https://fonts.gstatic.com/s/montserrat/v25/JTUSjIg1_i6t8kCHKm459WdhyyTh89Y.ttf",
-          fontWeight: 700,
-        },
-      ],
-    });
-    Font.register({
-      family: "Roboto Mono",
-      fonts: [
-        {
-          src: "https://fonts.gstatic.com/s/robotomono/v22/L0xuDF4xlVMF-BfR8bXMIhJHg45mwgGE.ttf",
-        },
-        {
-          src: "https://fonts.gstatic.com/s/robotomono/v22/L0xuDF4xlVMF-BfR8bXMIjHOg45mwgHE.ttf",
-          fontWeight: 700,
-        },
-      ],
-    });
-  } catch {
-    /* offline ou registro duplicado; segue com fallback do motor */
-  }
-}
+const FONT_SANS = "Helvetica";
+const FONT_SANS_BOLD = "Helvetica-Bold";
+const FONT_MONO = "Courier";
 
 const DS_COLORS = {
   brand: "#1351B4",
@@ -90,7 +43,6 @@ const DS_COLORS = {
   riskMedio: "#F2A900",
   riskAlto: "#E8590C",
   riskCritico: "#C5160B",
-  watermark: "#C5160B",
 };
 
 const RISK_COLOR: Record<NivelRisco, string> = {
@@ -188,10 +140,10 @@ function formatDateOnlyBR(iso: string): string {
 
 const styles = StyleSheet.create({
   page: {
-    paddingTop: 96,
-    paddingBottom: 60,
+    paddingTop: 108,
+    paddingBottom: 82,
     paddingHorizontal: 40,
-    fontFamily: "Raleway",
+    fontFamily: FONT_SANS,
     fontSize: 9.5,
     color: DS_COLORS.textStrong,
     lineHeight: 1.4,
@@ -204,7 +156,7 @@ const styles = StyleSheet.create({
     right: 40,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-end",
     borderBottomWidth: 1,
     borderBottomColor: DS_COLORS.border,
     paddingBottom: 8,
@@ -219,73 +171,74 @@ const styles = StyleSheet.create({
   headerAgency: {
     fontSize: 8.5,
     color: DS_COLORS.textStrong,
-    fontWeight: 700,
-    fontFamily: "Raleway",
+    fontFamily: FONT_SANS_BOLD,
   },
   headerSubtitle: {
     fontSize: 7.5,
     color: DS_COLORS.textMuted,
   },
-  demoBadge: {
+  headerPeca: {
     marginTop: 4,
-    fontSize: 6.5,
-    letterSpacing: 1.4,
-    color: DS_COLORS.watermark,
-    borderWidth: 1,
-    borderColor: DS_COLORS.watermark,
     paddingVertical: 2,
     paddingHorizontal: 6,
-    fontWeight: 700,
+    borderRadius: 2,
+    backgroundColor: DS_COLORS.brandTint,
+    color: DS_COLORS.brandDark,
+    fontSize: 7.5,
+    fontFamily: FONT_MONO,
+    letterSpacing: 0.4,
   },
   footer: {
     position: "absolute",
     bottom: 20,
     left: 40,
     right: 40,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     borderTopWidth: 1,
     borderTopColor: DS_COLORS.border,
     paddingTop: 6,
+  },
+  footerInstitutional: {
+    fontSize: 6.5,
+    color: DS_COLORS.textMuted,
+    marginBottom: 4,
+    textAlign: "center",
+    lineHeight: 1.35,
+  },
+  footerMeta: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     fontSize: 7,
     color: DS_COLORS.textMuted,
   },
   footerCorrelation: {
-    fontFamily: "Roboto Mono",
+    fontFamily: FONT_MONO,
     color: DS_COLORS.textStrong,
-  },
-  watermark: {
-    position: "absolute",
-    top: 340,
-    left: -30,
-    right: -30,
-    textAlign: "center",
-    fontSize: 62,
-    fontWeight: 700,
-    color: DS_COLORS.watermark,
-    opacity: 0.08,
-    transform: "rotate(-24deg)",
-    letterSpacing: 6,
   },
   h1: {
     fontSize: 20,
-    fontWeight: 700,
+    fontFamily: FONT_SANS_BOLD,
     color: DS_COLORS.brandDark,
-    marginBottom: 4,
+    marginBottom: 8,
+    lineHeight: 1.3,
   },
   eyebrow: {
     fontSize: 8,
     letterSpacing: 1.4,
     color: DS_COLORS.textMuted,
-    fontWeight: 700,
+    fontFamily: FONT_SANS_BOLD,
     textTransform: "uppercase",
-    marginBottom: 4,
+    marginBottom: 6,
   },
   intro: {
     fontSize: 10,
     color: DS_COLORS.textMuted,
-    marginBottom: 12,
+    marginBottom: 16,
+    lineHeight: 1.7,
+  },
+  introStrong: {
+    fontFamily: FONT_SANS_BOLD,
+    color: DS_COLORS.textStrong,
   },
   section: {
     marginTop: 14,
@@ -297,7 +250,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 9,
-    fontWeight: 700,
+    fontFamily: FONT_SANS_BOLD,
     color: DS_COLORS.brand,
     textTransform: "uppercase",
     letterSpacing: 1,
@@ -325,7 +278,7 @@ const styles = StyleSheet.create({
     color: DS_COLORS.textStrong,
   },
   mono: {
-    fontFamily: "Roboto Mono",
+    fontFamily: FONT_MONO,
     color: DS_COLORS.textStrong,
   },
   bannerSigilo: {
@@ -338,7 +291,7 @@ const styles = StyleSheet.create({
   },
   bannerSigiloTitle: {
     fontSize: 9,
-    fontWeight: 700,
+    fontFamily: FONT_SANS_BOLD,
     color: DS_COLORS.warningText,
     marginBottom: 4,
     textTransform: "uppercase",
@@ -354,9 +307,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   scoreValue: {
-    fontFamily: "Montserrat",
+    fontFamily: FONT_SANS_BOLD,
     fontSize: 40,
-    fontWeight: 700,
     color: DS_COLORS.textStrong,
     marginRight: 12,
   },
@@ -372,7 +324,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 2,
     fontSize: 8,
-    fontWeight: 700,
+    fontFamily: FONT_SANS_BOLD,
     color: "#FFFFFF",
     alignSelf: "flex-start",
   },
@@ -395,7 +347,7 @@ const styles = StyleSheet.create({
   tableHead: {
     backgroundColor: DS_COLORS.n25,
     fontSize: 8,
-    fontWeight: 700,
+    fontFamily: FONT_SANS_BOLD,
     color: DS_COLORS.textMuted,
     textTransform: "uppercase",
     letterSpacing: 0.6,
@@ -407,7 +359,7 @@ const styles = StyleSheet.create({
   },
   chipSeveridade: {
     fontSize: 8,
-    fontWeight: 700,
+    fontFamily: FONT_SANS_BOLD,
     color: "#FFFFFF",
     paddingVertical: 1,
     paddingHorizontal: 5,
@@ -432,7 +384,7 @@ const styles = StyleSheet.create({
   },
   divTitle: {
     fontSize: 10,
-    fontWeight: 700,
+    fontFamily: FONT_SANS_BOLD,
     color: DS_COLORS.textStrong,
   },
   divMeta: {
@@ -446,9 +398,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   divValor: {
-    fontFamily: "Montserrat",
+    fontFamily: FONT_SANS_BOLD,
     fontSize: 11,
-    fontWeight: 700,
     color: DS_COLORS.textStrong,
   },
   totalRow: {
@@ -462,15 +413,14 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     fontSize: 9,
-    fontWeight: 700,
+    fontFamily: FONT_SANS_BOLD,
     color: DS_COLORS.textMuted,
     textTransform: "uppercase",
     letterSpacing: 0.6,
   },
   totalValue: {
-    fontFamily: "Montserrat",
+    fontFamily: FONT_SANS_BOLD,
     fontSize: 14,
-    fontWeight: 700,
     color: DS_COLORS.brandDark,
   },
   timelineItem: {
@@ -480,14 +430,14 @@ const styles = StyleSheet.create({
     borderLeftColor: DS_COLORS.brand,
   },
   timelineWhen: {
-    fontFamily: "Roboto Mono",
+    fontFamily: FONT_MONO,
     fontSize: 8,
     color: DS_COLORS.textMuted,
     marginBottom: 2,
   },
   timelineTitle: {
     fontSize: 10,
-    fontWeight: 700,
+    fontFamily: FONT_SANS_BOLD,
     color: DS_COLORS.textStrong,
   },
   timelineSubtitle: {
@@ -502,7 +452,7 @@ const styles = StyleSheet.create({
   },
   recomendacaoTitle: {
     fontSize: 11,
-    fontWeight: 700,
+    fontFamily: FONT_SANS_BOLD,
     color: DS_COLORS.brandDark,
     marginBottom: 3,
   },
@@ -527,34 +477,108 @@ const styles = StyleSheet.create({
     color: DS_COLORS.textMuted,
     fontStyle: "italic",
   },
+  signatureBox: {
+    marginTop: 18,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: DS_COLORS.border,
+    borderRadius: 4,
+    backgroundColor: DS_COLORS.n25,
+  },
+  signatureHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 8,
+  },
+  signatureTitle: {
+    fontSize: 9,
+    fontFamily: FONT_SANS_BOLD,
+    color: DS_COLORS.brand,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  signatureSeal: {
+    borderWidth: 1,
+    borderColor: DS_COLORS.brand,
+    borderRadius: 2,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    fontSize: 7,
+    fontFamily: FONT_SANS_BOLD,
+    color: DS_COLORS.brand,
+    letterSpacing: 0.6,
+  },
+  signatureLine: {
+    borderTopWidth: 1,
+    borderTopColor: DS_COLORS.textStrong,
+    marginTop: 32,
+    paddingTop: 4,
+  },
+  signatureName: {
+    fontSize: 10,
+    fontFamily: FONT_SANS_BOLD,
+    color: DS_COLORS.textStrong,
+  },
+  signatureRole: {
+    fontSize: 8.5,
+    color: DS_COLORS.textMuted,
+  },
+  signatureMeta: {
+    fontSize: 7.5,
+    color: DS_COLORS.textMuted,
+    marginTop: 8,
+    lineHeight: 1.5,
+  },
 });
 
+/*
+  Dados institucionais da Secretaria da Fazenda de Brusque impressos
+  no rodapé de todas as páginas. Mantidos como constantes locais para
+  facilitar a mudança futura (basta editar aqui). Fontes:
+  https://www.brusque.sc.gov.br/portal-municipal/secretarias/fazenda
+*/
+const ORGAO_NOME = "Prefeitura Municipal de Brusque · Secretaria da Fazenda";
+const ORGAO_ENDERECO = "Praça das Bandeiras, 77 · Centro · Brusque/SC · CEP 88350-110";
+const ORGAO_CONTATO = "fazenda@brusque.sc.gov.br · (47) 3211-7000";
+
 type PageChromeProps = {
-  logoSrc: string;
+  logoSrc: string | null;
   emittedAt: string;
   correlationId: string;
+  numeroPeca: string;
 };
 
-function PageChrome({ logoSrc, emittedAt, correlationId }: PageChromeProps) {
+function PageChrome({ logoSrc, emittedAt, correlationId, numeroPeca }: PageChromeProps) {
   return (
     <>
       <View style={styles.header} fixed>
-        <Image src={logoSrc} style={styles.headerLogo} />
+        {logoSrc ? (
+          <Image src={logoSrc} style={styles.headerLogo} />
+        ) : (
+          <Text style={{ fontFamily: FONT_SANS_BOLD, fontSize: 12, color: DS_COLORS.brand }}>
+            FiscalCheck AI
+          </Text>
+        )}
         <View style={styles.headerRight}>
           <Text style={styles.headerAgency}>
             Prefeitura Municipal de Brusque · Secretaria da Fazenda
           </Text>
           <Text style={styles.headerSubtitle}>FiscalCheck AI — Instrução do Caso</Text>
-          <Text style={styles.demoBadge}>AMBIENTE DE DEMONSTRAÇÃO</Text>
+          <Text style={styles.headerPeca}>Peça nº {numeroPeca}</Text>
         </View>
       </View>
-      <Text style={styles.watermark} fixed>
-        AMBIENTE DE DEMONSTRAÇÃO
-      </Text>
       <View style={styles.footer} fixed>
-        <Text>Emitido em {formatDateBR(emittedAt)}</Text>
-        <Text style={styles.footerCorrelation}>cid {correlationId}</Text>
-        <Text render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
+        <Text style={styles.footerInstitutional}>
+          {ORGAO_NOME}
+          {"\n"}
+          {ORGAO_ENDERECO} · {ORGAO_CONTATO}
+        </Text>
+        <View style={styles.footerMeta}>
+          <Text>Emitido em {formatDateBR(emittedAt)}</Text>
+          <Text style={styles.footerCorrelation}>cid {correlationId}</Text>
+          <Text render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
+        </View>
       </View>
     </>
   );
@@ -822,12 +846,17 @@ function DecisaoAuditorBlock({ decisions }: { decisions: DossieData["decisions"]
 
 type DossiePdfDocumentProps = {
   data: DossieData;
-  logoSrc: string;
+  /*
+    O logo é passado JÁ COMO data URL (base64) para evitar que o motor
+    do @react-pdf tente fazer fetch do asset em runtime — em ambientes
+    corporativos esse fetch pode falhar por CORS/AV e derrubar toda a
+    geração do PDF. Se o carregamento do logo falhar antes de chegar
+    aqui, passamos `null` e o header renderiza um placeholder textual.
+  */
+  logoSrc: string | null;
 };
 
 export function DossiePdfDocument({ data, logoSrc }: DossiePdfDocumentProps) {
-  ensureFontsRegistered();
-
   const {
     caso,
     contribuinte,
@@ -841,14 +870,15 @@ export function DossiePdfDocument({ data, logoSrc }: DossiePdfDocumentProps) {
     auditor,
     emittedAt,
     correlationId,
+    numeroPeca,
   } = data;
 
-  const chromeProps: PageChromeProps = { logoSrc, emittedAt, correlationId };
+  const chromeProps: PageChromeProps = { logoSrc, emittedAt, correlationId, numeroPeca };
 
   return (
     <Document
-      title={`Instrução do Caso ${caso.id.toUpperCase()}`}
-      author="FiscalCheck AI"
+      title={`Peça ${numeroPeca} — Instrução do Caso ${caso.id.toUpperCase()}`}
+      author={auditor.displayName}
       subject="Peça processual de instrução do caso fiscal"
       creator="FiscalCheck AI"
       producer="FiscalCheck AI"
@@ -856,14 +886,14 @@ export function DossiePdfDocument({ data, logoSrc }: DossiePdfDocumentProps) {
       <Page size="A4" style={styles.page}>
         <PageChrome {...chromeProps} />
 
-        <Text style={styles.eyebrow}>Peça processual · Módulo 4</Text>
+        <Text style={styles.eyebrow}>
+          Peça processual {numeroPeca} · Módulo 4 · Gestão da fiscalização
+        </Text>
         <Text style={styles.h1}>Instrução do Caso {caso.id.toUpperCase()}</Text>
         <Text style={styles.intro}>
-          Documento gerado por{" "}
-          <Text style={{ fontWeight: 700, color: DS_COLORS.textStrong }}>
-            {auditor.displayName}
-          </Text>{" "}
-          ({auditor.role}) para servir como peça anexável à ação fiscal.
+          Peça <Text style={styles.introStrong}>{numeroPeca}</Text> emitida por{" "}
+          <Text style={styles.introStrong}>{auditor.displayName}</Text> ({auditor.role}) para servir
+          como documento anexável à ação fiscal instaurada pela Secretaria da Fazenda de Brusque/SC.
         </Text>
 
         <SigiloBanner />
@@ -959,23 +989,45 @@ export function DossiePdfDocument({ data, logoSrc }: DossiePdfDocumentProps) {
                 <Text style={[styles.eyebrow, { marginTop: 8 }]}>
                   Quadro societário (CPF mascarado)
                 </Text>
-                {contribuinte.socios.map((s, idx) => (
-                  <View
-                    key={`${s.nome}-${idx}`}
-                    style={[
-                      styles.socioRow,
-                      idx === (contribuinte.socios?.length ?? 0) - 1
-                        ? { borderBottomWidth: 0 }
-                        : {},
-                    ]}
-                    wrap={false}
-                  >
-                    <Text style={styles.metaValue}>{s.nome}</Text>
-                    <Text style={[styles.metaValue, styles.mono]}>
-                      {s.cpfMascarado} · {s.participacao}%
-                    </Text>
+                <View style={styles.table}>
+                  <View style={[styles.tableRow, styles.tableHead]}>
+                    <Text style={[styles.tableCell, { width: "28%" }]}>Sócio</Text>
+                    <Text style={[styles.tableCell, { width: "20%" }]}>CPF</Text>
+                    <Text style={[styles.tableCell, { width: "28%" }]}>Qualificação</Text>
+                    <Text style={[styles.tableCell, { width: "14%" }]}>Sócio desde</Text>
+                    <Text style={[styles.tableCell, { width: "10%", textAlign: "right" }]}>%</Text>
                   </View>
-                ))}
+                  {contribuinte.socios.map((s, idx) => (
+                    <View
+                      key={`${s.nome}-${idx}`}
+                      style={[
+                        styles.tableRow,
+                        idx === (contribuinte.socios?.length ?? 0) - 1 ? styles.tableRowLast : {},
+                      ]}
+                      wrap={false}
+                    >
+                      <Text style={[styles.tableCell, { width: "28%" }]}>{s.nome}</Text>
+                      <Text style={[styles.tableCell, styles.mono, { width: "20%" }]}>
+                        {s.cpfMascarado}
+                      </Text>
+                      <Text style={[styles.tableCell, { width: "28%", fontSize: 8.5 }]}>
+                        {s.qualificacao ?? "—"}
+                      </Text>
+                      <Text style={[styles.tableCell, styles.mono, { width: "14%", fontSize: 8 }]}>
+                        {s.entradaEm ? formatDateOnlyBR(s.entradaEm) : "—"}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.tableCell,
+                          styles.mono,
+                          { width: "10%", textAlign: "right" },
+                        ]}
+                      >
+                        {s.participacao}%
+                      </Text>
+                    </View>
+                  ))}
+                </View>
               </>
             ) : null}
           </View>
@@ -1074,13 +1126,38 @@ export function DossiePdfDocument({ data, logoSrc }: DossiePdfDocumentProps) {
           )}
         </View>
 
-        <View style={{ marginTop: 20 }} wrap={false}>
+        <View style={styles.signatureBox} wrap={false}>
+          <View style={styles.signatureHeader}>
+            <Text style={styles.signatureTitle}>10 · Assinatura eletrônica do auditor</Text>
+            <Text style={styles.signatureSeal}>ASSINADO ELETRONICAMENTE</Text>
+          </View>
+          <Text style={{ fontSize: 8.5, color: DS_COLORS.textMuted }}>
+            Documento assinado eletronicamente por{" "}
+            <Text style={{ fontFamily: FONT_SANS_BOLD, color: DS_COLORS.textStrong }}>
+              {auditor.displayName}
+            </Text>{" "}
+            ({auditor.role}), em {formatDateBR(emittedAt)}, com base em autenticação MFA registrada
+            na sessão do FiscalCheck AI.
+          </Text>
+          <View style={styles.signatureLine}>
+            <Text style={styles.signatureName}>{auditor.displayName}</Text>
+            <Text style={styles.signatureRole}>{auditor.role} · Matrícula funcional interna</Text>
+          </View>
+          <Text style={styles.signatureMeta}>
+            Verificação de integridade: a autenticidade desta peça pode ser conferida na trilha de
+            auditoria do FiscalCheck AI (módulo 6 · T19) pelo correlation id{" "}
+            <Text style={styles.mono}>{correlationId}</Text>. Peça nº{" "}
+            <Text style={styles.mono}>{numeroPeca}</Text>.{"\n"}
+            Qualquer alteração posterior invalida a assinatura acima.
+          </Text>
+        </View>
+
+        <View style={{ marginTop: 14 }} wrap={false}>
           <Text style={styles.eyebrow}>Certificação da exportação</Text>
           <Text style={{ fontSize: 8.5, color: DS_COLORS.textMuted }}>
-            Esta peça foi gerada em ambiente de demonstração do FiscalCheck AI e registrada na
-            trilha de auditoria (T19) com o correlation id{" "}
+            Esta peça foi registrada na trilha de auditoria (T19) com o correlation id{" "}
             <Text style={styles.mono}>{correlationId}</Text> no mesmo instante da geração deste
-            documento. O uso oficial requer emissão pelo módulo homologado.
+            documento, permitindo verificar autenticidade contra o registro auditável do sistema.
           </Text>
         </View>
       </Page>

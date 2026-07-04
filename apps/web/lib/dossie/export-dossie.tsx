@@ -40,6 +40,30 @@ function timestampSlug(): string {
   return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`;
 }
 
+/*
+  Baixa o logo local e devolve como data URL. Fazemos isso ANTES de
+  renderizar o PDF para o motor do @react-pdf não precisar fazer o
+  próprio fetch em runtime (o fetch interno da lib estoura em
+  ambientes com AV/proxy corporativo — causa mais comum de crash da
+  geração). Se falhar, devolvemos `null` e o header do PDF cai em um
+  fallback textual sem quebrar o export.
+*/
+async function loadLogoAsDataUrl(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return await new Promise<string | null>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : null);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
+
 async function generatePdfBlob({
   data,
   logoSrc,
@@ -57,13 +81,19 @@ async function generatePdfBlob({
     import("./pdf-document"),
   ]);
 
-  const instance = pdf(<DossiePdfDocument data={data} logoSrc={logoSrc} />);
+  const logoDataUrl = await loadLogoAsDataUrl(logoSrc);
+  const instance = pdf(<DossiePdfDocument data={data} logoSrc={logoDataUrl} />);
   return await instance.toBlob();
 }
 
 export async function exportDossieToPdf(input: ExportDossieInput): Promise<ExportDossieResult> {
   const { data, caseId, logoSrc, actor } = input;
-  const filename = `dossie-${caseId.toLowerCase()}-${timestampSlug()}.pdf`;
+  /*
+    Nome do arquivo prioriza o número da peça (PEC-YYYY-XXXXXX) —
+    facilita a organização em pastas oficiais. Ainda incluímos o id
+    do caso + timestamp para desambiguar reexportações do mesmo caso.
+  */
+  const filename = `${data.numeroPeca}-${caseId.toLowerCase()}-${timestampSlug()}.pdf`;
 
   const blob = await generatePdfBlob({ data, logoSrc });
   downloadBlob(filename, blob);
