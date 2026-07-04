@@ -179,7 +179,7 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
           width={40}
           height={40}
           priority
-          className="size-10 shrink-0 rounded-[10px] shadow-[0_4px_12px_rgba(25,211,232,0.30)]"
+          className="size-10 shrink-0 drop-shadow-[0_4px_10px_rgba(25,211,232,0.35)]"
         />
         <div className="grid leading-none">
           <span className="font-display text-[16px] font-extrabold tracking-[-0.2px]">

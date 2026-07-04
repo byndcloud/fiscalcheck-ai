@@ -8,10 +8,7 @@ import { z } from "zod";
   cadeia de custódia.
 */
 
-export const CaseDocumentKindSchema = z.enum([
-  "termo_intimacao",
-  "termo_inicio_fiscalizacao",
-]);
+export const CaseDocumentKindSchema = z.enum(["termo_intimacao", "termo_inicio_fiscalizacao"]);
 export type CaseDocumentKind = z.infer<typeof CaseDocumentKindSchema>;
 
 export const CaseDocumentSchema = z.object({

@@ -150,3 +150,9 @@ exports/
 .fleet/
 *.tgz
 *.tar.gz
+
+# ============================================================
+# Previews locais gerados por scripts/make-logo-transparent.py
+# (composições sobre fundos claros/escuros para validar assets)
+# ============================================================
+apps/web/public/brand/.preview-*.png

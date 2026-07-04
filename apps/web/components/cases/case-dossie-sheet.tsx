@@ -19,11 +19,15 @@ import type {
   Caso,
   Contribuinte,
   DecisionAction,
+  Divergencia,
+  NFSe,
+  Score,
 } from "@fiscalcheck/shared-types";
 
 import { AgentRecommendationBadge } from "@/components/cases/agent-recommendation-badge";
 import { ApprovalModal } from "@/components/cases/approval-modal";
 import { DecisionChainEntry } from "@/components/cases/decision-chain-entry";
+import { DossieExportButton } from "@/components/cases/dossie-export-button";
 import { NextActionPanel } from "@/components/cases/next-action-panel";
 import { Button } from "@/components/ui/button";
 import {
@@ -126,6 +130,54 @@ export function CaseDossieSheet({ casoId, casos, taxpayerById, open, onOpenChang
     queryFn: () => apiRequest<CaseDocument[]>(`/cases/${casoId}/documents`),
   });
 
+  /*
+    Dados extras que o T13 não consumia mas o dossiê exportado em PDF
+    (T28) precisa: score completo com fatores XAI, divergências com
+    descrição/valor e NFS-e de origem. Cacheamos por 5 min pois são
+    consultas globais que raramente mudam durante o uso do dossiê.
+  */
+  const scores = useQuery({
+    queryKey: ["scores"],
+    queryFn: () => apiRequest<Score[]>("/ai/scores"),
+    enabled: open,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const divergences = useQuery({
+    queryKey: ["divergences"],
+    queryFn: () => apiRequest<Divergencia[]>("/crossing/divergences"),
+    enabled: open,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const nfse = useQuery({
+    queryKey: ["nfse"],
+    queryFn: () => apiRequest<NFSe[]>("/nfse"),
+    enabled: open,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  /*
+    Fatias específicas para o export do dossiê (T28). Isoladas com
+    `useMemo` para permanecerem estáveis por render e evitar
+    recomputar `divergenciasDoCaso` a cada mudança de estado
+    interno do sheet (ex.: abertura de modais aninhados).
+  */
+  const scoresData = scores.data;
+  const divergencesData = divergences.data;
+  const scoreDoContribuinte = useMemo(() => {
+    if (!caso) return null;
+    return scoresData?.find((s) => s.contribuinteId === caso.contribuinteId) ?? null;
+  }, [caso, scoresData]);
+
+  const divergenciasDoCaso = useMemo(() => {
+    if (!caso) return [];
+    const ids = new Set(caso.divergenciaIds);
+    return divergencesData?.filter((d) => ids.has(d.id)) ?? [];
+  }, [caso, divergencesData]);
+
+  const nfseFullList = nfse.data ?? [];
+
   const decision = useMutation({
     mutationFn: async (payload: DecisionRequestBody) => {
       if (!casoId) throw new Error("Caso não selecionado.");
@@ -185,11 +237,23 @@ export function CaseDossieSheet({ casoId, casos, taxpayerById, open, onOpenChang
         >
           <div className="flex flex-col gap-5 p-6">
             <SheetHeader className="gap-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="font-mono text-xs uppercase text-muted-foreground">
-                  {caso.id.toUpperCase()}
-                </span>
-                {caso.agenteResponsavel ? <AgentRecommendationBadge /> : null}
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-mono text-xs uppercase text-muted-foreground">
+                    {caso.id.toUpperCase()}
+                  </span>
+                  {caso.agenteResponsavel ? <AgentRecommendationBadge /> : null}
+                </div>
+                <DossieExportButton
+                  caso={caso}
+                  contribuinte={taxpayer ?? null}
+                  score={scoreDoContribuinte}
+                  divergencias={divergenciasDoCaso}
+                  evidencias={nfseFullList}
+                  decisions={decisions.data ?? []}
+                  documents={documents.data ?? []}
+                  disabled={decisions.isLoading || documents.isLoading}
+                />
               </div>
               <SheetTitle>{taxpayer?.razaoSocial ?? `Caso ${caso.contribuinteId}`}</SheetTitle>
               <SheetDescription>
@@ -454,8 +518,8 @@ export function CaseDossieSheet({ casoId, casos, taxpayerById, open, onOpenChang
                 {viewingDocument.conteudo}
               </pre>
               <p className="text-[10px] text-muted-foreground">
-                Documento em modo de demonstração — versão final é gerada em PDF pelo módulo de
-                emissão oficial (fora deste POC).
+                Documento em modo de demonstração. Para a peça processual consolidada, use
+                &ldquo;Exportar PDF&rdquo; no cabeçalho do dossiê (T28).
               </p>
             </div>
           ) : null}

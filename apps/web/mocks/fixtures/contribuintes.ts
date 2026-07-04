@@ -22,8 +22,20 @@ export const contribuintesFixture: Contribuinte[] = [
     uf: "SC",
     endereco: "Rua Fictícia, 123 — Centro",
     socios: [
-      { nome: "Marina G.", cpfMascarado: "***.***.***-11", participacao: 60 },
-      { nome: "Ricardo T.", cpfMascarado: "***.***.***-22", participacao: 40 },
+      {
+        nome: "Marina G.",
+        cpfMascarado: "***.***.***-11",
+        participacao: 60,
+        qualificacao: "Administradora",
+        entradaEm: "2018-03-14",
+      },
+      {
+        nome: "Ricardo T.",
+        cpfMascarado: "***.***.***-22",
+        participacao: 40,
+        qualificacao: "Sócio-quotista",
+        entradaEm: "2018-03-14",
+      },
     ],
   },
   {
@@ -37,7 +49,15 @@ export const contribuintesFixture: Contribuinte[] = [
     atividadePrincipal: "13.30-8 · Fabricação de tecidos de malha",
     municipio: "Brusque",
     uf: "SC",
-    socios: [{ nome: "Ana P.", cpfMascarado: "***.***.***-33", participacao: 100 }],
+    socios: [
+      {
+        nome: "Ana P.",
+        cpfMascarado: "***.***.***-33",
+        participacao: 100,
+        qualificacao: "Sócia-administradora",
+        entradaEm: "2020-07-01",
+      },
+    ],
   },
   {
     id: "ct-003",
@@ -51,8 +71,20 @@ export const contribuintesFixture: Contribuinte[] = [
     municipio: "Brusque",
     uf: "SC",
     socios: [
-      { nome: "Bruno S.", cpfMascarado: "***.***.***-44", participacao: 55 },
-      { nome: "Camila V.", cpfMascarado: "***.***.***-55", participacao: 45 },
+      {
+        nome: "Bruno S.",
+        cpfMascarado: "***.***.***-44",
+        participacao: 55,
+        qualificacao: "Diretor-presidente",
+        entradaEm: "2015-11-22",
+      },
+      {
+        nome: "Camila V.",
+        cpfMascarado: "***.***.***-55",
+        participacao: 45,
+        qualificacao: "Diretora financeira",
+        entradaEm: "2015-11-22",
+      },
     ],
   },
   {
@@ -79,8 +111,20 @@ export const contribuintesFixture: Contribuinte[] = [
     municipio: "Brusque",
     uf: "SC",
     socios: [
-      { nome: "Diego R.", cpfMascarado: "***.***.***-66", participacao: 80 },
-      { nome: "Elisa M.", cpfMascarado: "***.***.***-77", participacao: 20 },
+      {
+        nome: "Diego R.",
+        cpfMascarado: "***.***.***-66",
+        participacao: 80,
+        qualificacao: "Sócio-administrador",
+        entradaEm: "2012-05-08",
+      },
+      {
+        nome: "Elisa M.",
+        cpfMascarado: "***.***.***-77",
+        participacao: 20,
+        qualificacao: "Sócia-quotista",
+        entradaEm: "2019-02-11",
+      },
     ],
   },
   {
@@ -96,8 +140,20 @@ export const contribuintesFixture: Contribuinte[] = [
     uf: "SC",
     endereco: "Rod. Antônio Heil, km 4 — Distrito Industrial",
     socios: [
-      { nome: "Fábio L.", cpfMascarado: "***.***.***-88", participacao: 50 },
-      { nome: "Giovana R.", cpfMascarado: "***.***.***-99", participacao: 50 },
+      {
+        nome: "Fábio L.",
+        cpfMascarado: "***.***.***-88",
+        participacao: 50,
+        qualificacao: "Administrador",
+        entradaEm: "2010-01-15",
+      },
+      {
+        nome: "Giovana R.",
+        cpfMascarado: "***.***.***-99",
+        participacao: 50,
+        qualificacao: "Administradora",
+        entradaEm: "2010-01-15",
+      },
     ],
   },
   {
@@ -149,8 +205,20 @@ export const contribuintesFixture: Contribuinte[] = [
     municipio: "Brusque",
     uf: "SC",
     socios: [
-      { nome: "Henrique F.", cpfMascarado: "***.***.***-10", participacao: 70 },
-      { nome: "Isabela D.", cpfMascarado: "***.***.***-20", participacao: 30 },
+      {
+        nome: "Henrique F.",
+        cpfMascarado: "***.***.***-10",
+        participacao: 70,
+        qualificacao: "Sócio-administrador",
+        entradaEm: "2016-09-01",
+      },
+      {
+        nome: "Isabela D.",
+        cpfMascarado: "***.***.***-20",
+        participacao: 30,
+        qualificacao: "Sócia-quotista",
+        entradaEm: "2021-04-12",
+      },
     ],
   },
   {

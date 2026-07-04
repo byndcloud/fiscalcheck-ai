@@ -21,6 +21,17 @@ export const SocioSchema = z.object({
   nome: z.string(),
   cpfMascarado: z.string(),
   participacao: z.number().min(0).max(100),
+  /*
+    Qualificação societária conforme QSA da Receita Federal
+    (ex.: "Administrador", "Sócio-quotista", "Diretor", "Presidente").
+    Campo opcional para não quebrar fixtures existentes.
+  */
+  qualificacao: z.string().optional(),
+  /*
+    Data de entrada no quadro societário (ISO 8601, apenas data).
+    Útil para PDFs/relatórios que precisam identificar sócios recentes.
+  */
+  entradaEm: z.string().optional(),
 });
 export type Socio = z.infer<typeof SocioSchema>;
 

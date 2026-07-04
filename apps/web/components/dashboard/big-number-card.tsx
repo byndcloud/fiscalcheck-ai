@@ -116,7 +116,7 @@ export function BigNumberCard({ kpi, icon: Icon, accent, positive = true }: BigN
         </span>
       </header>
 
-      <p className="font-display text-[28px] font-extrabold leading-none tracking-[-0.02em] text-[#121826]">
+      <p className="font-display text-[28px] font-semibold leading-none tracking-[-0.02em] text-[#121826]">
         {value}
       </p>
 
