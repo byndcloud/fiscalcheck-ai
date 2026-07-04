@@ -36,13 +36,19 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
   allowedDevOrigins: replitDevOrigins,
   /*
-    T28 (dossiê PDF): `@react-pdf/renderer` é uma lib Node-first
-    (usa `fs`, `zlib`, `stream` etc.). Isolamos ela em SSR aqui
-    para o Next não tentar pré-empacotar; no cliente, o import é
-    dinâmico dentro de `lib/dossie/export-dossie.tsx`, então a lib
-    só carrega quando o auditor clica em "Exportar PDF".
+    Libs Node-first isoladas em SSR (o Next não tenta pré-empacotar):
+
+    · `@react-pdf/renderer` (T28 dossiê e T17 relatórios) — usa
+      `fs`, `zlib`, `stream` etc. No cliente, o import é dinâmico
+      dentro de `lib/dossie/export-dossie.tsx` e `lib/reports/
+      generate-report.tsx`, então a lib só carrega quando o
+      auditor/gestor aciona a exportação.
+    · `xlsx` (T17 relatórios gerenciais) — SheetJS Community usa
+      APIs Node internamente; importada dinamicamente em
+      `lib/reports/build-xlsx.ts`. Isolar em SSR evita que o
+      Turbopack tente empacotá-la no bundle server.
   */
-  serverExternalPackages: ["@react-pdf/renderer"],
+  serverExternalPackages: ["@react-pdf/renderer", "xlsx"],
   async headers() {
     return [
       {

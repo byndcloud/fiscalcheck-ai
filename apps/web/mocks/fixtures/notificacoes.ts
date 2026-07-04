@@ -15,6 +15,7 @@ export const notificacoesFixture: Notificacao[] = [
     severidade: 5,
     criadoEm: "2026-06-29T09:20:00Z",
     lida: false,
+    origem: "manual",
   },
   {
     id: "nt-002",
@@ -26,6 +27,7 @@ export const notificacoesFixture: Notificacao[] = [
     severidade: 3,
     criadoEm: "2026-07-02T09:00:00Z",
     lida: false,
+    origem: "manual",
   },
   {
     id: "nt-003",
@@ -38,6 +40,7 @@ export const notificacoesFixture: Notificacao[] = [
     criadoEm: "2026-07-01T18:47:00Z",
     lida: true,
     lidaEm: "2026-07-02T08:12:00Z",
+    origem: "manual",
   },
   {
     id: "nt-004",
@@ -48,5 +51,7 @@ export const notificacoesFixture: Notificacao[] = [
     severidade: 4,
     criadoEm: "2026-07-02T12:00:00Z",
     lida: false,
+    origem: "auto_meta",
+    linkHref: "/analytics#metas",
   },
 ];
