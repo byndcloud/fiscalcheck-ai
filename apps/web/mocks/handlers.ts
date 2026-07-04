@@ -22,11 +22,17 @@ import {
   DivergenciaSchema,
   DossieExportRequestSchema,
   DossieExportResponseSchema,
+  type MetaPiloto,
+  MetaPilotoSchema,
   MonthlyRecoverySeriesSchema,
   NFSeSchema,
   type Notificacao,
   NotificacaoSchema,
   PanelKpisSchema,
+  PanelManagerKpisSchema,
+  PanelManagerPeriodoSchema,
+  RelatorioGerencialRequestSchema,
+  RelatorioGerencialResponseSchema,
   RiskDistributionSchema,
   type RiskModelChange,
   RiskModelChangeSchema,
@@ -38,12 +44,18 @@ import {
   RoleSchema,
   ScoreSchema,
   SmartAlertSchema,
+  type SusAvaliacao,
+  SusAvaliacaoSchema,
+  SusSubmitRequestSchema,
+  SusSubmitResponseSchema,
   type SystemUser,
   SystemUserSchema,
   UserCreateRequestSchema,
   UserUpdateRequestSchema,
 } from "@fiscalcheck/shared-types";
 
+import { refreshMeta } from "@/lib/analytics/meta-status";
+import { computeSusMedia, computeSusScore } from "@/lib/analytics/sus";
 import { nextStatus, shouldEmitDocument } from "@/lib/case-transitions";
 
 import { agentesFixture } from "./fixtures/agentes";
@@ -59,14 +71,17 @@ import { comunicacoesFixture } from "./fixtures/comunicacoes";
 import { contribuintesFixture } from "./fixtures/contribuintes";
 import { divergenciasFixture } from "./fixtures/divergencias";
 import { KPIsAnalyticsSchema, kpisFixture } from "./fixtures/kpis";
+import { metasPilotoFixture } from "./fixtures/metas-piloto";
 import { monthlyRecoveryFixture } from "./fixtures/monthly-recovery";
 import { nfseFixture } from "./fixtures/nfse";
 import { notificacoesFixture } from "./fixtures/notificacoes";
 import { panelKpisFixture } from "./fixtures/panel-kpis";
+import { buildPanelManagerKpisFixture } from "./fixtures/panel-manager-kpis";
 import { riskDistributionFixture } from "./fixtures/risk-distribution";
 import { riskModelConfigFixture, riskModelHistoryFixture } from "./fixtures/risk-model";
 import { scoresFixture } from "./fixtures/scores";
 import { smartAlertsFixture } from "./fixtures/smart-alerts";
+import { susAvaliacoesFixture } from "./fixtures/sus-avaliacoes";
 import { systemUsersFixture } from "./fixtures/system-users";
 
 /*
@@ -123,6 +138,61 @@ const systemUsersMutable: SystemUser[] = systemUsersFixture.map((u) => ({ ...u }
 
 let auditLogSeq = auditLogMutable.length + 100;
 let userSeq = systemUsersMutable.length + 100;
+
+/*
+  Estado in-memory do módulo 5 (T17 · Painel do Gestor). A meta de
+  usabilidade sofre mutação quando o auditor submete uma avaliação
+  SUS (o `atual` é recalculado como média); avaliações SUS são
+  append-only.
+
+  A regra "meta em risco" é aplicada em cada leitura das metas,
+  garantindo que uma queda repentina de `atual` gere notificação
+  automática no sino sem precisar de job em background — modelo POC.
+*/
+const metasMutable: MetaPiloto[] = metasPilotoFixture.map((m) => ({ ...m }));
+const susAvaliacoesMutable: SusAvaliacao[] = [...susAvaliacoesFixture];
+
+let susSeq = susAvaliacoesMutable.length + 1;
+const metasAlertadas = new Set<string>(
+  metasMutable.filter((m) => m.status === "em_risco" || m.status === "critico").map((m) => m.id),
+);
+
+function ensureMetaRiskNotifications(now: Date = new Date()): MetaPiloto[] {
+  const refreshed = metasMutable.map((m) => refreshMeta(m, now));
+  // Substitui in-place: `refreshed[i]` é garantido por construção do map,
+  // mas `noUncheckedIndexedAccess` obriga o narrowing explícito.
+  for (let i = 0; i < refreshed.length; i += 1) {
+    const next = refreshed[i];
+    if (next) metasMutable[i] = next;
+  }
+  for (const meta of refreshed) {
+    const inRisk = meta.status === "em_risco" || meta.status === "critico";
+    if (inRisk && !metasAlertadas.has(meta.id)) {
+      const severidade = meta.status === "critico" ? 5 : 4;
+      const titulo = `Meta em risco · ${meta.nome}`;
+      const corpo =
+        meta.status === "critico"
+          ? `${meta.nome} está com progresso crítico (${Math.round(meta.progressoPct * 100)}%) e prazo próximo. Ação urgente do gestor.`
+          : `${meta.nome} está em risco: progresso ${Math.round(meta.progressoPct * 100)}%. Revise o plano do piloto.`;
+      notificacoesMutable.unshift({
+        id: `nt-meta-${meta.id}-${now.getTime()}`,
+        tipo: "meta_risco",
+        titulo,
+        corpo,
+        metaId: meta.id,
+        severidade,
+        criadoEm: now.toISOString(),
+        lida: false,
+        origem: "auto_meta",
+        linkHref: "/analytics#metas",
+      });
+      metasAlertadas.add(meta.id);
+    } else if (!inRisk && metasAlertadas.has(meta.id)) {
+      metasAlertadas.delete(meta.id);
+    }
+  }
+  return refreshed;
+}
 
 function pushAudit(
   entry: Omit<AuditLogEntry, "id" | "correlationId"> & {
@@ -477,6 +547,7 @@ export const handlers = [
         severidade: parsed.data.action === "aprovar" ? 4 : 3,
         criadoEm: now.toISOString(),
         lida: false,
+        origem: "manual",
       };
       notificacoesMutable.unshift(notificacaoEmitida);
     }
@@ -597,6 +668,171 @@ export const handlers = [
   http.get(`${API_URL}/analytics/alerts`, () =>
     respondValidated(z.array(SmartAlertSchema), smartAlertsFixture),
   ),
+
+  // Módulo 5 — Painel do Gestor (T17)
+  http.get(`${API_URL}/analytics/panel-manager-kpis`, ({ request }) => {
+    const url = new URL(request.url);
+    const periodoRaw = url.searchParams.get("periodo") ?? "30d";
+    const parsed = PanelManagerPeriodoSchema.safeParse(periodoRaw);
+    if (!parsed.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_periodo",
+          message: `Período inválido: '${periodoRaw}'. Use 30d, 90d, trimestre ou ano.`,
+        },
+        { status: 400 },
+      );
+    }
+    return respondValidated(PanelManagerKpisSchema, buildPanelManagerKpisFixture(parsed.data));
+  }),
+
+  http.get(`${API_URL}/analytics/metas`, () => {
+    const refreshed = ensureMetaRiskNotifications();
+    return respondValidated(z.array(MetaPilotoSchema), refreshed);
+  }),
+
+  http.post(`${API_URL}/analytics/metas/:id/sus`, async ({ params, request }) => {
+    const { id } = params as { id: string };
+    if (id !== "meta-usabilidade") {
+      return HttpResponse.json(
+        {
+          error_code: "meta_nao_aceita_sus",
+          message: "SUS só se aplica à meta de usabilidade.",
+        },
+        { status: 400 },
+      );
+    }
+
+    const bodyRaw = await request.json().catch(() => ({}));
+    const parsed = SusSubmitRequestSchema.safeParse(bodyRaw);
+    if (!parsed.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_sus_body",
+          message: "Respostas SUS inválidas.",
+          issues: parsed.error.issues,
+        },
+        { status: 400 },
+      );
+    }
+
+    let score: number;
+    try {
+      score = computeSusScore(parsed.data.respostas);
+    } catch (error) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_sus_answers",
+          message: error instanceof Error ? error.message : "Erro ao calcular SUS.",
+        },
+        { status: 400 },
+      );
+    }
+
+    const nomeHeader = request.headers.get("X-Actor-Name") ?? "Auditor sem identificação";
+    const idHeader = request.headers.get("X-Actor-Id") ?? "mock-anon";
+    const now = new Date();
+
+    const avaliacao: SusAvaliacao = {
+      id: `sus-${now.getFullYear()}-${String(susSeq).padStart(3, "0")}`,
+      respondidoPor: nomeHeader,
+      respondidoEm: now.toISOString(),
+      respostas: parsed.data.respostas,
+      score,
+      comentario: parsed.data.comentario,
+    };
+    susAvaliacoesMutable.unshift(avaliacao);
+    susSeq += 1;
+
+    // Recalcula a média SUS e atualiza a meta de usabilidade.
+    const novaMedia = computeSusMedia(susAvaliacoesMutable.map((s) => s.score));
+    const idx = metasMutable.findIndex((m) => m.id === "meta-usabilidade");
+    const currentMeta = idx >= 0 ? metasMutable[idx] : undefined;
+    if (currentMeta) {
+      const refreshed = refreshMeta(
+        { ...currentMeta, atual: novaMedia, atualizadoEm: now.toISOString() },
+        now,
+      );
+      metasMutable[idx] = refreshed;
+    }
+    ensureMetaRiskNotifications(now);
+
+    pushAudit({
+      timestamp: now.toISOString(),
+      action: "meta.sus.registrada",
+      actorId: idHeader,
+      actorName: nomeHeader,
+      actorRole: "auditor",
+      ipAddress: "10.20.30.11",
+      resource: "meta:usabilidade",
+      result: "sucesso",
+      atypical: false,
+      details: `Avaliação SUS registrada com score ${score}. Nova média: ${novaMedia}.`,
+    });
+
+    return respondValidated(SusSubmitResponseSchema, {
+      avaliacao,
+      novaMetaAtual: novaMedia,
+    });
+  }),
+
+  http.get(`${API_URL}/analytics/sus`, () =>
+    respondValidated(z.array(SusAvaliacaoSchema), susAvaliacoesMutable),
+  ),
+
+  http.post(`${API_URL}/analytics/reports/generate`, async ({ request }) => {
+    const roleHeader = request.headers.get("X-Actor-Role");
+    const roleParsed = RoleSchema.safeParse(roleHeader);
+    const atorPapel: Role = roleParsed.success ? roleParsed.data : "supervisor";
+    if (atorPapel !== "supervisor" && atorPapel !== "admin") {
+      return HttpResponse.json(
+        {
+          error_code: "forbidden_role",
+          message: "Apenas Gestor e Administrador podem gerar relatórios gerenciais.",
+        },
+        { status: 403 },
+      );
+    }
+
+    const bodyRaw = await request.json().catch(() => ({}));
+    const parsed = RelatorioGerencialRequestSchema.safeParse(bodyRaw);
+    if (!parsed.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_report_body",
+          message: "Parâmetros do relatório inválidos.",
+          issues: parsed.error.issues,
+        },
+        { status: 400 },
+      );
+    }
+
+    const nomeHeader = request.headers.get("X-Actor-Name") ?? ROLE_DISPLAY[atorPapel];
+    const idHeader = request.headers.get("X-Actor-Id") ?? `mock-${atorPapel}`;
+    const now = new Date();
+    const nomeArquivo = `${parsed.data.tipo}-${parsed.data.periodo.inicio.slice(0, 10)}-${parsed.data.periodo.fim.slice(0, 10)}.${parsed.data.formato}`;
+
+    pushAudit({
+      timestamp: now.toISOString(),
+      action: "relatorio.gerencial.gerado",
+      actorId: idHeader,
+      actorName: nomeHeader,
+      actorRole: atorPapel,
+      ipAddress: "10.20.30.11",
+      resource: `relatorio:${parsed.data.tipo}`,
+      result: "sucesso",
+      atypical: false,
+      correlationId: parsed.data.correlationId,
+      details: `Relatório de ${parsed.data.tipo} (${parsed.data.formato.toUpperCase()}) para o período ${parsed.data.periodo.inicio} → ${parsed.data.periodo.fim}. Seções: ${parsed.data.secoes.join(", ")}.`,
+    });
+
+    return respondValidated(RelatorioGerencialResponseSchema, {
+      filename: nomeArquivo,
+      correlationId: parsed.data.correlationId,
+      bytesMock: 4_096,
+      emitidoEm: now.toISOString(),
+    });
+  }),
 
   // Módulo 6 — Governança (contrato legado — minimal)
   http.get(`${API_URL}/compliance/audit-log`, () =>

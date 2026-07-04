@@ -41,7 +41,7 @@ app/                                    # rotas (App Router)
 │   ├── ai                              # módulo 3 (scores + agentes)
 │   ├── cases                           # módulo 4 — fila, dossiê, workflow (T13)
 │   ├── citizen                         # portal do cidadão
-│   ├── analytics                       # módulo 5
+│   ├── analytics                       # módulo 5 — Painel do Gestor (T17: KPIs, metas, SUS, relatórios)
 │   ├── comunicacoes                    # central de notificações eletrônicas (T15)
 │   ├── esteira-de-agentes              # painel da esteira de agentes (T10)
 │   ├── modelo-de-risco                 # config do modelo de risco (T02)
@@ -53,6 +53,7 @@ app/                                    # rotas (App Router)
 ├── page.tsx                            # redirect → /login
 └── globals.css                         # Tailwind v4 + tokens DS
 components/
+├── analytics/                          # Painel do Gestor: KPI trend, sparkline, metas, SUS, relatórios (T17)
 ├── app-shell/                          # sidebar, header, banner, sino de notificações
 ├── auth/                               # AuthLayout, InstitutionalPanel, LoginForm
 ├── agents/                             # cards e sheet da esteira de agentes (T10)
@@ -64,12 +65,15 @@ components/
 ├── providers.tsx                       # QueryClient + MSW bootstrap + Toaster
 └── ui/                                 # shadcn primitives + componentes DS custom
 lib/
+├── analytics/                          # utilitários puros: sus.ts, meta-status.ts (T17)
 ├── api-client.ts                       # fetch client com correlation-id
 ├── case-transitions.ts                 # regras de estado dos casos (T13)
 ├── compliance/export-audit.ts          # export CSV/JSON da trilha (T19)
+├── dossie/                             # geração do PDF do dossiê (T28, react-pdf)
 ├── format-relative-time.ts             # "há 5 min" etc.
 ├── masks.ts                            # máscara de CPF/CNPJ/IP (T19)
 ├── mocks/agents.ts                     # fixtures dos agentes (T10)
+├── reports/                            # PDF (react-pdf) + XLSX (SheetJS dynamic import) — T17
 ├── risk-model/simulate.ts              # simulação do modelo (T02)
 ├── roles.ts                            # labels e helpers de papel
 └── utils.ts                            # cn() helper

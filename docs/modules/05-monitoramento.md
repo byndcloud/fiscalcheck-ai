@@ -14,6 +14,24 @@
 - **Agente de relatórios** — atualiza painéis, gera insights, alerta sobre progresso das metas (acurácia, escala, usabilidade).
 - **Relatórios gerenciais** — subsídio para planejamento e prestação de contas.
 
+## Entrega T17 · Painel do Gestor (MVP web)
+
+Rota `/analytics` no `apps/web`, restrita a `supervisor` + `admin`. Estende a implementação inicial (KPIs simples) para virar o **Painel do Gestor** completo do módulo 5.
+
+- **KPIs em tempo real** (7): casos abertos, casos em análise, valor recuperado, potencial recuperável, produtividade auditor, divergências críticas, autorregularização — cada um com sparkline (12 pontos) e drill-down para `/cases`.
+- **Metas do piloto (RF05)**: acurácia 70%, ganho de escala 100%, usabilidade 80%. Card de meta mostra baseline × atual × alvo + status (`no_alvo` / `em_risco` / `critico`). A regra determinística vive em [`apps/web/lib/analytics/meta-status.ts`](../../apps/web/lib/analytics/meta-status.ts).
+- **Captura SUS**: modal com as 10 perguntas do System Usability Scale (Brooke, 1996). O score alimenta a meta de usabilidade — cálculo puro em [`apps/web/lib/analytics/sus.ts`](../../apps/web/lib/analytics/sus.ts).
+- **Gráficos interativos** com `recharts` ([ADR-0005](../adr/0005-recharts.md)): AreaChart de recuperação mensal e PieChart de status de casos.
+- **Gerador de relatórios** (`ReportGeneratorModal`): Calibragem / Validação em PDF (`@react-pdf/renderer`) ou XLSX (SheetJS via dynamic import — [ADR-0006](../adr/0006-xlsx-sheetjs.md)). Cada emissão registra evento append-only na trilha via `POST /analytics/reports/generate`.
+- **Alertas automáticos**: regra determinística no handler MSW empurra `Notificacao` com `origem: "auto_meta"` no sino sempre que uma meta transita para `em_risco`/`critico` — categoriza a origem sem quebrar consumidores existentes.
+
+Endpoints MSW novos (todos em [`apps/web/mocks/handlers.ts`](../../apps/web/mocks/handlers.ts)):
+
+- `GET /analytics/panel-manager-kpis?periodo=30d|90d|trimestre|ano`
+- `GET /analytics/metas` · `POST /analytics/metas/:id/sus`
+- `GET /analytics/sus`
+- `POST /analytics/reports/generate` (RBAC: `supervisor` ou `admin`)
+
 ## Arquitetura interna
 
 ```text

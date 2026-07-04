@@ -18,7 +18,7 @@ const AUDITORIAL_LABELS = [
   "Comunicações",
 ] as const;
 
-const ALL_LABELS = [...AUDITORIAL_LABELS, "Cidadão", "Gerencial", "Governança"] as const;
+const ALL_LABELS = [...AUDITORIAL_LABELS, "Cidadão", "Painel do Gestor", "Governança"] as const;
 
 describe("Sidebar — filtragem por papel", () => {
   beforeEach(() => {
@@ -30,7 +30,7 @@ describe("Sidebar — filtragem por papel", () => {
     useSession.getState().clear();
   });
 
-  it("auditor vê itens auditoriais e não vê Cidadão, Governança nem Gerencial", () => {
+  it("auditor vê itens auditoriais e não vê Cidadão, Governança nem Painel do Gestor", () => {
     useSession.getState().setRole("auditor");
     render(<Sidebar />);
     for (const label of AUDITORIAL_LABELS) {
@@ -38,16 +38,16 @@ describe("Sidebar — filtragem por papel", () => {
     }
     expect(screen.queryByText("Cidadão")).toBeNull();
     expect(screen.queryByText("Governança")).toBeNull();
-    expect(screen.queryByText("Gerencial")).toBeNull();
+    expect(screen.queryByText("Painel do Gestor")).toBeNull();
   });
 
-  it("supervisor (gestor) vê auditoriais + Gerencial + Governança, mas não Cidadão", () => {
+  it("supervisor (gestor) vê auditoriais + Painel do Gestor + Governança, mas não Cidadão", () => {
     useSession.getState().setRole("supervisor");
     render(<Sidebar />);
     for (const label of AUDITORIAL_LABELS) {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
-    expect(screen.getByText("Gerencial")).toBeInTheDocument();
+    expect(screen.getByText("Painel do Gestor")).toBeInTheDocument();
     expect(screen.getByText("Governança")).toBeInTheDocument();
     expect(screen.queryByText("Cidadão")).toBeNull();
   });

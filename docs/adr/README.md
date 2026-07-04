@@ -17,6 +17,8 @@ Cada decisão arquitetural relevante vira um ADR numerado. Uma vez `Accepted`, *
 | [0002](./0002-database-mvp-replit.md) | Estratégia de banco para o MVP no Replit — pgvector sim, Apache AGE adiado | Accepted |
 | [0003](./0003-preview-replit.md) | Estratégia de preview no Replit — webview web-only com MSW | Proposed |
 | [0004](./0004-pdf-dossie-react-pdf.md) | Geração de PDF do dossiê no cliente com `@react-pdf/renderer` | Accepted |
+| [0005](./0005-recharts.md) | `recharts` como biblioteca de gráficos do Painel do Gestor | Accepted |
+| [0006](./0006-xlsx-sheetjs.md) | Exportação de relatórios gerenciais em XLSX com SheetJS Community | Accepted |
 
 ## Padrões de qualidade
 

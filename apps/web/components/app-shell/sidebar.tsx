@@ -122,8 +122,8 @@ const NAV_SECTIONS: readonly NavSection[] = [
     items: [
       {
         href: "/analytics",
-        label: "Gerencial",
-        description: "KPIs e monitoramento",
+        label: "Painel do Gestor",
+        description: "Metas, KPIs e relatórios",
         icon: BarChart3Icon,
         roles: ["supervisor", "admin"] as const,
       },

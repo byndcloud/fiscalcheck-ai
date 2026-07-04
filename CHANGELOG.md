@@ -6,6 +6,21 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o 
 
 ## [Não publicado]
 
+### Added — T17 · Painel do Gestor, Metas do Piloto e Alertas (2026-07-04)
+
+Entrega do Painel do Gestor completo do módulo 5 (RF05/FA06 do edital), estendendo a rota `/analytics` (restrita a `supervisor` + `admin`).
+
+- **Schemas em `@fiscalcheck/shared-types`** para `PanelManagerKpis` (7 indicadores com sparkline + drill-down), `MetaPiloto` (baseline/atual/alvo + status derivado), `SusAvaliacao` e `RelatorioGerencial{Request,Response}`. `NotificacaoSchema` estendido com `origem: "manual" | "auto_kpi" | "auto_meta"` + `linkHref` para categorizar alertas do agente de relatórios.
+- **[ADR-0005](./docs/adr/0005-recharts.md)** — `recharts` como biblioteca oficial de gráficos.
+- **[ADR-0006](./docs/adr/0006-xlsx-sheetjs.md)** — exportação XLSX com SheetJS Community via dynamic import (chunk isolado em `/analytics`).
+- **Componentes reutilizáveis** em [`apps/web/components/analytics/`](./apps/web/components/analytics/): `KpiTrendCard`, `Sparkline`, `MetaProgressCard`, `PeriodFilter`, `SusSurveyModal`, `ReportGeneratorModal`.
+- **Utilitários puros** em [`apps/web/lib/analytics/`](./apps/web/lib/analytics/): `sus.ts` (fórmula Brooke 1996 + labels pt-BR) e `meta-status.ts` (transição `no_alvo → em_risco → critico`).
+- **Geração de relatórios** em [`apps/web/lib/reports/`](./apps/web/lib/reports/): PDF (`GerencialPdfReport` sobre `@react-pdf/renderer`) e XLSX (`generateXlsxBlob` com dynamic import de SheetJS), ambos com `correlationId` na trilha via `POST /analytics/reports/generate`.
+- **Handlers MSW novos** em [`apps/web/mocks/handlers.ts`](./apps/web/mocks/handlers.ts): `GET /analytics/panel-manager-kpis`, `GET /analytics/metas`, `POST /analytics/metas/:id/sus`, `GET /analytics/sus`, `POST /analytics/reports/generate` (RBAC supervisor/admin). Regra determinística: sempre que uma meta transita para `em_risco`/`critico`, o handler empurra `Notificacao` com `origem: "auto_meta"` para o sino.
+- **Sidebar**: item `/analytics` renomeado de "Gerencial" para "Painel do Gestor".
+- **Testes**: `sus-score`, `meta-em-risco`, `panel-manager-kpis` e `report-generator` (UI + payload).
+- **Docs**: [`docs/modules/05-monitoramento.md`](./docs/modules/05-monitoramento.md) atualizado com a seção "Entrega T17" e [`docs/adr/README.md`](./docs/adr/README.md) com as novas entradas.
+
 ### Changed — Reconciliação pós-simplificação e sprints T01–T19 (2026-07-03)
 
 Fecha vestígios que a simplificação do MVP (2026-07-02) e as sprints T01–T19 deixaram na documentação. Nenhum código de runtime alterado (apenas 1 docstring).
