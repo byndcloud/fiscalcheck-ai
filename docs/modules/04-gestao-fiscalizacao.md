@@ -16,6 +16,16 @@
 - **Canal multicanal com cidadão** — portal, e-mail, SMS, WhatsApp.
 - **Gestão completa do caso** — anotações, prazos, acompanhamento, devolutivas.
 
+## Entrega T16 · Portal do Contribuinte / Autorregularização (MVP web)
+
+> Frente de UI do RF07/FA05, entregue no `apps/web` sobre a camada mock (MSW).
+
+- **Portal `/citizen`** mobile-first com login mock (perfil Contribuinte ou botão "Entrar com gov.br"), acessível pelo contribuinte ou contador. Nenhum dado fiscal aparece sem identificação (guard de sessão) e o recorte do mock só expõe casos formalizados — triagem interna nunca chega ao cidadão (art. 198 CTN).
+- **Fluxo acolhedor de 3 passos** (Ciência → Regularização → Confirmação): explicação da divergência em linguagem clara (`lib/citizen/plain-language.ts`), registro de ciência com protocolo, emissão de guia integral (DAM mock), simulador de parcelamento com adesão (`lib/citizen/parcelamento.ts` — 1–12x, piso R$ 100/parcela) que emite a guia da 1ª parcela, contestação com upload mock e agendamento de atendimento.
+- **Devolutiva ao auditor (aceite T16 × T14)** — cada ação empilha uma `CitizenInteracao` (protocolo `PRT-2026-…`), atualiza `observacoes`/status do caso (adesão → `em_autorregularizacao`) e empurra notificação `devolutiva` para o sino do auditor.
+- **Acompanhamento em tempo real** — linha do tempo das interações no detalhe da pendência + indicação dos canais de aviso (e-mail, SMS, WhatsApp).
+- **Páginas institucionais** — `/citizen/termos` e `/citizen/privacidade` (LGPD + contato do DPO).
+
 ## Arquitetura interna
 
 ```text

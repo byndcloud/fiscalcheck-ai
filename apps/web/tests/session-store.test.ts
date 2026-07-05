@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
+import { userProfilesFixture } from "@/mocks/fixtures/user-profiles";
 import { useSession } from "@/stores/session-store";
 
 describe("useSession store", () => {
@@ -16,8 +17,9 @@ describe("useSession store", () => {
     useSession.getState().setRole("auditor");
     const state = useSession.getState();
     expect(state.role).toBe("auditor");
-    expect(state.user?.id).toBe("mock-auditor");
-    expect(state.user?.displayName).toMatch(/auditor/i);
+    // T27: identidade default vem do diretório de perfis fake.
+    expect(state.user?.id).toBe(userProfilesFixture.auditor.id);
+    expect(state.user?.displayName).toBe(userProfilesFixture.auditor.nome);
   });
 
   it("setRole aceita usuário customizado", () => {

@@ -29,6 +29,7 @@ import { ApprovalModal } from "@/components/cases/approval-modal";
 import { DecisionChainEntry } from "@/components/cases/decision-chain-entry";
 import { DossieExportButton } from "@/components/cases/dossie-export-button";
 import { NextActionPanel } from "@/components/cases/next-action-panel";
+import { ScoreFactorsPanel } from "@/components/risk/score-factors-panel";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -370,6 +371,21 @@ export function CaseDossieSheet({ casoId, casos, taxpayerById, open, onOpenChang
               onReject={() => setPendingAction("rejeitar")}
               disabled={decision.isPending}
             />
+
+            {/* T09 — Explicabilidade: todo score exibido dá acesso aos fatores. */}
+            {scoreDoContribuinte ? (
+              <ScoreFactorsPanel score={scoreDoContribuinte} />
+            ) : scores.isLoading ? (
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-surface p-4 text-xs text-muted-foreground shadow-[var(--e-1)]">
+                <Loader2Icon aria-hidden className="size-3.5 animate-spin" /> Carregando fatores do
+                score…
+              </div>
+            ) : (
+              <p className="rounded-lg border border-border bg-surface p-4 text-xs text-muted-foreground shadow-[var(--e-1)]">
+                Explicabilidade indisponível — não há score calculado para este contribuinte no
+                ambiente de demonstração.
+              </p>
+            )}
 
             {caso.recomendacao ? (
               <section

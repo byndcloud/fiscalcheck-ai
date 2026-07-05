@@ -2,13 +2,22 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
-import { SparklesIcon } from "lucide-react";
-import { useMemo } from "react";
+import { BarChart3Icon, SparklesIcon } from "lucide-react";
+import { useMemo, useState } from "react";
 
 import type { Agente, Score } from "@fiscalcheck/shared-types";
 
+import { ScoreFactorsPanel } from "@/components/risk/score-factors-panel";
+import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { PageHeader } from "@/components/ui/page-header";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { apiRequest } from "@/lib/api-client";
 
@@ -28,6 +37,9 @@ const AGENTE_STATUS_LABEL: Record<Agente["status"], string> = {
 };
 
 export default function AiPage() {
+  // T09 — score selecionado abre o painel de fatores num Sheet lateral.
+  const [explainedScore, setExplainedScore] = useState<Score | null>(null);
+
   const scores = useQuery({
     queryKey: ["ai", "scores"],
     queryFn: () => apiRequest<Score[]>("/ai/scores"),
@@ -68,6 +80,21 @@ export default function AiPage() {
           <p className="max-w-md text-xs text-muted-foreground line-clamp-2">
             {getValue<string | undefined>() ?? "—"}
           </p>
+        ),
+      },
+      {
+        id: "explicabilidade",
+        header: "Explicabilidade",
+        cell: ({ row }) => (
+          <Button
+            size="xs"
+            variant="secondary"
+            onClick={() => setExplainedScore(row.original)}
+            aria-label={`Ver fatores do score do contribuinte ${row.original.contribuinteId}`}
+          >
+            <BarChart3Icon aria-hidden className="size-3.5" />
+            Ver fatores
+          </Button>
         ),
       },
     ],
@@ -131,6 +158,27 @@ export default function AiPage() {
           </ul>
         )}
       </section>
+
+      <Sheet
+        open={explainedScore !== null}
+        onOpenChange={(next) => (!next ? setExplainedScore(null) : undefined)}
+      >
+        <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-lg">
+          {explainedScore ? (
+            <div className="flex flex-col gap-4 p-2">
+              <SheetHeader className="gap-1 p-0">
+                <SheetTitle>Por que este score?</SheetTitle>
+                <SheetDescription>
+                  Contribuinte{" "}
+                  <span className="font-mono uppercase">{explainedScore.contribuinteId}</span> ·
+                  fatores que compõem a classificação de risco (RF03).
+                </SheetDescription>
+              </SheetHeader>
+              <ScoreFactorsPanel score={explainedScore} />
+            </div>
+          ) : null}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

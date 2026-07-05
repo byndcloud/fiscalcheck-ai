@@ -15,6 +15,14 @@
 - **Explicabilidade (XAI)** — registro dos fatores que justificam cada classificação.
 - **Active Learning** — cada feedback do auditor realimenta retrain + calibragem (agente de calibragem).
 
+## Entrega T09 · Explicabilidade das classificações (MVP web)
+
+> Frente de UI do RF03, entregue no `apps/web` sobre a camada mock (MSW).
+
+- **`ScoreFactorsPanel`** (`apps/web/components/risk/score-factors-panel.tsx`) — painel "Por que este score?": barras de contribuição por fator (±pts) ordenadas por magnitude no espectro de risco do DS, origem do fator (cruzamento / rede societária / cadastro / histórico), evidência textual e rodapé com a nota "Explicabilidade registrada para defesa perante órgãos de controle" + `modeloVersao`/`calculadoEm`.
+- **Pontos de acesso** — todo score exibido dá acesso ao painel (critério de aceite): seção fixa no Dossiê do caso (T13) e botão "Ver fatores" na tabela de scores em `/ai` (Sheet lateral). O PDF do dossiê (T28) já incorporava os mesmos fatores.
+- **Coerência de dados** — os scores mock (`apps/web/mocks/fixtures/scores.ts`) espelham o `scoreValor` dos casos e narram os mesmos indícios da recomendação do orquestrador.
+
 ## Arquitetura interna
 
 ```text

@@ -9,6 +9,7 @@ import type { Notificacao } from "@fiscalcheck/shared-types";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { SkeletonText } from "@/components/ui/skeleton";
+import { useUserProfile } from "@/hooks/use-user-profile";
 import { apiRequest } from "@/lib/api-client";
 import { resolveErrorMessage } from "@/lib/errors";
 import { cn } from "@/lib/utils";
@@ -82,9 +83,17 @@ export function NotificationBell() {
     },
   });
 
+  /*
+    T27: preferência "Notificações no sino" desligada silencia o alerta
+    visual (badge/ícone tocando), mas a lista continua acessível — o
+    usuário escolhe não ser interrompido, não perder o histórico.
+  */
+  const profileQuery = useUserProfile();
+  const alertsEnabled = profileQuery.data?.preferencias.notificacoesAtivas ?? true;
+
   const unreadCount = useMemo(() => query.data?.filter((n) => !n.lida).length ?? 0, [query.data]);
 
-  const IconComp = unreadCount > 0 ? BellRingIcon : BellIcon;
+  const IconComp = alertsEnabled && unreadCount > 0 ? BellRingIcon : BellIcon;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -92,11 +101,15 @@ export function NotificationBell() {
         <Button
           variant="ghost"
           size="icon"
-          aria-label={unreadCount > 0 ? `Notificações — ${unreadCount} não lidas` : "Notificações"}
+          aria-label={
+            alertsEnabled && unreadCount > 0
+              ? `Notificações — ${unreadCount} não lidas`
+              : "Notificações"
+          }
           className="relative"
         >
           <IconComp className="size-4" aria-hidden="true" />
-          {unreadCount > 0 ? (
+          {alertsEnabled && unreadCount > 0 ? (
             <span
               aria-hidden="true"
               className="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-destructive text-[10px] font-semibold text-white"
@@ -111,9 +124,11 @@ export function NotificationBell() {
           <div>
             <p className="text-sm font-semibold text-text-strong">Notificações</p>
             <p className="text-xs text-muted-foreground">
-              {unreadCount === 0
-                ? "Tudo em dia"
-                : `${unreadCount} não lida${unreadCount === 1 ? "" : "s"}`}
+              {!alertsEnabled
+                ? "Alertas silenciados nas preferências"
+                : unreadCount === 0
+                  ? "Tudo em dia"
+                  : `${unreadCount} não lida${unreadCount === 1 ? "" : "s"}`}
             </p>
           </div>
         </header>

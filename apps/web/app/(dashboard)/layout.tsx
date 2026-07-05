@@ -25,19 +25,22 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const role = useSession((s) => s.role);
 
+  const isCitizenRoute = pathname === "/citizen" || pathname?.startsWith("/citizen/");
+
   useEffect(() => {
     if (!role) {
       router.replace("/login");
       return;
     }
-    if (role === "cidadao" && pathname !== "/citizen") {
+    // T16: o cidadão navega em /citizen e subrotas (termos, privacidade).
+    if (role === "cidadao" && !isCitizenRoute) {
       router.replace("/citizen");
       return;
     }
-    if (role !== "cidadao" && pathname === "/citizen") {
+    if (role !== "cidadao" && isCitizenRoute) {
       router.replace("/dashboard");
     }
-  }, [role, pathname, router]);
+  }, [role, isCitizenRoute, router]);
 
   if (!role) {
     return (

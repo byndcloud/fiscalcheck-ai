@@ -63,4 +63,17 @@ export const divergenciasFixture: Divergencia[] = [
     detectadoEm: "2026-07-01T18:11:00Z",
     evidencias: ["ct-004"],
   },
+  {
+    id: "dv-006",
+    contribuinteId: "ct-004",
+    tipo: "subdeclaracao",
+    origem: "declarado_vs_nfse",
+    severidade: 2,
+    valor: 18_500.0,
+    competencia: "2026-03",
+    descricao:
+      "ISS apurado sobre NFS-e do período (R$ 43.200,00) superior ao valor declarado e recolhido (R$ 24.700,00).",
+    detectadoEm: "2026-06-10T10:05:00Z",
+    evidencias: ["nf-3110", "nf-3112", "nf-3119"],
+  },
 ];

@@ -236,6 +236,42 @@ export {
 } from "./schemas/sus-avaliacao";
 
 export {
+  AgendamentoRequestSchema,
+  CitizenActionResponseSchema,
+  CitizenInteracaoSchema,
+  CitizenInteracaoTipoSchema,
+  ContestacaoRequestSchema,
+  GuiaDamSchema,
+  ParcelamentoAdesaoRequestSchema,
+  type AgendamentoRequest,
+  type CitizenActionResponse,
+  type CitizenInteracao,
+  type CitizenInteracaoTipo,
+  type ContestacaoRequest,
+  type GuiaDam,
+  type ParcelamentoAdesaoRequest,
+} from "./schemas/citizen-portal";
+
+export {
+  CitizenCompanyLinkSchema,
+  CitizenRegistrationSchema,
+  CitizenRegistrationUpdateRequestSchema,
+  DensityPreferenceSchema,
+  FontSizePreferenceSchema,
+  PreferencesUpdateRequestSchema,
+  UserPreferencesSchema,
+  UserProfileSchema,
+  type CitizenCompanyLink,
+  type CitizenRegistration,
+  type CitizenRegistrationUpdateRequest,
+  type DensityPreference,
+  type FontSizePreference,
+  type PreferencesUpdateRequest,
+  type UserPreferences,
+  type UserProfile,
+} from "./schemas/user-profile";
+
+export {
   PeriodoSchema,
   RelatorioFormatoSchema,
   RelatorioGerencialRequestSchema,

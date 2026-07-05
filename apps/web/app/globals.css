@@ -273,6 +273,23 @@
   }
 
   /*
+    T27 — preferências de interface do usuário (menu do avatar).
+    - Tamanho da letra: escala o rem raiz; todas as utilities de texto
+      (rem-based) acompanham sem mudança por componente.
+    - Densidade: reduz o `--spacing` do Tailwind v4 — paddings, gaps e
+      margens de todas as utilities encolhem proporcionalmente.
+    Os atributos são aplicados no <html> pelo UserMenu conforme a
+    preferência persistida na camada de serviço fake.
+  */
+  :root[data-font-scale="grande"] {
+    font-size: 17.5px;
+  }
+
+  :root[data-density="compacta"] {
+    --spacing: 0.215rem;
+  }
+
+  /*
     §6 do DS: todo movimento é suprimido sob `prefers-reduced-motion: reduce`.
     Aplicamos globalmente para cobrir animações de bibliotecas terceiras
     (tw-animate-css, Radix) sem necessidade de configuração por componente.

@@ -61,6 +61,17 @@ describe("LoginForm — fluxo mock", () => {
     expect(pushMock).toHaveBeenCalledWith("/dashboard");
   });
 
+  it("gov.br autentica no perfil ativo (não força cidadao)", async () => {
+    renderWithProviders(<LoginForm />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Entrar com/i }));
+
+    await waitFor(() => {
+      expect(useSession.getState().role).toBe("auditor");
+    });
+    expect(pushMock).toHaveBeenCalledWith("/dashboard");
+  });
+
   it("valida senha curta com mensagem em pt-BR", async () => {
     renderWithProviders(<LoginForm />);
 
