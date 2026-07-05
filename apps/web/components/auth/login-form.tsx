@@ -60,6 +60,7 @@ export function LoginForm() {
   const setRole = useSession((s) => s.setRole);
   const [showPassword, setShowPassword] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [govBrLoading, setGovBrLoading] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(LoginSchema),
@@ -77,6 +78,16 @@ export function LoginForm() {
     setRole(values.role);
     toast.success(`Bem-vindo(a) — perfil ${ROLE_LABEL_PT[values.role]}`);
     router.push(homeRouteForRole(values.role));
+  }
+
+  async function handleGovBrLogin() {
+    setGovBrLoading(true);
+    // Simula o redirect de OAuth do gov.br — em produção será o fluxo real.
+    // Autentica no perfil ativo (engrenagem), disponível para todos os papéis.
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    setRole(selectedRole);
+    toast.success(`Identificação gov.br confirmada — perfil ${ROLE_LABEL_PT[selectedRole]}.`);
+    router.push(homeRouteForRole(selectedRole));
   }
 
   return (
@@ -173,6 +184,28 @@ export function LoginForm() {
               </>
             ) : (
               "Entrar"
+            )}
+          </Button>
+
+          {/* T16 — acesso via conta gov.br (mock), disponível para qualquer perfil. */}
+          <div aria-hidden="true" className="h-px w-full bg-border" />
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            disabled={govBrLoading || form.formState.isSubmitting}
+            onClick={handleGovBrLogin}
+          >
+            {govBrLoading ? (
+              <>
+                <LoaderCircleIcon aria-hidden="true" className="animate-spin" />
+                Conectando ao gov.br…
+              </>
+            ) : (
+              <>
+                Entrar com <span className="font-extrabold tracking-tight text-brand">gov.br</span>
+                <span className="sr-only">(simulação para demonstração)</span>
+              </>
             )}
           </Button>
         </form>

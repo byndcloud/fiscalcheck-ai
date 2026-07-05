@@ -2,6 +2,7 @@ import { http, HttpResponse } from "msw";
 import { z } from "zod";
 
 import {
+  AgendamentoRequestSchema,
   AgenteSchema,
   type AtypicalAccess,
   AtypicalAccessSchema,
@@ -15,13 +16,21 @@ import {
   CaseDocumentSchema,
   type Caso,
   CasoSchema,
+  CitizenActionResponseSchema,
+  type CitizenInteracao,
+  CitizenInteracaoSchema,
+  type CitizenInteracaoTipo,
+  CitizenRegistrationSchema,
+  CitizenRegistrationUpdateRequestSchema,
   ComplianceSealSchema,
   ComunicacaoSchema,
+  ContestacaoRequestSchema,
   ContribuinteSchema,
   DecisionRequestSchema,
   DivergenciaSchema,
   DossieExportRequestSchema,
   DossieExportResponseSchema,
+  type GuiaDam,
   type MetaPiloto,
   MetaPilotoSchema,
   MonthlyRecoverySeriesSchema,
@@ -31,6 +40,8 @@ import {
   PanelKpisSchema,
   PanelManagerKpisSchema,
   PanelManagerPeriodoSchema,
+  ParcelamentoAdesaoRequestSchema,
+  PreferencesUpdateRequestSchema,
   RelatorioGerencialRequestSchema,
   RelatorioGerencialResponseSchema,
   RiskDistributionSchema,
@@ -51,12 +62,15 @@ import {
   type SystemUser,
   SystemUserSchema,
   UserCreateRequestSchema,
+  type UserPreferences,
+  UserProfileSchema,
   UserUpdateRequestSchema,
 } from "@fiscalcheck/shared-types";
 
 import { refreshMeta } from "@/lib/analytics/meta-status";
 import { computeSusMedia, computeSusScore } from "@/lib/analytics/sus";
 import { nextStatus, shouldEmitDocument } from "@/lib/case-transitions";
+import { simulateParcelamento } from "@/lib/citizen/parcelamento";
 
 import { agentesFixture } from "./fixtures/agentes";
 import { ArquivoIngeridoSchema, arquivosFixture } from "./fixtures/arquivos";
@@ -83,6 +97,7 @@ import { scoresFixture } from "./fixtures/scores";
 import { smartAlertsFixture } from "./fixtures/smart-alerts";
 import { susAvaliacoesFixture } from "./fixtures/sus-avaliacoes";
 import { systemUsersFixture } from "./fixtures/system-users";
+import { userProfilesFixture } from "./fixtures/user-profiles";
 
 /*
   Handlers MSW — 1 endpoint por módulo funcional.
@@ -95,6 +110,30 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const notificacoesMutable = [...notificacoesFixture];
 
 /*
+  Preferências de interface por papel (T27 · Transversal).
+  Persistidas na camada de serviço fake enquanto a sessão do worker
+  viver — mesmo padrão dos demais estados in-memory deste arquivo.
+*/
+const DEFAULT_USER_PREFERENCES: UserPreferences = {
+  tamanhoFonte: "padrao",
+  densidade: "confortavel",
+  notificacoesAtivas: true,
+};
+const userPreferencesByRole = new Map<Role, UserPreferences>();
+
+function getPreferencesForRole(role: Role): UserPreferences {
+  return userPreferencesByRole.get(role) ?? { ...DEFAULT_USER_PREFERENCES };
+}
+
+/*
+  Cadastro do cidadão é editável (contato/endereço) — clone mutável da
+  fixture para o PUT /me/registration persistir na sessão do worker.
+*/
+const citizenRegistrationMutable = userProfilesFixture.cidadao.dadosCadastrais
+  ? { ...userProfilesFixture.cidadao.dadosCadastrais }
+  : undefined;
+
+/*
   Estado in-memory do módulo 4 (T13). Os arrays só sofrem `unshift` /
   `splice(x,1, updated)` — nunca `delete`. Cadeia decisória é
   append-only por contrato (AGENTS.md §1.1).
@@ -105,6 +144,100 @@ const caseDocumentsMutable: CaseDocument[] = [...caseDocumentsFixture];
 
 let decisionSeq = caseDecisionsMutable.length + 1;
 let documentSeq = caseDocumentsMutable.length + 1;
+
+/*
+  Estado in-memory do Portal do Contribuinte (T16 · módulo 4).
+  Interações são append-only; cada ação gera protocolo próprio e uma
+  devolutiva no caso do auditor (notificação `devolutiva` no sino +
+  atualização de `observacoes` do caso — visível no dossiê T13/T14).
+*/
+/*
+  Sessão mock do portal: representa um contador que atende 3 empresas
+  (RF07 — acesso pelo contribuinte OU pelo contador). O portal só expõe
+  casos já formalizados ao contribuinte — `candidato`/`em_analise`/
+  `aguardando_aprovacao` são triagem interna e mostrá-los antes da
+  notificação violaria o sigilo fiscal (art. 198 CTN).
+*/
+const CITIZEN_TAXPAYER_IDS = ["ct-002", "ct-003", "ct-004"] as const;
+const CITIZEN_VISIBLE_STATUSES: readonly Caso["status"][] = [
+  "notificado",
+  "em_autorregularizacao",
+  "fiscalizacao",
+  "encerrado",
+];
+const citizenInteracoesMutable: CitizenInteracao[] = [];
+let citizenProtocoloSeq = 481_002;
+let guiaSeq = 77;
+
+function nextProtocolo(): string {
+  citizenProtocoloSeq += 1;
+  return `PRT-2026-${String(citizenProtocoloSeq).padStart(6, "0")}`;
+}
+
+function pushCitizenInteracao(
+  casoId: string,
+  tipo: CitizenInteracaoTipo,
+  resumo: string,
+): CitizenInteracao {
+  const interacao: CitizenInteracao = {
+    id: `ci-${Date.now()}-${citizenInteracoesMutable.length + 1}`,
+    casoId,
+    tipo,
+    protocolo: nextProtocolo(),
+    resumo,
+    criadoEm: new Date().toISOString(),
+  };
+  citizenInteracoesMutable.unshift(interacao);
+  return interacao;
+}
+
+/** Devolutiva do contribuinte no sino do auditor (aceite T16 × T14). */
+function pushDevolutivaNotification(caso: Caso, titulo: string, corpo: string): void {
+  notificacoesMutable.unshift({
+    id: `nt-dev-${caso.id}-${Date.now()}`,
+    tipo: "devolutiva",
+    titulo,
+    corpo,
+    casoId: caso.id,
+    contribuinteId: caso.contribuinteId,
+    severidade: 3,
+    criadoEm: new Date().toISOString(),
+    lida: false,
+    origem: "manual",
+    linkHref: "/cases",
+  });
+}
+
+function isCitizenVisible(caso: Caso): boolean {
+  return (
+    (CITIZEN_TAXPAYER_IDS as readonly string[]).includes(caso.contribuinteId) &&
+    CITIZEN_VISIBLE_STATUSES.includes(caso.status)
+  );
+}
+
+function findCitizenCase(casoId: string): Caso | undefined {
+  return casosMutable.find((c) => c.id === casoId && isCitizenVisible(c));
+}
+
+function buildGuiaDam(descricao: string, valor: number, vencimento: string): GuiaDam {
+  guiaSeq += 1;
+  const numero = `DAM-2026-${String(guiaSeq).padStart(5, "0")}`;
+  /*
+    Linha digitável sintética (nunca um boleto real): blocos derivados
+    do sequencial para permanecer estável em snapshot/demonstração.
+  */
+  const bloco = String(guiaSeq).padStart(5, "0");
+  const centavos = String(Math.round(valor * 100)).padStart(10, "0");
+  const linhaDigitavel = `8${bloco}0000${centavos.slice(0, 5)} ${centavos.slice(5)}0${bloco} 03340${bloco} 9 ${vencimento.replaceAll("-", "")}`;
+  return {
+    numero,
+    descricao,
+    valor,
+    vencimento,
+    linhaDigitavel,
+    emitidaEm: new Date().toISOString(),
+  };
+}
 
 /*
   Estado in-memory do módulo 3 (T02 · Configuração do Modelo de Risco).
@@ -648,10 +781,250 @@ export const handlers = [
     return respondValidated(ComunicacaoSchema, found);
   }),
 
-  // Portal do cidadão — subconjunto dos casos
+  // ── Portal do Contribuinte (T16 · módulo 4) ─────────────────────────
+  // A sessão mock enxerga só os casos formalizados dos CNPJs vinculados.
   http.get(`${API_URL}/citizen/cases`, () => {
-    const meus = casosMutable.filter((caso) => ["ct-002", "ct-003"].includes(caso.contribuinteId));
+    const meus = casosMutable.filter(isCitizenVisible);
     return respondValidated(z.array(CasoSchema), meus);
+  }),
+
+  // Acompanhamento em tempo real — linha do tempo de interações do caso.
+  http.get(`${API_URL}/citizen/cases/:id/interacoes`, ({ params }) => {
+    const { id } = params as { id: string };
+    const timeline = citizenInteracoesMutable.filter((i) => i.casoId === id);
+    return respondValidated(z.array(CitizenInteracaoSchema), timeline);
+  }),
+
+  // Divergências do próprio caso — recorte mínimo p/ explicação em
+  // linguagem clara (não expõe a base completa de cruzamentos ao cidadão).
+  http.get(`${API_URL}/citizen/cases/:id/divergencias`, ({ params }) => {
+    const { id } = params as { id: string };
+    const caso = findCitizenCase(id);
+    if (!caso) {
+      return HttpResponse.json(
+        { error_code: "citizen_case_not_found", message: "Pendência não encontrada." },
+        { status: 404 },
+      );
+    }
+    const ids = new Set(caso.divergenciaIds);
+    const doCaso = divergenciasFixture.filter((d) => ids.has(d.id));
+    return respondValidated(z.array(DivergenciaSchema), doCaso);
+  }),
+
+  // Registro de ciência com protocolo (RF07 — dá início ao passo 1).
+  http.post(`${API_URL}/citizen/cases/:id/ciencia`, ({ params }) => {
+    const { id } = params as { id: string };
+    const caso = findCitizenCase(id);
+    if (!caso) {
+      return HttpResponse.json(
+        { error_code: "citizen_case_not_found", message: "Pendência não encontrada." },
+        { status: 404 },
+      );
+    }
+    const jaRegistrada = citizenInteracoesMutable.some(
+      (i) => i.casoId === id && i.tipo === "ciencia",
+    );
+    if (jaRegistrada) {
+      return HttpResponse.json(
+        { error_code: "ciencia_ja_registrada", message: "A ciência já foi registrada." },
+        { status: 409 },
+      );
+    }
+
+    const interacao = pushCitizenInteracao(
+      id,
+      "ciencia",
+      "Ciência da notificação registrada pelo contribuinte.",
+    );
+    caso.observacoes = `Contribuinte registrou ciência em ${new Date().toLocaleDateString("pt-BR")} (protocolo ${interacao.protocolo}).`;
+    caso.atualizadoEm = new Date().toISOString();
+    pushDevolutivaNotification(
+      caso,
+      `Ciência registrada · ${caso.id.toUpperCase()}`,
+      `O contribuinte ${caso.contribuinteId} registrou ciência da notificação (protocolo ${interacao.protocolo}).`,
+    );
+    return respondValidated(CitizenActionResponseSchema, { interacao, caso });
+  }),
+
+  // Emissão de guia integral (mock DAM) — pagamento à vista.
+  http.post(`${API_URL}/citizen/cases/:id/guia`, ({ params }) => {
+    const { id } = params as { id: string };
+    const caso = findCitizenCase(id);
+    if (!caso) {
+      return HttpResponse.json(
+        { error_code: "citizen_case_not_found", message: "Pendência não encontrada." },
+        { status: 404 },
+      );
+    }
+    const valor = caso.valorPotencial ?? 0;
+    if (valor <= 0) {
+      return HttpResponse.json(
+        {
+          error_code: "guia_sem_valor",
+          message: "Esta pendência não possui valor a recolher.",
+        },
+        { status: 422 },
+      );
+    }
+    const vencimento = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const guia = buildGuiaDam(
+      `Regularização integral — ${caso.id.toUpperCase()}`,
+      valor,
+      vencimento,
+    );
+    const interacao = pushCitizenInteracao(
+      id,
+      "guia_emitida",
+      `Guia ${guia.numero} emitida para pagamento integral (vencimento ${new Date(`${vencimento}T12:00:00Z`).toLocaleDateString("pt-BR")}).`,
+    );
+    caso.atualizadoEm = new Date().toISOString();
+    pushDevolutivaNotification(
+      caso,
+      `Guia emitida · ${caso.id.toUpperCase()}`,
+      `O contribuinte ${caso.contribuinteId} emitiu a guia ${guia.numero} para regularização integral (protocolo ${interacao.protocolo}).`,
+    );
+    return respondValidated(CitizenActionResponseSchema, { interacao, caso, guia });
+  }),
+
+  // Adesão ao parcelamento — transiciona o caso para autorregularização.
+  http.post(`${API_URL}/citizen/cases/:id/parcelamento`, async ({ params, request }) => {
+    const { id } = params as { id: string };
+    const caso = findCitizenCase(id);
+    if (!caso) {
+      return HttpResponse.json(
+        { error_code: "citizen_case_not_found", message: "Pendência não encontrada." },
+        { status: 404 },
+      );
+    }
+    const bodyRaw = await request.json().catch(() => ({}));
+    const parsed = ParcelamentoAdesaoRequestSchema.safeParse(bodyRaw);
+    if (!parsed.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_parcelamento_body",
+          message: "Número de parcelas inválido (1 a 12).",
+          issues: parsed.error.issues,
+        },
+        { status: 400 },
+      );
+    }
+    const valor = caso.valorPotencial ?? 0;
+    if (valor <= 0) {
+      return HttpResponse.json(
+        {
+          error_code: "parcelamento_sem_valor",
+          message: "Esta pendência não possui valor a parcelar.",
+        },
+        { status: 422 },
+      );
+    }
+
+    const plano = simulateParcelamento(valor, parsed.data.parcelas);
+    const guia = buildGuiaDam(
+      `Parcela 1/${plano.parcelas} — ${caso.id.toUpperCase()}`,
+      plano.valorParcela,
+      plano.primeiroVencimento,
+    );
+    const interacao = pushCitizenInteracao(
+      id,
+      "adesao_parcelamento",
+      `Adesão ao parcelamento em ${plano.parcelas}x de R$ ${plano.valorParcela.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} — guia ${guia.numero} da 1ª parcela emitida.`,
+    );
+
+    // Devolutiva estrutural: o caso migra para autorregularização.
+    if (
+      caso.status === "notificado" ||
+      caso.status === "candidato" ||
+      caso.status === "em_analise"
+    ) {
+      caso.status = "em_autorregularizacao";
+    }
+    caso.observacoes = `Contribuinte aderiu ao parcelamento em ${plano.parcelas}x (protocolo ${interacao.protocolo}) — 1ª parcela vence em ${new Date(`${plano.primeiroVencimento}T12:00:00Z`).toLocaleDateString("pt-BR")}.`;
+    caso.proximaAcaoRecomendada = "Acompanhar o recolhimento das parcelas do termo de adesão.";
+    caso.atualizadoEm = new Date().toISOString();
+    pushDevolutivaNotification(
+      caso,
+      `Adesão ao parcelamento · ${caso.id.toUpperCase()}`,
+      `O contribuinte ${caso.contribuinteId} aderiu ao parcelamento em ${plano.parcelas}x (protocolo ${interacao.protocolo}). Caso movido para autorregularização.`,
+    );
+    return respondValidated(CitizenActionResponseSchema, { interacao, caso, guia });
+  }),
+
+  // Canal de resposta/contestação com upload mock + protocolo.
+  http.post(`${API_URL}/citizen/cases/:id/contestacao`, async ({ params, request }) => {
+    const { id } = params as { id: string };
+    const caso = findCitizenCase(id);
+    if (!caso) {
+      return HttpResponse.json(
+        { error_code: "citizen_case_not_found", message: "Pendência não encontrada." },
+        { status: 404 },
+      );
+    }
+    const bodyRaw = await request.json().catch(() => ({}));
+    const parsed = ContestacaoRequestSchema.safeParse(bodyRaw);
+    if (!parsed.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_contestacao_body",
+          message: "Preencha o assunto e uma mensagem com pelo menos 30 caracteres.",
+          issues: parsed.error.issues,
+        },
+        { status: 400 },
+      );
+    }
+
+    const anexos = parsed.data.arquivos.length;
+    const interacao = pushCitizenInteracao(
+      id,
+      "contestacao",
+      `Contestação enviada: "${parsed.data.assunto}"${anexos > 0 ? ` com ${anexos} documento(s) anexado(s)` : ""}. Em análise pela equipe fiscal.`,
+    );
+    caso.observacoes = `Contestação do contribuinte em análise (protocolo ${interacao.protocolo}): ${parsed.data.assunto}.`;
+    caso.atualizadoEm = new Date().toISOString();
+    pushDevolutivaNotification(
+      caso,
+      `Contestação recebida · ${caso.id.toUpperCase()}`,
+      `O contribuinte ${caso.contribuinteId} contestou a divergência (protocolo ${interacao.protocolo}): "${parsed.data.assunto}". Requer análise do auditor.`,
+    );
+    return respondValidated(CitizenActionResponseSchema, { interacao, caso });
+  }),
+
+  // Agendamento de atendimento presencial/vídeo.
+  http.post(`${API_URL}/citizen/cases/:id/agendamento`, async ({ params, request }) => {
+    const { id } = params as { id: string };
+    const caso = findCitizenCase(id);
+    if (!caso) {
+      return HttpResponse.json(
+        { error_code: "citizen_case_not_found", message: "Pendência não encontrada." },
+        { status: 404 },
+      );
+    }
+    const bodyRaw = await request.json().catch(() => ({}));
+    const parsed = AgendamentoRequestSchema.safeParse(bodyRaw);
+    if (!parsed.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_agendamento_body",
+          message: "Escolha uma data e um período válidos.",
+          issues: parsed.error.issues,
+        },
+        { status: 400 },
+      );
+    }
+    const dataLabel = new Date(`${parsed.data.data}T12:00:00Z`).toLocaleDateString("pt-BR");
+    const periodoLabel = parsed.data.periodo === "manha" ? "manhã (8h–12h)" : "tarde (13h–17h)";
+    const interacao = pushCitizenInteracao(
+      id,
+      "agendamento",
+      `Atendimento agendado para ${dataLabel}, período da ${periodoLabel}.`,
+    );
+    caso.atualizadoEm = new Date().toISOString();
+    pushDevolutivaNotification(
+      caso,
+      `Atendimento agendado · ${caso.id.toUpperCase()}`,
+      `O contribuinte ${caso.contribuinteId} agendou atendimento para ${dataLabel} (${periodoLabel}) — protocolo ${interacao.protocolo}.`,
+    );
+    return respondValidated(CitizenActionResponseSchema, { interacao, caso });
   }),
 
   // Módulo 5 — Analytics
@@ -1182,6 +1555,79 @@ export const handlers = [
     return respondValidated(SystemUserSchema, updated);
   }),
 
+  // Perfil e preferências do usuário (T27 · Transversal)
+  http.get(`${API_URL}/me`, ({ request }) => {
+    const url = new URL(request.url);
+    const roleParsed = RoleSchema.safeParse(url.searchParams.get("role"));
+    if (!roleParsed.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_role",
+          message: "Informe um papel válido para carregar o perfil.",
+        },
+        { status: 400 },
+      );
+    }
+    const role = roleParsed.data;
+    return respondValidated(UserProfileSchema, {
+      ...userProfilesFixture[role],
+      ...(role === "cidadao" ? { dadosCadastrais: citizenRegistrationMutable } : {}),
+      preferencias: getPreferencesForRole(role),
+    });
+  }),
+
+  http.put(`${API_URL}/me/registration`, async ({ request }) => {
+    if (!citizenRegistrationMutable) {
+      return HttpResponse.json(
+        {
+          error_code: "registration_not_found",
+          message: "Cadastro do contribuinte não encontrado.",
+        },
+        { status: 404 },
+      );
+    }
+    const bodyRaw = await request.json().catch(() => null);
+    const body = CitizenRegistrationUpdateRequestSchema.safeParse(bodyRaw);
+    if (!body.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_registration_body",
+          message: "Não foi possível salvar seus dados. Revise os campos e tente novamente.",
+          issues: body.error.issues,
+        },
+        { status: 400 },
+      );
+    }
+    // Só contato/endereço mudam por aqui; CPF e vínculos societários
+    // exigem via formal (Junta Comercial / atendimento da Prefeitura).
+    Object.assign(citizenRegistrationMutable, body.data, {
+      atualizadoEm: new Date().toISOString(),
+    });
+    return respondValidated(CitizenRegistrationSchema, citizenRegistrationMutable);
+  }),
+
+  http.put(`${API_URL}/me/preferences`, async ({ request }) => {
+    const bodyRaw = await request.json().catch(() => null);
+    const body = PreferencesUpdateRequestSchema.safeParse(bodyRaw);
+    if (!body.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_preferences_body",
+          message: "Não foi possível salvar as preferências. Verifique os dados enviados.",
+          issues: body.error.issues,
+        },
+        { status: 400 },
+      );
+    }
+    const { role, preferencias } = body.data;
+    const updated: UserPreferences = {
+      ...getPreferencesForRole(role),
+      ...preferencias,
+    };
+    userPreferencesByRole.set(role, updated);
+    return respondValidated(UserProfileSchema.shape.preferencias, updated);
+  }),
+
   // Notificações in-app
   http.get(`${API_URL}/notifications`, () =>
     respondValidated(z.array(NotificacaoSchema), notificacoesMutable),
@@ -1224,11 +1670,12 @@ export const handlers = [
       );
     }
     const role = body.data.role ?? "auditor";
+    const profile = userProfilesFixture[role];
     return respondValidated(LoginResponseSchema, {
       role,
       mockUser: {
-        id: `mock-${role}`,
-        displayName: `Usuário mock (${role})`,
+        id: profile.id,
+        displayName: profile.nome,
       },
       issuedAt: new Date().toISOString(),
     });

@@ -6,6 +6,7 @@ import {
   DatabaseIcon,
   LayoutDashboardIcon,
   type LucideIcon,
+  PencilLineIcon,
   ScanSearchIcon,
   SendIcon,
   ShieldCheckIcon,
@@ -114,6 +115,13 @@ const NAV_SECTIONS: readonly NavSection[] = [
         icon: UsersIcon,
         roles: ["cidadao"] as const,
       },
+      {
+        href: "/citizen/dados",
+        label: "Meus dados",
+        description: "Cadastro, contato e endereço",
+        icon: PencilLineIcon,
+        roles: ["cidadao"] as const,
+      },
     ],
   },
   {
@@ -161,6 +169,16 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
     ),
   })).filter((section) => section.items.length > 0);
 
+  /*
+    Item ativo = href mais específico (mais longo) que casa com a rota.
+    Evita "Cidadão" (/citizen) e "Meus dados" (/citizen/dados) acesos
+    ao mesmo tempo em subrotas.
+  */
+  const activeHref = visibleSections
+    .flatMap((section) => section.items)
+    .filter((item) => pathname === item.href || pathname?.startsWith(`${item.href}/`))
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+
   return (
     <nav
       aria-label="Navegação principal"
@@ -171,25 +189,48 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
         className,
       )}
     >
-      <div className="flex items-center gap-3 px-2 pb-1">
-        <Image
-          src="/brand/logo-mark.png"
-          alt=""
-          aria-hidden="true"
-          width={40}
-          height={40}
-          priority
-          className="size-10 shrink-0 drop-shadow-[0_4px_10px_rgba(25,211,232,0.35)]"
-        />
-        <div className="grid leading-none">
-          <span className="font-display text-[16px] font-extrabold tracking-[-0.2px]">
-            FiscalCheck<span className="text-[#19d3e8]"> AI</span>
-          </span>
-          <span className="mt-1.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-[#7e97c4]">
-            Inteligência fiscal agêntica
-          </span>
+      {/* T16 — no perfil do contribuinte a marca exibida é a da Prefeitura de Brusque. */}
+      {role === "cidadao" ? (
+        <div className="flex items-center gap-3 px-2 pb-1">
+          <Image
+            src="/brand/brasao-brusque.png"
+            alt=""
+            aria-hidden="true"
+            width={40}
+            height={40}
+            priority
+            className="size-10 shrink-0 object-contain drop-shadow-[0_4px_10px_rgba(255,255,255,0.2)]"
+          />
+          <div className="grid leading-none">
+            <span className="font-display text-[15px] font-extrabold tracking-[-0.2px]">
+              Prefeitura de Brusque
+            </span>
+            <span className="mt-1.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-[#7e97c4]">
+              Santa Catarina · Secretaria da Fazenda
+            </span>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="flex items-center gap-3 px-2 pb-1">
+          <Image
+            src="/brand/logo-mark.png"
+            alt=""
+            aria-hidden="true"
+            width={40}
+            height={40}
+            priority
+            className="size-10 shrink-0 drop-shadow-[0_4px_10px_rgba(25,211,232,0.35)]"
+          />
+          <div className="grid leading-none">
+            <span className="font-display text-[16px] font-extrabold tracking-[-0.2px]">
+              FiscalCheck<span className="text-[#19d3e8]"> AI</span>
+            </span>
+            <span className="mt-1.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-[#7e97c4]">
+              Inteligência fiscal agêntica
+            </span>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto pt-1">
         {visibleSections.map((section) => (
@@ -199,7 +240,7 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
             </p>
             <ul className="grid gap-[3px]">
               {section.items.map((item) => {
-                const active = pathname === item.href || pathname?.startsWith(`${item.href}/`);
+                const active = item.href === activeHref;
                 const Icon = item.icon;
                 return (
                   <li key={item.href}>

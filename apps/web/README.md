@@ -40,7 +40,10 @@ app/                                    # rotas (App Router)
 │   ├── crossing                        # módulo 2
 │   ├── ai                              # módulo 3 (scores + agentes)
 │   ├── cases                           # módulo 4 — fila, dossiê, workflow (T13)
-│   ├── citizen                         # portal do cidadão
+│   ├── citizen                         # Portal do Contribuinte — autorregularização (T16)
+│   │   ├── dados                       # Meus dados — edição de contato/endereço (T27)
+│   │   ├── termos                      # página institucional — termos de uso (T16)
+│   │   └── privacidade                 # página institucional — LGPD + DPO (T16)
 │   ├── analytics                       # módulo 5 — Painel do Gestor (T17: KPIs, metas, SUS, relatórios)
 │   ├── comunicacoes                    # central de notificações eletrônicas (T15)
 │   ├── esteira-de-agentes              # painel da esteira de agentes (T10)
@@ -54,13 +57,15 @@ app/                                    # rotas (App Router)
 └── globals.css                         # Tailwind v4 + tokens DS
 components/
 ├── analytics/                          # Painel do Gestor: KPI trend, sparkline, metas, SUS, relatórios (T17)
-├── app-shell/                          # sidebar, header, banner, sino de notificações
+├── app-shell/                          # sidebar, header, banner, sino, menu do avatar (T27)
 ├── auth/                               # AuthLayout, InstitutionalPanel, LoginForm
 ├── agents/                             # cards e sheet da esteira de agentes (T10)
 ├── cases/                              # fila, dossiê e workflow de decisão (T13)
+├── citizen/                            # portal do contribuinte: cards, stepper 3 passos, diálogos (T16)
 ├── communications/                     # central de notificações (T15)
 ├── compliance/                         # trilha, agente de conformidade, admin (T19)
 ├── dashboard/                          # widgets do painel gerencial (T01)
+├── risk/                               # ScoreFactorsPanel — "Por que este score?" (T09)
 ├── risk-model/                         # editor + simulador do modelo de risco (T02)
 ├── providers.tsx                       # QueryClient (onError global → toast) + MSW bootstrap + Toaster
 └── ui/                                 # shadcn primitives + componentes DS custom
@@ -69,6 +74,7 @@ lib/
 ├── analytics/                          # utilitários puros: sus.ts, meta-status.ts (T17)
 ├── api-client.ts                       # fetch client com correlation-id + ApiError
 ├── case-transitions.ts                 # regras de estado dos casos (T13)
+├── citizen/                            # simulador de parcelamento + linguagem clara (T16)
 ├── compliance/export-audit.ts          # export CSV/JSON da trilha (T19)
 ├── dossie/                             # geração do PDF do dossiê (T28, react-pdf)
 ├── errors.ts                           # resolveErrorMessage — mapa ApiError → pt-BR (T25)
@@ -81,7 +87,8 @@ lib/
 ├── toast.ts                            # notify.success/warning/error/info + notify.apiError (T25)
 └── utils.ts                            # cn() helper
 hooks/
-└── use-agents-feed.ts                  # stream/pooling dos eventos da esteira (T10)
+├── use-agents-feed.ts                  # stream/pooling dos eventos da esteira (T10)
+└── use-user-profile.ts                 # perfil + preferências do usuário logado (T27)
 stores/
 ├── ui-store.ts                         # sidebar collapse
 └── session-store.ts                    # papel + usuário mock (T01)

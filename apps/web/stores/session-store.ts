@@ -2,6 +2,8 @@ import { create } from "zustand";
 
 import type { Role } from "@fiscalcheck/shared-types";
 
+import { userProfilesFixture } from "@/mocks/fixtures/user-profiles";
+
 /**
  * Store de sessão do usuário (T01 — mock).
  *
@@ -31,18 +33,12 @@ export const useSession = create<SessionState>((set) => ({
   setRole: (role, user) =>
     set({
       role,
+      // T27: identidade default vem do diretório de perfis fake — um
+      // nome distinto por papel, o mesmo que GET /me devolve.
       user: user ?? {
-        id: `mock-${role}`,
-        displayName: DEFAULT_DISPLAY_NAME[role],
+        id: userProfilesFixture[role].id,
+        displayName: userProfilesFixture[role].nome,
       },
     }),
   clear: () => set({ role: null, user: null }),
 }));
-
-const DEFAULT_DISPLAY_NAME: Record<Role, string> = {
-  auditor: "Auditor Fiscal",
-  supervisor: "Gestor",
-  admin: "Administrador",
-  cidadao: "Contribuinte",
-  agente_sistema: "Agente do sistema",
-};
