@@ -6,6 +6,20 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o 
 
 ## [Não publicado]
 
+### Added — T25 · Estados de vazio, carregamento e erro + Toasts (transversal) (2026-07-04)
+
+Fundação transversal de feedback de UI. Consolida em um único conjunto o que estava espalhado por página (loading, vazio, erro, toast), sem introduzir novo design system nem substituir lib de UI existente. Base para o checklist de QA (T22).
+
+- **Componentes reutilizáveis** em [`apps/web/components/ui/`](./apps/web/components/ui/): `Skeleton` + `SkeletonText`/`SkeletonCard`/`SkeletonRow`/`SkeletonTable`, `ErrorState` (título/descrição pt-BR + botão "Tentar novamente" + últimos 12 chars do `correlationId`) e `AsyncBoundary` — resolve precedência **loading > erro > vazio > sucesso** e evita `if/else` inline em cada tela. `EmptyState` existente foi mantido e agora é usado pelo `AsyncBoundary` como slot padrão de vazio.
+- **Tratamento único de erro** em [`apps/web/lib/errors.ts`](./apps/web/lib/errors.ts): `resolveErrorMessage(unknown)` mapeia `ApiError.code` (18+ códigos catalogados dos handlers MSW) → `{ title, description }` em pt-BR sem vazar stack, path ou detalhe técnico. Fallbacks por status (401/403 → autorização, 404 → não encontrado, 5xx → indisponibilidade) e detecção de `TypeError: Failed to fetch` → mensagem de conexão. Preserva `correlationId` para telemetria.
+- **Toast tipado** em [`apps/web/lib/toast.ts`](./apps/web/lib/toast.ts): `notify.success/warning/error/info(msg, opts?)` + `notify.apiError(error, opts?)` como wrapper fino sobre o `sonner` já integrado (o `Toaster` do DS em `components/ui/sonner.tsx` cobre fila, auto-dismiss, `role=status`/`role=alert` e 4 tipos por tokens semânticos). Consumidores legados que usam `toast` do sonner direto continuam funcionando; a partir de T25 o caminho recomendado é `notify.apiError` em `onError` e `notify.success` em `onSuccess`.
+- **QueryClient global** em [`apps/web/components/providers.tsx`](./apps/web/components/providers.tsx): `QueryCache.onError` e `MutationCache.onError` disparam `notify.apiError` automaticamente. Escrita bem-sucedida pode declarar `meta.toastSuccess = "..."` para virar `notify.success`. Leitura pode declarar `meta.silent = true` quando a tela já mostra `ErrorState` inline (evita toast duplicado). Wiring é opt-out — silêncio explícito, ruído por padrão.
+- **Telas migradas como referência**: [`/ingestion`](./apps/web/app/(dashboard)/ingestion/page.tsx) (T04), [`/cases`](./apps/web/app/(dashboard)/cases/page.tsx) (T13) e [`/comunicacoes`](./apps/web/app/(dashboard)/comunicacoes/page.tsx) (T15) trocaram `Loader2 + p.text-destructive + EmptyState` inline por `<AsyncBoundary>` + `<SkeletonTable>`/`<SkeletonCard>` + `<EmptyState>` padrão. `NotificationBell` (também T15) ganhou `SkeletonText` + botão "Tentar novamente" no popover quando `/notifications` falha.
+- **Testes**: [`errors-resolve.test.ts`](./apps/web/tests/errors-resolve.test.ts) (8 casos, incluindo códigos mapeados, fallbacks por status, `TypeError: Failed to fetch` e não-vazamento de mensagem técnica), [`async-boundary.test.tsx`](./apps/web/tests/async-boundary.test.tsx) (7 casos, precedência de estados + `onRetry`) e [`query-client-toast.test.ts`](./apps/web/tests/query-client-toast.test.ts) (4 casos, `queryCache.onError`, `mutationCache.onError/onSuccess`, `meta.silent` e `meta.toastSuccess`).
+- **Docs**: [`docs/design-system/design-system.md` §7 · Estados transversais](./docs/design-system/design-system.md) documenta os 5 blocos (EmptyState, Skeleton, ErrorState, AsyncBoundary, Toast) com regras de uso.
+
+Nota de decisão: a task descrevia "Radix Toast" como base. Optamos por manter `sonner` — ele já está integrado ao root, estilizado por tokens DS e cobre o contrato pedido (fila, auto-dismiss, 4 tipos, acessibilidade). Trocar por Radix Toast introduziria duplicação sem ganho funcional.
+
 ### Added — T17 · Painel do Gestor, Metas do Piloto e Alertas (2026-07-04)
 
 Entrega do Painel do Gestor completo do módulo 5 (RF05/FA06 do edital), estendendo a rota `/analytics` (restrita a `supervisor` + `admin`).

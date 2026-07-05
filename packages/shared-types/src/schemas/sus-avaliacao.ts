@@ -15,11 +15,7 @@ import { z } from "zod";
   cruas para auditoria posterior.
 */
 
-export const SusRespostaSchema = z
-  .number()
-  .int()
-  .min(1)
-  .max(5);
+export const SusRespostaSchema = z.number().int().min(1).max(5);
 
 export const SusAvaliacaoSchema = z.object({
   id: z.string().min(1),

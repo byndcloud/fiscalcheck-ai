@@ -62,20 +62,23 @@ components/
 ├── compliance/                         # trilha, agente de conformidade, admin (T19)
 ├── dashboard/                          # widgets do painel gerencial (T01)
 ├── risk-model/                         # editor + simulador do modelo de risco (T02)
-├── providers.tsx                       # QueryClient + MSW bootstrap + Toaster
+├── providers.tsx                       # QueryClient (onError global → toast) + MSW bootstrap + Toaster
 └── ui/                                 # shadcn primitives + componentes DS custom
+    #  T25: skeleton.tsx, error-state.tsx, async-boundary.tsx, empty-state.tsx, sonner.tsx
 lib/
 ├── analytics/                          # utilitários puros: sus.ts, meta-status.ts (T17)
-├── api-client.ts                       # fetch client com correlation-id
+├── api-client.ts                       # fetch client com correlation-id + ApiError
 ├── case-transitions.ts                 # regras de estado dos casos (T13)
 ├── compliance/export-audit.ts          # export CSV/JSON da trilha (T19)
 ├── dossie/                             # geração do PDF do dossiê (T28, react-pdf)
+├── errors.ts                           # resolveErrorMessage — mapa ApiError → pt-BR (T25)
 ├── format-relative-time.ts             # "há 5 min" etc.
 ├── masks.ts                            # máscara de CPF/CNPJ/IP (T19)
 ├── mocks/agents.ts                     # fixtures dos agentes (T10)
 ├── reports/                            # PDF (react-pdf) + XLSX (SheetJS dynamic import) — T17
 ├── risk-model/simulate.ts              # simulação do modelo (T02)
 ├── roles.ts                            # labels e helpers de papel
+├── toast.ts                            # notify.success/warning/error/info + notify.apiError (T25)
 └── utils.ts                            # cn() helper
 hooks/
 └── use-agents-feed.ts                  # stream/pooling dos eventos da esteira (T10)
