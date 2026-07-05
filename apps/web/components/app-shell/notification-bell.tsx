@@ -1,14 +1,16 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BellIcon, BellRingIcon, CheckIcon } from "lucide-react";
+import { BellIcon, BellRingIcon, CheckIcon, RefreshCwIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import type { Notificacao } from "@fiscalcheck/shared-types";
 
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { SkeletonText } from "@/components/ui/skeleton";
 import { apiRequest } from "@/lib/api-client";
+import { resolveErrorMessage } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 
 /*
@@ -48,10 +50,16 @@ export function NotificationBell() {
     queryKey: NOTIFICATIONS_QUERY_KEY,
     queryFn: fetchNotifications,
     staleTime: 30_000,
+    // T25: erro do sino é resolvido inline (retry no próprio popover).
+    // Evita toast global — o sino está sempre visível, um toast a mais
+    // seria ruído em cima de um problema que o usuário já vê.
+    meta: { silent: true },
   });
 
   const mutation = useMutation({
     mutationFn: markNotificationRead,
+    // T25: erros de "marcar como lida" caem no toast global.
+    // Nada específico a comunicar aqui além da mensagem amigável pt-BR.
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
       const previous = queryClient.getQueryData<Notificacao[]>(NOTIFICATIONS_QUERY_KEY);
@@ -110,12 +118,23 @@ export function NotificationBell() {
           </div>
         </header>
         <div className="max-h-80 overflow-y-auto">
-          {query.isLoading ? (
-            <p className="px-4 py-6 text-center text-sm text-muted-foreground">Carregando…</p>
+          {query.isPending ? (
+            <div className="px-4 py-4">
+              <SkeletonText lines={3} />
+            </div>
           ) : query.isError ? (
-            <p className="px-4 py-6 text-center text-sm text-destructive">
-              Não foi possível carregar as notificações.
-            </p>
+            <div role="alert" className="grid gap-2 px-4 py-6 text-center text-sm text-destructive">
+              <p className="font-medium">{resolveErrorMessage(query.error).title}</p>
+              <p className="text-xs text-muted-foreground">
+                {resolveErrorMessage(query.error).description}
+              </p>
+              <div className="mt-1 flex justify-center">
+                <Button type="button" variant="outline" size="sm" onClick={() => query.refetch()}>
+                  <RefreshCwIcon aria-hidden="true" />
+                  Tentar novamente
+                </Button>
+              </div>
+            </div>
           ) : (query.data?.length ?? 0) === 0 ? (
             <p className="px-4 py-6 text-center text-sm text-muted-foreground">Sem notificações.</p>
           ) : (

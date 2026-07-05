@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangleIcon, InboxIcon, Loader2Icon, SendIcon } from "lucide-react";
+import { InboxIcon, SendIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import type {
@@ -16,8 +16,10 @@ import { CommunicationDetailSheet } from "@/components/communications/communicat
 import { CommunicationsList } from "@/components/communications/communications-list";
 import { CommunicationsToolbar } from "@/components/communications/communications-toolbar";
 import { STATUS_LABEL_PT } from "@/components/communications/status-stepper";
+import { AsyncBoundary } from "@/components/ui/async-boundary";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
+import { SkeletonTable } from "@/components/ui/skeleton";
 import { apiRequest } from "@/lib/api-client";
 
 type CanalFilter = CanalComunicacao | "todos";
@@ -39,12 +41,16 @@ export default function ComunicacoesPage() {
   const query = useQuery({
     queryKey: ["communications"],
     queryFn: () => apiRequest<Comunicacao[]>("/communications"),
+    // T25: erro tratado inline pelo AsyncBoundary (retry + descrição
+    // amigável). Evita toast global duplicado.
+    meta: { silent: true },
   });
 
   const taxpayers = useQuery({
     queryKey: ["taxpayers"],
     queryFn: () => apiRequest<Contribuinte[]>("/taxpayers"),
     staleTime: 5 * 60 * 1000,
+    meta: { silent: true },
   });
 
   const [search, setSearch] = useState("");
@@ -104,42 +110,35 @@ export default function ComunicacoesPage() {
         totalCount={comunicacoes.length}
       />
 
-      {query.isLoading ? (
-        <output
-          aria-live="polite"
-          className="flex items-center gap-2 rounded-lg border border-dashed border-border bg-surface/60 p-6 text-sm text-muted-foreground"
-        >
-          <Loader2Icon aria-hidden className="size-4 animate-spin" />
-          Carregando comunicações eletrônicas…
-        </output>
-      ) : query.isError ? (
-        <div
-          role="alert"
-          className="flex items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive"
-        >
-          <AlertTriangleIcon aria-hidden className="mt-0.5 size-5" />
-          <div className="grid gap-1">
-            <p className="font-semibold">Não foi possível carregar as comunicações.</p>
-            <p className="text-xs">
-              Verifique sua conexão com a API mock e tente recarregar a página.
-            </p>
-          </div>
-        </div>
-      ) : comunicacoes.length === 0 ? (
-        <EmptyState
-          icon={SendIcon}
-          title="Ainda não há comunicações eletrônicas"
-          description="Comunicações emitidas pelo fluxo de casos aparecerão aqui com rastreio de entrega, ciência e resposta."
-        />
-      ) : filtered.length === 0 ? (
-        <EmptyState
-          icon={InboxIcon}
-          title="Nenhuma comunicação corresponde aos filtros"
-          description="Ajuste canal, status ou o texto da busca para ver comunicações desta central."
-        />
-      ) : (
-        <CommunicationsList data={filtered} taxpayerById={taxpayerById} onSelect={setSelectedId} />
-      )}
+      <AsyncBoundary
+        isLoading={query.isPending}
+        isError={query.isError}
+        isEmpty={comunicacoes.length === 0}
+        error={query.error}
+        onRetry={() => query.refetch()}
+        loading={<SkeletonTable rows={5} columns={5} />}
+        empty={
+          <EmptyState
+            icon={SendIcon}
+            title="Ainda não há comunicações eletrônicas"
+            description="Comunicações emitidas pelo fluxo de casos aparecerão aqui com rastreio de entrega, ciência e resposta."
+          />
+        }
+      >
+        {filtered.length === 0 ? (
+          <EmptyState
+            icon={InboxIcon}
+            title="Nenhuma comunicação corresponde aos filtros"
+            description="Ajuste canal, status ou o texto da busca para ver comunicações desta central."
+          />
+        ) : (
+          <CommunicationsList
+            data={filtered}
+            taxpayerById={taxpayerById}
+            onSelect={setSelectedId}
+          />
+        )}
+      </AsyncBoundary>
 
       <CommunicationDetailSheet
         comunicacaoId={selectedId}

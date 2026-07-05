@@ -264,6 +264,23 @@ Nova anatomia, de cima para baixo: **rótulo em label caps** (11 px / 700) à es
 
 Grade fixa por colunas (caso · contribuinte · score · risco · divergência · status). Cabeçalho em label caps 10,5 px sobre `--n-25`; linhas com *hover* `--c-brand-050`; ID do caso em Roboto Mono azul; contribuinte em duas linhas (nome 13,5 px / 700 + CNPJ mono e setor, com microtag `AGENTE` quando aplicável). O score aparece como **score-chip**: retângulo 42×30 px de raio 8 px, fundo do nível de risco e numeral Roboto Mono 15 px / 700 — separado da pílula de nível, que traz o rótulo textual. Valores monetários em Roboto Mono; chevron de acesso ao dossiê ao fim da linha.
 
+### Estados transversais — vazio, carregamento, erro e toast (T25)
+
+Camada obrigatória em toda tela que consuma dados. Padroniza o que antes ficava espalhado por página em `if/else` inline. Referência de implementação em `apps/web/components/ui/{skeleton,empty-state,error-state,async-boundary}.tsx` e `apps/web/lib/{errors,toast}.ts`.
+
+- **Empty state** — bloco central com **ícone Lucide 24 px** em tile 48 px `bg-brand-050`/`text-brand`, título 16 px / 700 e descrição 14 px em `text-muted-foreground`, tudo sobre borda tracejada `--border` e fundo `bg-surface/60` com raio `--r-lg`. Slot opcional de ação (`Button` variante `outline`/`brand`). Variantes de conteúdo: **lista vazia** (nada foi criado), **busca sem resultado** (ajustar filtro) e **sem permissão** (sinaliza RBAC — o texto orienta a pedir acesso, não expõe o role).
+- **Skeleton** — retângulo `bg-n-100` com pulso Tailwind, raio `--r-sm`. Wrappers reutilizáveis: `Skeleton` base, `SkeletonText` (N linhas), `SkeletonCard` (mesmo raio/elevação de um card real) e `SkeletonTable` (linhas + colunas do futuro conteúdo, para evitar *layout shift*). Movimento respeita `prefers-reduced-motion` via regra global do §6.
+- **Error state** — bloco centralizado com ícone `AlertTriangleIcon`, borda `border-destructive/40`, fundo `bg-destructive/5` e **botão “Tentar novamente”** (variante `outline`). Título e descrição vêm sempre do mapa único `resolveErrorMessage` (§9) — nunca `error.message` cru. Quando há `ApiError.correlationId`, os últimos 12 caracteres aparecem em mono discreto para o usuário reportar ao suporte.
+- **AsyncBoundary** — componente que recebe `{ isLoading, isError, isEmpty, error, onRetry, loading, empty, errorSlot, children }` e resolve a precedência **loading > error > empty > success**. É a interface canônica para consumir queries do TanStack — as telas param de repetir três blocos condicionais.
+- **Toast (sonner)** — `Toaster` do `sonner` fica no root (`components/ui/sonner.tsx`), estilizado via tokens (`--c-success`, `--c-warning`, `--c-danger`, `--c-info`). Quatro tipos suportados (`success`, `warning`, `error`, `info`), fila com auto-dismiss, botão de fechar e `role=status`/`role=alert` + `aria-live` nativos. Consumo padrão: `notify.success/warning/error/info` e `notify.apiError(error)` do módulo `lib/toast.ts` (nunca `toast.error(error.message)` direto).
+
+**Regras de uso**
+
+- Toda tela com query passa por `AsyncBoundary`. Nenhuma tela em branco.
+- Toda ação de escrita (salvar, aprovar, exportar, enviar) retorna toast — sucesso ou erro. Mutations com `meta.toastSuccess = "..."` disparam sucesso automaticamente.
+- Erros de leitura viram toast só quando a query **não** sinaliza `meta.silent = true`. Telas que já mostram `ErrorState` inline com `retry` devem marcar `silent` para evitar toast duplicado.
+- **Nunca** exibir stack, path, código HTTP cru ou mensagem técnica ao usuário. Todo texto passa por `resolveErrorMessage`.
+
 ---
 
 ## 8. Padrões de domínio

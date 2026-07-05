@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Loader2Icon } from "lucide-react";
+import { BriefcaseIcon, SearchIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import type { Caso, Contribuinte } from "@fiscalcheck/shared-types";
@@ -11,7 +11,10 @@ import { CaseKanban } from "@/components/cases/case-kanban";
 import { CaseList } from "@/components/cases/case-list";
 import { CasesToolbar } from "@/components/cases/cases-toolbar";
 import type { CaseView } from "@/components/cases/view-toggle";
+import { AsyncBoundary } from "@/components/ui/async-boundary";
+import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { apiRequest } from "@/lib/api-client";
 
 const VIEW_STORAGE_KEY = "fiscalcheck.cases.view";
@@ -42,12 +45,15 @@ export default function CasesPage() {
   const query = useQuery({
     queryKey: ["cases"],
     queryFn: () => apiRequest<Caso[]>("/cases"),
+    // T25: erro tratado inline pelo AsyncBoundary — sem toast duplicado.
+    meta: { silent: true },
   });
 
   const taxpayers = useQuery({
     queryKey: ["taxpayers"],
     queryFn: () => apiRequest<Contribuinte[]>("/taxpayers"),
     staleTime: 5 * 60 * 1000,
+    meta: { silent: true },
   });
 
   const [view, setView] = useState<CaseView>("kanban");
@@ -112,19 +118,43 @@ export default function CasesPage() {
         visible={filteredCasos.length}
       />
 
-      {query.isLoading ? (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2Icon aria-hidden className="size-4 animate-spin" /> Carregando casos…
-        </div>
-      ) : query.isError ? (
-        <p role="alert" className="text-sm text-destructive">
-          Não foi possível carregar os casos. Tente novamente em instantes.
-        </p>
-      ) : view === "kanban" ? (
-        <CaseKanban data={filteredCasos} taxpayerById={taxpayerById} onOpenDossie={setSelectedId} />
-      ) : (
-        <CaseList data={filteredCasos} taxpayerById={taxpayerById} onOpenDossie={setSelectedId} />
-      )}
+      <AsyncBoundary
+        isLoading={query.isPending}
+        isError={query.isError}
+        isEmpty={casos.length === 0}
+        error={query.error}
+        onRetry={() => query.refetch()}
+        loading={
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <SkeletonCard height="h-40" />
+            <SkeletonCard height="h-40" />
+            <SkeletonCard height="h-40" />
+          </div>
+        }
+        empty={
+          <EmptyState
+            icon={BriefcaseIcon}
+            title="Nenhum caso na fila"
+            description="Assim que o motor de risco identificar novos candidatos ou o auditor abrir um caso manualmente, eles aparecerão aqui."
+          />
+        }
+      >
+        {filteredCasos.length === 0 ? (
+          <EmptyState
+            icon={SearchIcon}
+            title="Nenhum caso corresponde à busca"
+            description="Ajuste o texto do filtro ou limpe para ver todos os casos ativos."
+          />
+        ) : view === "kanban" ? (
+          <CaseKanban
+            data={filteredCasos}
+            taxpayerById={taxpayerById}
+            onOpenDossie={setSelectedId}
+          />
+        ) : (
+          <CaseList data={filteredCasos} taxpayerById={taxpayerById} onOpenDossie={setSelectedId} />
+        )}
+      </AsyncBoundary>
 
       <CaseDossieSheet
         casoId={selectedId}
