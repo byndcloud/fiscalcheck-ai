@@ -7,6 +7,7 @@ import {
   GraduationCapIcon,
   LayoutDashboardIcon,
   type LucideIcon,
+  MapPinnedIcon,
   PencilLineIcon,
   ScanSearchIcon,
   SendIcon,
@@ -117,6 +118,13 @@ const NAV_SECTIONS: readonly NavSection[] = [
         label: "Comunicações",
         description: "Central de notificações eletrônicas",
         icon: SendIcon,
+        roles: AUDITORIAL_ROLES,
+      },
+      {
+        href: "/geofiscalizacao",
+        label: "Geofiscalização",
+        description: "Obras com indício (construção civil)",
+        icon: MapPinnedIcon,
         roles: AUDITORIAL_ROLES,
       },
       {

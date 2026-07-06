@@ -96,6 +96,23 @@ export {
 } from "./schemas/case-collab";
 
 export {
+  AlvaraSituacaoSchema,
+  GeoAlvaraSchema,
+  GeoDeteccaoSchema,
+  GeoFonteDeteccaoSchema,
+  GeoObraSchema,
+  GeoObraStatusSchema,
+  GeoObraTipoSchema,
+  type AlvaraSituacao,
+  type GeoAlvara,
+  type GeoDeteccao,
+  type GeoFonteDeteccao,
+  type GeoObra,
+  type GeoObraStatus,
+  type GeoObraTipo,
+} from "./schemas/geo";
+
+export {
   NetworkEdgeSchema,
   NetworkEdgeTipoSchema,
   NetworkEsquemaSchema,

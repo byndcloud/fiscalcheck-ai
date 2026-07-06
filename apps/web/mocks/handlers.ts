@@ -38,6 +38,8 @@ import {
   DivergenciaSchema,
   DossieExportRequestSchema,
   DossieExportResponseSchema,
+  type GeoObra,
+  GeoObraSchema,
   type GuiaDam,
   type MetaPiloto,
   MetaPilotoSchema,
@@ -107,6 +109,7 @@ import {
 } from "./fixtures/copilot-scripts";
 import { findCtcAlert, getCtcFeed } from "./fixtures/ctc-feed";
 import { divergenciasFixture } from "./fixtures/divergencias";
+import { geoObrasFixture } from "./fixtures/geo-obras";
 import { KPIsAnalyticsSchema, kpisFixture } from "./fixtures/kpis";
 import { metasPilotoFixture } from "./fixtures/metas-piloto";
 import { monthlyRecoveryFixture } from "./fixtures/monthly-recovery";
@@ -192,6 +195,19 @@ const nonFilersMutable: NonFiler[] = nonFilersFixture.map((nf) => ({
 }));
 let radarCaseSeq = 1;
 let ctcCaseSeq = 1;
+
+/*
+  Estado in-memory do módulo 7 (T21 · Geofiscalização).
+  "Gerar caso" abre um caso candidato REAL em `casosMutable` (aparece na
+  fila /cases com badge AGENTE) — sempre por ação explícita do auditor
+  (AGENTS.md §1.1). Idempotente: segunda tentativa devolve 409.
+*/
+const geoObrasMutable: GeoObra[] = geoObrasFixture.map((o) => ({
+  ...o,
+  deteccao: { ...o.deteccao },
+  alvara: { ...o.alvara },
+}));
+let geoCaseSeq = 1;
 
 /*
   Estado in-memory do Portal do Contribuinte (T16 · módulo 4).
@@ -2224,6 +2240,86 @@ export const handlers = [
     };
     trainingAttempts.set(id, result);
     return respondValidated(TrainingAttemptResultSchema, result);
+  }),
+
+  // Módulo 7 — Geofiscalização (T21 · complementar)
+  // Pins ordenados por severidade do indício (desc) — mesma priorização
+  // visual que o auditor vê no mapa.
+  http.get(`${API_URL}/support/geofiscalizacao/obras`, () =>
+    respondValidated(
+      z.array(GeoObraSchema),
+      [...geoObrasMutable].sort((a, b) => b.severidade - a.severidade),
+    ),
+  ),
+
+  /*
+    "Gerar caso" — abre caso candidato real na fila do módulo 4 a partir
+    do indício de obra. A UI exige confirmação do auditor; aqui o efeito
+    é idempotente: segunda tentativa devolve 409 com o caso já aberto.
+  */
+  http.post(`${API_URL}/support/geofiscalizacao/obras/:id/open-case`, ({ params }) => {
+    const { id } = params as { id: string };
+    const obra = geoObrasMutable.find((o) => o.id === id);
+    if (!obra) {
+      return HttpResponse.json(
+        {
+          error_code: "geo_obra_not_found",
+          message: "Obra ou imóvel com indício não encontrado.",
+        },
+        { status: 404 },
+      );
+    }
+    if (obra.status === "caso_aberto") {
+      return HttpResponse.json(
+        {
+          error_code: "geo_case_already_open",
+          message: "Já existe caso candidato aberto para esta obra.",
+          casoId: obra.casoId,
+        },
+        { status: 409 },
+      );
+    }
+
+    const now = new Date().toISOString();
+    const divergenciaEstimada = Math.max(0, obra.valorEstimadoObra - obra.nfseConstrucao12m);
+    const ALVARA_LABEL: Record<GeoObra["alvara"]["situacao"], string> = {
+      sem_alvara: "sem alvará localizado",
+      alvara_divergente: "alvará divergente da intervenção detectada",
+      alvara_compativel: "alvará compatível, serviços subdeclarados",
+    };
+    const caso: Caso = {
+      id: `cs-2026-g${String(geoCaseSeq).padStart(3, "0")}`,
+      contribuinteId: obra.contribuinteId,
+      status: "candidato",
+      criadoEm: now,
+      atualizadoEm: now,
+      agenteResponsavel: "ag-orquestrador",
+      divergenciaIds: [],
+      valorPotencial: divergenciaEstimada,
+      periodoApuracao: "últimos 12 meses",
+      tributo: "iss",
+      proximaAcaoRecomendada: `Verificar obra em ${obra.endereco} (${obra.bairro}) — ${ALVARA_LABEL[obra.alvara.situacao]}.`,
+      recomendacao: {
+        // Sem alvará = irregularidade formal já caracterizada → verificação
+        // in loco; nos demais, o convite à autorregularização vem primeiro.
+        acao: obra.alvara.situacao === "sem_alvara" ? "fiscalizacao" : "autorregularizacao",
+        justificativa: `Detecção por visão computacional (${obra.deteccao.fonte === "satelite" ? "satélite" : "imagens de rua"}): ${obra.deteccao.resumo} Situação do licenciamento: ${ALVARA_LABEL[obra.alvara.situacao]}.`,
+        confianca: obra.deteccao.confianca,
+        baseadaEm: [obra.id],
+      },
+      observacoes: `Caso aberto a partir da Geofiscalização (T21). Área detectada: ${obra.deteccao.areaDetectadaM2} m²; NFS-e de construção (12m): R$ ${Math.round(obra.nfseConstrucao12m / 1000)} mil.`,
+    };
+    geoCaseSeq += 1;
+    casosMutable.unshift(caso);
+
+    obra.status = "caso_aberto";
+    obra.casoId = caso.id;
+
+    return respondValidated(
+      z.object({ obra: GeoObraSchema, caso: CasoSchema }),
+      { obra, caso },
+      { status: 201 },
+    );
   }),
 
   // Notificações in-app
