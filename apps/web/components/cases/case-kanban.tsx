@@ -7,6 +7,7 @@ import type { Caso, Contribuinte, StatusCaso } from "@fiscalcheck/shared-types";
 import { AgentRecommendationBadge } from "@/components/cases/agent-recommendation-badge";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { prazoInfo } from "@/lib/prazo";
 import { cn } from "@/lib/utils";
 
 /*
@@ -49,20 +50,8 @@ const CURRENCY_BRL = new Intl.NumberFormat("pt-BR", {
   maximumFractionDigits: 0,
 });
 
-function relativePrazo(prazo?: string): { label: string; tone: "muted" | "warn" | "danger" } {
-  if (!prazo) return { label: "Sem prazo", tone: "muted" };
-  const target = new Date(prazo).getTime();
-  const now = Date.now();
-  const diffDays = Math.round((target - now) / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return { label: "Vence hoje", tone: "danger" };
-  if (diffDays > 0) {
-    return {
-      label: `Vence em ${diffDays}d`,
-      tone: diffDays <= 3 ? "warn" : "muted",
-    };
-  }
-  return { label: `Vencido há ${Math.abs(diffDays)}d`, tone: "danger" };
-}
+// T14: contagem regressiva compartilhada com a Lista e o dossiê.
+const relativePrazo = prazoInfo;
 
 export function CaseKanban({ data, taxpayerById, onOpenDossie }: Props) {
   const buckets = new Map<StatusCaso, Caso[]>();

@@ -26,6 +26,16 @@
 - **Acompanhamento em tempo real** — linha do tempo das interações no detalhe da pendência + indicação dos canais de aviso (e-mail, SMS, WhatsApp).
 - **Páginas institucionais** — `/citizen/termos` e `/citizen/privacidade` (LGPD + contato do DPO).
 
+## Entrega T14 · Anotações, prazos e devolutivas no caso (MVP web)
+
+> Frente de UI do RF04, entregue no `apps/web` sobre a camada mock (MSW).
+
+- **Prazos com contagem regressiva** — `lib/prazo.ts` compartilhado entre Kanban, Lista e dossiê: âmbar quando faltam ≤3 dias, vermelho quando vence hoje ou já venceu (aceite: vencidos destacados na fila).
+- **Linha do tempo do caso** — eixo vertical unificado no dossiê (autoria + timestamps) com criação, decisões, documentos, anotações e devolutivas do contribuinte.
+- **Anotações do auditor** — `GET/POST /cases/:id/annotations`, append-only com autoria (`X-Actor-*`) e RBAC (cidadão → 403).
+- **Devolutivas eletrônicas** — as `CitizenInteracao` do T16 chegam ao dossiê com **pré-triagem do agente** (recomendação não vinculante) e recebem tratamento formal do auditor: Acatar / Manter / Solicitar complemento, com justificativa obrigatória e registro imutável (`POST /cases/:id/interacoes/:interacaoId/tratamento`, idempotente).
+- **Sino (T01)** — notificação `devolutiva` agora leva direto ao dossiê (`/cases?caso=…`) pelo botão "Abrir caso".
+
 ## Arquitetura interna
 
 ```text

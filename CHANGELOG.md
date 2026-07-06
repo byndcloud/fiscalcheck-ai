@@ -6,6 +6,30 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o 
 
 ## [Não publicado]
 
+### Added — T14 · Anotações, prazos e devolutivas no caso (RF04) + T12 · Análise de Redes (RF08/FA09) (2026-07-06)
+
+**T14 — Gestão do caso no dossiê (módulo 4)**
+
+- **Schema** ([`case-collab.ts`](<./packages/shared-types/src/schemas/case-collab.ts>)): `CaseAnnotation` (anotação append-only com autoria), `DevolutivaTratamento` (Acatar / Manter / Solicitar complemento + justificativa + autoria) e `DevolutivaPreTriagem` (recomendação não vinculante do agente). `CitizenInteracao` (T16) ganhou `preTriagem` e `tratamento` opcionais — a devolutiva do cidadão vira item tratável no lado do auditor.
+- **Prazo com contagem regressiva** ([`lib/prazo.ts`](<./apps/web/lib/prazo.ts>) + `CaseDeadlineChip`): escala muted → âmbar (≤3 dias) → vermelho (vence hoje/vencido) compartilhada entre Kanban, **Lista** (antes só data seca — aceite: vencidos destacados na fila) e o cabeçalho do dossiê.
+- **Linha do tempo unificada** ([`case-timeline.tsx`](<./apps/web/components/cases/case-timeline.tsx>)): eixo vertical com autoria + timestamps fundindo criação do caso, decisões, documentos emitidos, anotações e devolutivas (destaque âmbar) + seus tratamentos.
+- **Caixa de devolutivas** ([`devolutivas-panel.tsx`](<./apps/web/components/cases/devolutivas-panel.tsx>)): cada devolutiva chega com a pré-triagem do agente (sugestão destacada no botão correspondente); o auditor registra Acatar/Manter/Solicitar complemento com justificativa obrigatória — `POST /cases/:id/interacoes/:interacaoId/tratamento`, idempotente (409), refletido em `observacoes` do caso.
+- **Anotações do auditor** ([`annotations-panel.tsx`](<./apps/web/components/cases/annotations-panel.tsx>)): `GET/POST /cases/:id/annotations` com RBAC (cidadão → 403), autoria via headers `X-Actor-*` e trilha imutável.
+- **Sino (T01)**: notificações com `linkHref` ganharam botão "Abrir caso" — devolutiva nova aponta para `/cases?caso=…` (deep-link do dossiê) e é marcada como lida ao navegar.
+- **Seed demonstrável**: contestação pendente com pré-triagem + 2 anotações num caso notificado — o fluxo completo aparece sem depender de ação prévia no portal.
+- **Testes** (10 casos novos): [`case-collab-handlers.test.ts`](<./apps/web/tests/case-collab-handlers.test.ts>) (anotações com autoria/RBAC, pré-triagem, tratamento idempotente, devolutiva → sino com deep-link) e [`prazo.test.ts`](<./apps/web/tests/prazo.test.ts>) (escala de alerta).
+
+**T12 — Análise de Redes / Graph Analytics (módulo 3)**
+
+- **Página nova `/analise-de-redes`** (item próprio na sidebar, papéis auditoriais), layout alinhado ao protótipo de referência: barra de contexto (comunidade, período, tipos de vínculo, profundidade), 6 métricas da comunidade, canvas do grafo + painel lateral e a **biblioteca de cenários abaixo do grafo** — clicar num cenário troca o grafo exibido.
+- **Schema** ([`network.ts`](<./packages/shared-types/src/schemas/network.ts>)): `NetworkScenario` (comunidade suspeita com nós, vínculos, padrões detectados e recomendação do agente), nós com score de rede, **centralidade**, **ligações com autuados** e identidades unificadas (resolução de entidades); vínculos societário/endereço/financeiro.
+- **5 cenários demonstráveis** ([`network-scenarios.ts`](<./apps/web/mocks/fixtures/network-scenarios.ts>), aceite): fragmentação artificial de receita (polo têxtil, C-07 → dossiê `cs-2026-0148`), conluio de fornecedores (construção civil, C-11 → `cs-2026-0128`), interposição de pessoas (C-04), endereço compartilhado (C-09) e rede familiar com revezamento de MEI (C-15). `GET /network/scenarios` validado por schema.
+- **Grafo SVG interativo** ([`network-graph.tsx`](<./apps/web/components/network/network-graph.tsx>)): sem lib nova (ADR-0005) — zoom por botões, arestas coloridas por tipo (societário sólido azul, endereço tracejado, financeiro âmbar), raio do nó proporcional ao score de risco, legenda completa e nós focáveis por teclado.
+- **Drawer do nó** ([`node-drawer.tsx`](<./apps/web/components/network/node-drawer.tsx>), aceite: clicar no nó abre o detalhe): identidades unificadas, indicadores de risco de rede (score, centralidade, ligações com autuados), "Abrir dossiê" (deep-link) e "Adicionar ao caso" (mock com toast, sujeito à validação do auditor).
+- **Painel lateral**: cards "Padrões detectados" com severidade no espectro de risco + card navy "Recomendação do agente" com CTA "Abrir dossiê consolidado".
+- **Filtros combináveis**: comunidade e período recortam os cenários; chips de vínculo ligam/desligam arestas; profundidade 1 nível restringe ao nó articulador (maior score) e vizinhos diretos.
+- **Testes** (6 casos novos): [`network-handlers.test.ts`](<./apps/web/tests/network-handlers.test.ts>) (≥5 cenários com fragmentação + conluio, integridade do grafo, sigilo dos documentos) e [`analise-de-redes-page.test.tsx`](<./apps/web/tests/analise-de-redes-page.test.tsx>) (biblioteca de cenários, troca de grafo, drawer do nó).
+
 ### Added — T06 · Non-filer Discovery (RF02) + T07 · Feed CTC (RF09/FA10) (2026-07-06)
 
 `/crossing` reestruturado em **3 abas** — Divergências (T05), **Fora do radar** (T06) e **Monitoramento CTC** (T07) — cobrindo as três frentes do módulo 2 numa única tela.

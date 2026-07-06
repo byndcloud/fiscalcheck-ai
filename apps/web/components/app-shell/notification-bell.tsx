@@ -1,7 +1,8 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BellIcon, BellRingIcon, CheckIcon, RefreshCwIcon } from "lucide-react";
+import { ArrowRightIcon, BellIcon, BellRingIcon, CheckIcon, RefreshCwIcon } from "lucide-react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import type { Notificacao } from "@fiscalcheck/shared-types";
@@ -188,8 +189,8 @@ export function NotificationBell() {
                       <p className="text-xs text-muted-foreground leading-snug">
                         {notification.corpo}
                       </p>
-                      {!notification.lida ? (
-                        <div className="mt-1">
+                      <div className="mt-1 flex flex-wrap items-center gap-1">
+                        {!notification.lida ? (
                           <Button
                             variant="ghost"
                             size="xs"
@@ -199,8 +200,23 @@ export function NotificationBell() {
                             <CheckIcon aria-hidden="true" />
                             Marcar como lida
                           </Button>
-                        </div>
-                      ) : null}
+                        ) : null}
+                        {/* T14: deep-link — devolutiva no sino abre o dossiê do caso */}
+                        {notification.linkHref ? (
+                          <Button asChild variant="ghost" size="xs">
+                            <Link
+                              href={notification.linkHref as never}
+                              onClick={() => {
+                                if (!notification.lida) mutation.mutate(notification.id);
+                                setOpen(false);
+                              }}
+                            >
+                              {notification.casoId ? "Abrir caso" : "Abrir"}
+                              <ArrowRightIcon aria-hidden="true" />
+                            </Link>
+                          </Button>
+                        ) : null}
+                      </div>
                     </div>
                   </article>
                 </li>

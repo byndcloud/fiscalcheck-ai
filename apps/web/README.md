@@ -64,6 +64,7 @@ components/
 ├── cases/                              # fila, dossiê e workflow de decisão (T13)
 ├── citizen/                            # portal do contribuinte: cards, stepper 3 passos, diálogos (T16)
 ├── crossing/                           # divergências (T05), fora do radar (T06) e feed CTC (T07)
+├── network/                            # grafo SVG, drawer do nó e labels da Análise de Redes (T12)
 ├── communications/                     # central de notificações (T15)
 ├── compliance/                         # trilha, agente de conformidade, admin (T19)
 ├── dashboard/                          # widgets do painel gerencial (T01)
@@ -84,6 +85,7 @@ lib/
 ├── errors.ts                           # resolveErrorMessage — mapa ApiError → pt-BR (T25)
 ├── format-relative-time.ts             # "há 5 min" etc.
 ├── masks.ts                            # máscara de CPF/CNPJ/IP (T19)
+├── prazo.ts                            # contagem regressiva de prazos do caso (T14)
 ├── mocks/agents.ts                     # fixtures dos agentes (T10)
 ├── reports/                            # PDF (react-pdf) + XLSX (SheetJS dynamic import) — T17
 ├── risk-model/simulate.ts              # simulação do modelo (T02)

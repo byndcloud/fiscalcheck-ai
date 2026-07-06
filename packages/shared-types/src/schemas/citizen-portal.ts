@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { DevolutivaPreTriagemSchema, DevolutivaTratamentoSchema } from "./case-collab";
 import { CasoSchema } from "./caso";
 
 /*
@@ -31,6 +32,13 @@ export const CitizenInteracaoSchema = z.object({
   protocolo: z.string(),
   resumo: z.string(),
   criadoEm: z.string(),
+  /*
+    T14: lado do auditor. A pré-triagem é a recomendação não vinculante
+    do agente; o tratamento é a resposta formal do auditor
+    (Acatar / Manter / Solicitar complemento).
+  */
+  preTriagem: DevolutivaPreTriagemSchema.optional(),
+  tratamento: DevolutivaTratamentoSchema.optional(),
 });
 export type CitizenInteracao = z.infer<typeof CitizenInteracaoSchema>;
 
