@@ -6,14 +6,18 @@ import type * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
+import { CopilotButton } from "./copilot-button";
+import { GlobalSearch } from "./global-search";
 import { NotificationBell } from "./notification-bell";
 import { UserMenu } from "./user-menu";
 
 /*
-  Header do shell autenticado. Contém o slot de breadcrumb (à esquerda),
-  sino de notificações e o menu do avatar (T27) — que concentra a
-  identidade do usuário, preferências e a ação de sair.
-  O botão de menu (mobile) fica a cargo do AppShell — recebido via prop.
+  Header do shell autenticado. O slot central hospeda a busca global
+  (T24) quando nenhuma página passa `breadcrumb` (nenhuma passa hoje).
+  No grupo de ações: atalho do Copilot Fiscal (T18, à esquerda do sino),
+  sino de notificações e o menu do avatar (T27) — identidade, preferências
+  e sair. Busca e Copilot só renderizam para perfis internos (RBAC interno
+  a cada componente). O botão de menu (mobile) fica a cargo do AppShell.
 */
 
 type HeaderProps = {
@@ -40,9 +44,21 @@ export function Header({ breadcrumb, onMenuClick }: HeaderProps) {
         </Button>
       ) : null}
 
-      <div className="flex-1 truncate">{breadcrumb}</div>
+      {/*
+        `truncate` (overflow-hidden) só quando o slot exibe breadcrumb: o
+        dropdown da busca global é `absolute` dentro deste container e seria
+        clipado — `min-w-0` mantém o flex contido sem cortar o dropdown.
+      */}
+      {breadcrumb ? (
+        <div className="flex flex-1 items-center gap-2 truncate">{breadcrumb}</div>
+      ) : (
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <GlobalSearch />
+        </div>
+      )}
 
       <div className="flex items-center gap-2">
+        <CopilotButton />
         <NotificationBell />
         <Separator orientation="vertical" className="h-6" />
         <UserMenu />

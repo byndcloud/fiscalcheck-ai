@@ -354,3 +354,23 @@ export {
   type RelatorioSecao,
   type RelatorioTipo,
 } from "./schemas/relatorio-gerencial";
+
+export {
+  SearchResultSchema,
+  SearchResultTypeSchema,
+  type SearchResult,
+  type SearchResultType,
+} from "./schemas/search";
+
+export {
+  CopilotAskRequestSchema,
+  CopilotAskResponseSchema,
+  CopilotMessageAuthorSchema,
+  CopilotMessageSchema,
+  CopilotSourceSchema,
+  type CopilotAskRequest,
+  type CopilotAskResponse,
+  type CopilotMessage,
+  type CopilotMessageAuthor,
+  type CopilotSource,
+} from "./schemas/copilot";
