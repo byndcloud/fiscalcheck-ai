@@ -51,6 +51,13 @@ const TIPO_EXPLICACAO: Record<TipoDivergencia, PlainExplanation> = {
     oQueFazer:
       "Nenhuma ação é obrigatória neste momento. Se quiser esclarecer o vínculo, use o canal de contestação ou agende um atendimento.",
   },
+  inativo_atividade: {
+    titulo: "Empresa sem atividade no cadastro, mas com notas emitidas",
+    explicacao:
+      "O cadastro da sua empresa consta como inativo ou suspenso, porém encontramos notas fiscais de serviço emitidas no período. Pode ser que a reativação não tenha sido registrada.",
+    oQueFazer:
+      "Atualize a situação cadastral da empresa ou, se houver engano, envie uma contestação com os documentos que comprovem a situação correta.",
+  },
 };
 
 const CURRENCY_BRL = new Intl.NumberFormat("pt-BR", {

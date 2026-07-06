@@ -1,7 +1,15 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { BriefcaseIcon, DownloadIcon, GaugeIcon, SparklesIcon, TrendingUpIcon } from "lucide-react";
+import {
+  BarChart3Icon,
+  BriefcaseIcon,
+  DownloadIcon,
+  GaugeIcon,
+  SparklesIcon,
+  TrendingUpIcon,
+} from "lucide-react";
+import { useState } from "react";
 
 import type {
   Caso,
@@ -16,7 +24,15 @@ import { BigNumberCard } from "@/components/dashboard/big-number-card";
 import { MonthlyRecoveryChart } from "@/components/dashboard/monthly-recovery-chart";
 import { RiskDistributionPanel } from "@/components/dashboard/risk-distribution-panel";
 import { SmartAlertsPanel } from "@/components/dashboard/smart-alerts-panel";
+import { ScoreFactorsPanel } from "@/components/risk/score-factors-panel";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { apiRequest } from "@/lib/api-client";
 
@@ -28,6 +44,9 @@ import { apiRequest } from "@/lib/api-client";
 */
 
 export default function DashboardPage() {
+  // T09 — todo score exibido dá acesso ao painel de fatores.
+  const [explainedScore, setExplainedScore] = useState<Score | null>(null);
+
   const panelKpis = useQuery({
     queryKey: ["analytics", "panel-kpis"],
     queryFn: () => apiRequest<PanelKpis>("/analytics/panel-kpis"),
@@ -175,15 +194,28 @@ export default function DashboardPage() {
                       </span>
                     </p>
                   </div>
-                  <div className="text-right">
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      {score ? (
+                        <StatusBadge kind="risk" level={score.nivel} />
+                      ) : (
+                        <span className="text-xs text-muted-foreground">sem score</span>
+                      )}
+                      <p className="mt-1 font-mono text-xs text-muted-foreground">
+                        {caso.scoreValor ?? "—"} / 100
+                      </p>
+                    </div>
                     {score ? (
-                      <StatusBadge kind="risk" level={score.nivel} />
-                    ) : (
-                      <span className="text-xs text-muted-foreground">sem score</span>
-                    )}
-                    <p className="mt-1 font-mono text-xs text-muted-foreground">
-                      {caso.scoreValor ?? "—"} / 100
-                    </p>
+                      <Button
+                        size="xs"
+                        variant="secondary"
+                        onClick={() => setExplainedScore(score)}
+                        aria-label={`Ver fatores do score do contribuinte ${score.contribuinteId}`}
+                      >
+                        <BarChart3Icon aria-hidden className="size-3.5" />
+                        Ver fatores
+                      </Button>
+                    ) : null}
                   </div>
                 </li>
               );
@@ -191,6 +223,28 @@ export default function DashboardPage() {
           </ol>
         )}
       </section>
+
+      {/* T09 — painel "Por que este score?" acessível do dashboard */}
+      <Sheet
+        open={explainedScore !== null}
+        onOpenChange={(next) => (!next ? setExplainedScore(null) : undefined)}
+      >
+        <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-lg">
+          {explainedScore ? (
+            <div className="flex flex-col gap-4 p-2">
+              <SheetHeader className="gap-1 p-0">
+                <SheetTitle>Por que este score?</SheetTitle>
+                <SheetDescription>
+                  Contribuinte{" "}
+                  <span className="font-mono uppercase">{explainedScore.contribuinteId}</span> ·
+                  fatores que compõem a classificação de risco (RF03).
+                </SheetDescription>
+              </SheetHeader>
+              <ScoreFactorsPanel score={explainedScore} />
+            </div>
+          ) : null}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

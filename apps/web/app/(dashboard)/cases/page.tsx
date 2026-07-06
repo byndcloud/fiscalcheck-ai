@@ -66,6 +66,17 @@ export default function CasesPage() {
     if (stored === "kanban" || stored === "lista") setView(stored);
   }, []);
 
+  /*
+    Deep-link T05 → T13: /cases?caso=cs-… abre o dossiê direto.
+    Lido de window.location para evitar o boundary de Suspense exigido
+    por useSearchParams em página client.
+  */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const casoParam = new URLSearchParams(window.location.search).get("caso");
+    if (casoParam) setSelectedId(casoParam);
+  }, []);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.sessionStorage.setItem(VIEW_STORAGE_KEY, view);

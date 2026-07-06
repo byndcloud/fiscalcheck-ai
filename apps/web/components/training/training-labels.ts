@@ -25,6 +25,7 @@ export const TIPO_DIVERGENCIA_LABEL: Record<TipoDivergencia, string> = {
   regime_incorreto: "Regime incorreto",
   endereco_inconsistente: "Endereço inconsistente",
   socio_vinculado: "Sócio vinculado",
+  inativo_atividade: "Inativo com atividade",
 };
 
 export const DECISAO_LABEL: Record<DecisionAction, string> = {
