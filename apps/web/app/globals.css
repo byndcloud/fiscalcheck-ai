@@ -37,6 +37,12 @@
   --c-risk-3: #f2a900;
   --c-risk-4: #e8590c;
   --c-risk-5: #c5160b;
+  /* Texto sobre fundos de risco (DS §10) — contraste AA em tinta clara */
+  --c-risk-1-txt: #0f5e18;
+  --c-risk-2-txt: #4f7016;
+  --c-risk-3-txt: #9a7700;
+  --c-risk-4-txt: #b5430a;
+  --c-risk-5-txt: #c5160b;
   --grad-risk: linear-gradient(
     90deg,
     #168821 0%,

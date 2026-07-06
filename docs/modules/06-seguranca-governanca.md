@@ -71,6 +71,15 @@ async def decidir(
 - **0** entradas mutáveis em `audit_log` (verificado por trigger).
 - **MFA**: 100% dos auditores ativos com MFA habilitado.
 
+## Entrega T20 · Ambiente de Simulação e Capacitação (RSC04)
+
+Modo "Treinamento" no front-end (`apps/web/app/(dashboard)/treinamento/`), acessível por item próprio na sidebar (seção "Capacitação", papéis auditoriais):
+
+- **Separação do ambiente real**: rota, handlers MSW (`/training/*`) e estado in-memory exclusivos — nenhuma tentativa gera caso, notificação ou entrada de auditoria; faixa âmbar permanente "AMBIENTE DE TREINAMENTO · dados anonimizados".
+- **Anonimização**: contribuintes por codinome ("Contribuinte Alfa"…) e CNPJ mascarado (`**.***.***/0001-**`), valores alterados — verificado por teste automatizado.
+- **Biblioteca de casos-exercício com gabarito**: 6 exercícios (iniciante → avançado) cobrindo os 5 tipos de divergência + falsos positivos didáticos. O auditor em formação decide (`aprovar|ajustar|rejeitar`) e justifica (≥ 20 chars); só então vê o comparativo **"sua decisão × decisão histórica"**, o desfecho real do caso e o aprendizado.
+- **Sigilo do gabarito**: `GET /training/cases` nunca inclui o gabarito antes da tentativa; segunda tentativa é bloqueada (409) porque o gabarito já foi revelado.
+
 ## Decisões pendentes
 
 - Provedor de identidade: **gov.br** (federado, ideal) vs **Keycloak self-hosted** vs **Azure AD do município**?

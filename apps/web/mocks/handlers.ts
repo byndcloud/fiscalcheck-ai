@@ -61,6 +61,10 @@ import {
   SusSubmitResponseSchema,
   type SystemUser,
   SystemUserSchema,
+  TrainingAttemptRequestSchema,
+  type TrainingAttemptResult,
+  TrainingAttemptResultSchema,
+  TrainingCaseSchema,
   UserCreateRequestSchema,
   type UserPreferences,
   UserProfileSchema,
@@ -97,6 +101,7 @@ import { scoresFixture } from "./fixtures/scores";
 import { smartAlertsFixture } from "./fixtures/smart-alerts";
 import { susAvaliacoesFixture } from "./fixtures/sus-avaliacoes";
 import { systemUsersFixture } from "./fixtures/system-users";
+import { trainingCasesFixture } from "./fixtures/training-cases";
 import { userProfilesFixture } from "./fixtures/user-profiles";
 
 /*
@@ -132,6 +137,13 @@ function getPreferencesForRole(role: Role): UserPreferences {
 const citizenRegistrationMutable = userProfilesFixture.cidadao.dadosCadastrais
   ? { ...userProfilesFixture.cidadao.dadosCadastrais }
   : undefined;
+
+/*
+  Tentativas do ambiente de treinamento (T20 · módulo 6). Estado
+  separado de qualquer dado "real" de caso — exercício não gera
+  decisão, notificação nem auditoria no ambiente de produção.
+*/
+const trainingAttempts = new Map<string, TrainingAttemptResult>();
 
 /*
   Estado in-memory do módulo 4 (T13). Os arrays só sofrem `unshift` /
@@ -1626,6 +1638,67 @@ export const handlers = [
     };
     userPreferencesByRole.set(role, updated);
     return respondValidated(UserProfileSchema.shape.preferencias, updated);
+  }),
+
+  // Ambiente de treinamento (T20 · RSC04 · módulo 6)
+  http.get(`${API_URL}/training/cases`, () => {
+    /*
+      O gabarito (decisão histórica + aprendizado) NUNCA sai na lista —
+      só é revelado após a tentativa, senão o exercício perde o valor.
+    */
+    const cases = trainingCasesFixture.map(({ gabarito: _g, aprendizado: _a, ...publicCase }) => ({
+      ...publicCase,
+      tentativa: trainingAttempts.get(publicCase.id),
+    }));
+    return respondValidated(z.array(TrainingCaseSchema), cases);
+  }),
+
+  http.post(`${API_URL}/training/cases/:id/attempt`, async ({ params, request }) => {
+    const { id } = params as { id: string };
+    const exercise = trainingCasesFixture.find((c) => c.id === id);
+    if (!exercise) {
+      return HttpResponse.json(
+        {
+          error_code: "training_case_not_found",
+          message: "Exercício não encontrado.",
+        },
+        { status: 404 },
+      );
+    }
+    if (trainingAttempts.has(id)) {
+      return HttpResponse.json(
+        {
+          error_code: "training_already_attempted",
+          message: "Você já concluiu este exercício. Reveja o gabarito na biblioteca.",
+        },
+        { status: 409 },
+      );
+    }
+    const bodyRaw = await request.json().catch(() => null);
+    const body = TrainingAttemptRequestSchema.safeParse(bodyRaw);
+    if (!body.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_training_attempt",
+          message: "Justifique sua decisão com pelo menos 20 caracteres — faz parte do exercício.",
+          issues: body.error.issues,
+        },
+        { status: 400 },
+      );
+    }
+    const result: TrainingAttemptResult = {
+      casoId: id,
+      acertou: body.data.acao === exercise.gabarito.acao,
+      suaDecisao: {
+        acao: body.data.acao,
+        justificativa: body.data.justificativa,
+      },
+      gabarito: exercise.gabarito,
+      aprendizado: exercise.aprendizado,
+      tentadoEm: new Date().toISOString(),
+    };
+    trainingAttempts.set(id, result);
+    return respondValidated(TrainingAttemptResultSchema, result);
   }),
 
   // Notificações in-app

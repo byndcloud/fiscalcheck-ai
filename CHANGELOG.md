@@ -6,6 +6,19 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o 
 
 ## [Não publicado]
 
+### Added — T20 · Ambiente de Simulação e Capacitação (RSC04) (2026-07-05)
+
+Modo "Treinamento" para novos auditores (módulo 6): biblioteca de casos-exercício com dados 100% anonimizados e gabarito baseado em decisão histórica — sem nenhuma mistura com o ambiente "real" (handlers, estado in-memory e rota exclusivos do treino; nenhuma tentativa gera caso, notificação ou entrada de auditoria).
+
+- **Schemas** em [`packages/shared-types/src/schemas/training.ts`](<./packages/shared-types/src/schemas/training.ts>): `TrainingCase` (contribuinte por codinome + CNPJ mascarado, contexto, divergência com valores, score/fatores em resumo, recomendação do agente), `TrainingAttemptRequest` (ação + justificativa obrigatória ≥ 20 chars — treinar a motivação do ato faz parte do exercício) e `TrainingAttemptResult` (sua decisão × gabarito + desfecho real + aprendizado). O gabarito fica **fora** do schema público do caso de propósito.
+- **Fixture** em [`mocks/fixtures/training-cases.ts`](<./apps/web/mocks/fixtures/training-cases.ts>): 6 exercícios (2 iniciante / 2 intermediário / 2 avançado) cobrindo os 5 tipos de divergência + 2 casos de **falso positivo didático** (score alto por fator de rede minoritário e anomalia estatística com explicação econômica) — ensinam que score alto ≠ caso procedente (human-in-the-loop).
+- **Handlers MSW**: `GET /training/cases` **nunca vaza o gabarito** antes da tentativa (testado por serialização); `POST /training/cases/:id/attempt` valida a justificativa, avalia o acerto contra a decisão histórica, persiste in-memory (progresso sobrevive à navegação) e bloqueia segunda tentativa (409 — o gabarito já foi revelado).
+- **Sidebar**: nova seção "Capacitação" com o item **Treinamento** (papéis auditoriais), ícone com acento âmbar (`--c-warning`) para diferenciar visualmente do ambiente real.
+- **Página [`/treinamento`](<./apps/web/app/(dashboard)/treinamento/page.tsx>)**: faixa âmbar permanente "AMBIENTE DE TREINAMENTO · dados anonimizados" (`TrainingBanner`, reutilizada em versão compacta dentro do exercício), card de progresso (concluídos + decisões alinhadas ao gabarito) e biblioteca em grid com estados via `AsyncBoundary`.
+- **`TrainingCaseSheet`**: fluxo didático em 2 tempos — ler o caso anonimizado, escolher `aprovar|ajustar|rejeitar` e justificar; só então o painel **"Sua decisão × decisão histórica"** compara as justificativas lado a lado, mostra "o que aconteceu no caso real" e o aprendizado a levar. Toast informativo diferencia acerto de divergência ("errar aqui é o objetivo do treino").
+- **Tokens**: variáveis `--c-risk-*-txt` do DS §10 (texto com contraste AA sobre fundos de risco) declaradas em `globals.css` — já eram referenciadas por `risk-model-form`/`modelo-de-risco` sem declaração.
+- **Testes** (8 casos novos): [`training-handlers.test.ts`](<./apps/web/tests/training-handlers.test.ts>) (anonimização da biblioteca, gabarito não vaza no GET, validação de justificativa, persistência da tentativa, 409 na segunda tentativa, 404) e [`training-page.test.tsx`](<./apps/web/tests/training-page.test.tsx>) (faixa âmbar, biblioteca anonimizada, fluxo completo decidir → gabarito, bloqueio sem justificativa mínima).
+
 ### Added — T27 · Perfil e preferências do usuário (transversal) (2026-07-05)
 
 Menu do avatar no header para **todos os papéis**, com preferências persistidas na camada de serviço fake (módulo: Transversal).

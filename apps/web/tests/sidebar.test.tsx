@@ -17,6 +17,7 @@ const AUDITORIAL_LABELS = [
   "Esteira de agentes",
   "Casos",
   "Comunicações",
+  "Treinamento",
 ] as const;
 
 const ALL_LABELS = [
