@@ -4,12 +4,15 @@ import { z } from "zod";
 import {
   AgendamentoRequestSchema,
   AgenteSchema,
+  AnnotationRequestSchema,
   type AtypicalAccess,
   AtypicalAccessSchema,
   type AuditLogEntry,
   AuditLogEntrySchema,
   AuditableActionSchema,
   BlockAtypicalRequestSchema,
+  type CaseAnnotation,
+  CaseAnnotationSchema,
   type CaseDecision,
   CaseDecisionSchema,
   type CaseDocument,
@@ -28,6 +31,8 @@ import {
   ContribuinteSchema,
   CtcFeedSchema,
   DecisionRequestSchema,
+  type DevolutivaPreTriagem,
+  DevolutivaTratamentoRequestSchema,
   DivergenciaSchema,
   DossieExportRequestSchema,
   DossieExportResponseSchema,
@@ -36,6 +41,7 @@ import {
   MetaPilotoSchema,
   MonthlyRecoverySeriesSchema,
   NFSeSchema,
+  NetworkScenarioSchema,
   type NonFiler,
   NonFilerSchema,
   type Notificacao,
@@ -95,6 +101,7 @@ import { divergenciasFixture } from "./fixtures/divergencias";
 import { KPIsAnalyticsSchema, kpisFixture } from "./fixtures/kpis";
 import { metasPilotoFixture } from "./fixtures/metas-piloto";
 import { monthlyRecoveryFixture } from "./fixtures/monthly-recovery";
+import { networkScenariosFixture } from "./fixtures/network-scenarios";
 import { nfseFixture } from "./fixtures/nfse";
 import { nonFilersFixture } from "./fixtures/non-filers";
 import { notificacoesFixture } from "./fixtures/notificacoes";
@@ -206,6 +213,40 @@ function nextProtocolo(): string {
   return `PRT-2026-${String(citizenProtocoloSeq).padStart(6, "0")}`;
 }
 
+/*
+  Pré-triagem do agente (T14): recomendação NÃO vinculante gerada quando
+  a devolutiva chega. Determinística por tipo — quem decide é o auditor.
+*/
+function buildPreTriagem(
+  tipo: CitizenInteracaoTipo,
+  resumo: string,
+): DevolutivaPreTriagem | undefined {
+  switch (tipo) {
+    case "contestacao":
+      return {
+        recomendacao: "solicitar_complemento",
+        resumo:
+          "Contestação sem documento fiscal que comprove a alegação — o agente sugere solicitar complemento antes de rever a divergência.",
+        confianca: 0.68,
+      };
+    case "adesao_parcelamento":
+      return {
+        recomendacao: "acatar",
+        resumo:
+          "Adesão formal ao parcelamento com 1ª guia emitida — o agente sugere acatar e acompanhar o recolhimento.",
+        confianca: 0.9,
+      };
+    case "agendamento":
+      return {
+        recomendacao: "acatar",
+        resumo: `Pedido de atendimento dentro do prazo do caso: ${resumo}`,
+        confianca: 0.82,
+      };
+    default:
+      return undefined;
+  }
+}
+
 function pushCitizenInteracao(
   casoId: string,
   tipo: CitizenInteracaoTipo,
@@ -218,6 +259,7 @@ function pushCitizenInteracao(
     protocolo: nextProtocolo(),
     resumo,
     criadoEm: new Date().toISOString(),
+    preTriagem: buildPreTriagem(tipo, resumo),
   };
   citizenInteracoesMutable.unshift(interacao);
   return interacao;
@@ -236,8 +278,92 @@ function pushDevolutivaNotification(caso: Caso, titulo: string, corpo: string): 
     criadoEm: new Date().toISOString(),
     lida: false,
     origem: "manual",
-    linkHref: "/cases",
+    // Deep-link T14: o sino leva direto ao dossiê do caso.
+    linkHref: `/cases?caso=${caso.id}`,
   });
+}
+
+/*
+  Anotações do auditor no caso (T14) — append-only, como toda trilha do
+  módulo 4. Seed com notas de instrução para o dossiê não nascer vazio.
+*/
+const caseAnnotationsMutable: CaseAnnotation[] = [];
+let annotationSeq = 1;
+
+function pushAnnotation(
+  casoId: string,
+  autor: { id: string; nome: string; papel: Role },
+  texto: string,
+  criadoEm?: string,
+): CaseAnnotation {
+  const annotation: CaseAnnotation = {
+    id: `an-2026-${String(annotationSeq).padStart(4, "0")}`,
+    casoId,
+    autorId: autor.id,
+    autorNome: autor.nome,
+    autorPapel: autor.papel,
+    texto,
+    criadoEm: criadoEm ?? new Date().toISOString(),
+  };
+  annotationSeq += 1;
+  caseAnnotationsMutable.unshift(annotation);
+  return annotation;
+}
+
+/*
+  Seed T14: uma devolutiva pendente (contestação) e anotações de
+  instrução num caso formalizado — o dossiê demonstra o fluxo completo
+  sem depender de uma ação prévia no portal do cidadão.
+*/
+function seedCaseCollab(): void {
+  const alvo = casosMutable.find(
+    (c) => isCitizenVisible(c) && c.status === "notificado" && (c.valorPotencial ?? 0) > 0,
+  );
+  if (!alvo) return;
+
+  const contestacao: CitizenInteracao = {
+    id: "ci-seed-0001",
+    casoId: alvo.id,
+    tipo: "contestacao",
+    protocolo: "PRT-2026-480991",
+    resumo:
+      'Contestação enviada: "Notas emitidas em duplicidade no período" com 2 documento(s) anexado(s). Em análise pela equipe fiscal.',
+    criadoEm: "2026-07-03T14:22:00Z",
+    preTriagem: {
+      recomendacao: "solicitar_complemento",
+      resumo:
+        "Os anexos não incluem as NFS-e supostamente duplicadas — o agente sugere solicitar os documentos fiscais antes de rever a divergência.",
+      confianca: 0.72,
+    },
+  };
+  citizenInteracoesMutable.push(contestacao);
+
+  /*
+    Segundo evento do seed: guia emitida (não usa `ciencia` para não
+    colidir com o bloqueio de duplicidade do fluxo T16).
+  */
+  const guia: CitizenInteracao = {
+    id: "ci-seed-0002",
+    casoId: alvo.id,
+    tipo: "guia_emitida",
+    protocolo: "PRT-2026-480972",
+    resumo: "Guia DAM-2026-00061 emitida para pagamento integral (vencimento 15/07/2026).",
+    criadoEm: "2026-07-01T09:10:00Z",
+  };
+  citizenInteracoesMutable.push(guia);
+
+  pushAnnotation(
+    alvo.id,
+    { id: "aud-0001", nome: "Carlos Andrade", papel: "auditor" },
+    "Conferi as NFS-e da competência 05/2026: numeração sequencial sem lacunas. A alegação de duplicidade precisa vir acompanhada dos pares de notas.",
+    "2026-07-03T16:40:00Z",
+  );
+  pushAnnotation(
+    alvo.id,
+    { id: "aud-0001", nome: "Carlos Andrade", papel: "auditor" },
+    "Contribuinte tem histórico de regularização espontânea em 2024 — priorizar canal de autorregularização antes de escalar.",
+    "2026-07-02T10:05:00Z",
+  );
 }
 
 function isCitizenVisible(caso: Caso): boolean {
@@ -440,6 +566,8 @@ function respondValidated<T>(
   }
   return HttpResponse.json(parsed.data as never, init);
 }
+
+seedCaseCollab();
 
 export const handlers = [
   // Módulo 1 — Ingestão
@@ -737,6 +865,155 @@ export const handlers = [
       .sort((a, b) => (a.emitidoEm < b.emitidoEm ? 1 : -1));
     return respondValidated(z.array(CaseDocumentSchema), docs);
   }),
+
+  // ── T14 · Anotações do auditor (append-only) ────────────────────────
+  http.get(`${API_URL}/cases/:id/annotations`, ({ params }) => {
+    const { id } = params as { id: string };
+    const notas = caseAnnotationsMutable
+      .filter((a) => a.casoId === id)
+      .slice()
+      .sort((a, b) => (a.criadoEm < b.criadoEm ? 1 : -1));
+    return respondValidated(z.array(CaseAnnotationSchema), notas);
+  }),
+
+  http.post(`${API_URL}/cases/:id/annotations`, async ({ params, request }) => {
+    const { id } = params as { id: string };
+    const caso = casosMutable.find((c) => c.id === id);
+    if (!caso) {
+      return HttpResponse.json(
+        { error_code: "case_not_found", message: "Caso não encontrado." },
+        { status: 404 },
+      );
+    }
+    const bodyRaw = await request.json().catch(() => ({}));
+    const parsed = AnnotationRequestSchema.safeParse(bodyRaw);
+    if (!parsed.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_annotation_body",
+          message: "A anotação precisa ter pelo menos 5 caracteres.",
+          issues: parsed.error.issues,
+        },
+        { status: 400 },
+      );
+    }
+
+    const roleHeader = request.headers.get("X-Actor-Role");
+    const roleParsed = RoleSchema.safeParse(roleHeader);
+    const papel: Role = roleParsed.success ? roleParsed.data : "auditor";
+    if (papel === "cidadao") {
+      return HttpResponse.json(
+        {
+          error_code: "forbidden_role",
+          message: "Apenas a equipe fiscal pode anotar o caso.",
+        },
+        { status: 403 },
+      );
+    }
+
+    const annotation = pushAnnotation(
+      id,
+      {
+        id: request.headers.get("X-Actor-Id") ?? `mock-${papel}`,
+        nome: request.headers.get("X-Actor-Name") ?? ROLE_DISPLAY[papel],
+        papel,
+      },
+      parsed.data.texto,
+    );
+    caso.atualizadoEm = new Date().toISOString();
+    return respondValidated(CaseAnnotationSchema, annotation, { status: 201 });
+  }),
+
+  // ── T14 · Devolutivas eletrônicas no lado do auditor ────────────────
+  http.get(`${API_URL}/cases/:id/interacoes`, ({ params }) => {
+    const { id } = params as { id: string };
+    const timeline = citizenInteracoesMutable.filter((i) => i.casoId === id);
+    return respondValidated(z.array(CitizenInteracaoSchema), timeline);
+  }),
+
+  /*
+    Tratamento da devolutiva (Acatar / Manter / Solicitar complemento).
+    Registra autoria + justificativa e vira evento da linha do tempo —
+    imutável depois de gravado (AGENTS.md §1.1).
+  */
+  http.post(
+    `${API_URL}/cases/:id/interacoes/:interacaoId/tratamento`,
+    async ({ params, request }) => {
+      const { id, interacaoId } = params as { id: string; interacaoId: string };
+      const caso = casosMutable.find((c) => c.id === id);
+      const interacao = citizenInteracoesMutable.find(
+        (i) => i.id === interacaoId && i.casoId === id,
+      );
+      if (!caso || !interacao) {
+        return HttpResponse.json(
+          { error_code: "devolutiva_not_found", message: "Devolutiva não encontrada." },
+          { status: 404 },
+        );
+      }
+      if (interacao.tratamento) {
+        return HttpResponse.json(
+          {
+            error_code: "devolutiva_ja_tratada",
+            message: "Esta devolutiva já recebeu tratamento do auditor.",
+          },
+          { status: 409 },
+        );
+      }
+
+      const bodyRaw = await request.json().catch(() => ({}));
+      const parsed = DevolutivaTratamentoRequestSchema.safeParse(bodyRaw);
+      if (!parsed.success) {
+        return HttpResponse.json(
+          {
+            error_code: "invalid_tratamento_body",
+            message: "Escolha a ação e justifique o tratamento (mínimo 10 caracteres).",
+            issues: parsed.error.issues,
+          },
+          { status: 400 },
+        );
+      }
+
+      const roleHeader = request.headers.get("X-Actor-Role");
+      const roleParsed = RoleSchema.safeParse(roleHeader);
+      const papel: Role = roleParsed.success ? roleParsed.data : "auditor";
+      if (papel === "cidadao") {
+        return HttpResponse.json(
+          {
+            error_code: "forbidden_role",
+            message: "Apenas a equipe fiscal pode tratar devolutivas.",
+          },
+          { status: 403 },
+        );
+      }
+
+      interacao.tratamento = {
+        acao: parsed.data.acao,
+        justificativa: parsed.data.justificativa,
+        tratadoPorId: request.headers.get("X-Actor-Id") ?? `mock-${papel}`,
+        tratadoPorNome: request.headers.get("X-Actor-Name") ?? ROLE_DISPLAY[papel],
+        tratadoEm: new Date().toISOString(),
+      };
+
+      const ACAO_LABEL: Record<typeof parsed.data.acao, string> = {
+        acatar: "acatada",
+        manter: "mantida (divergência confirmada)",
+        solicitar_complemento: "com complemento solicitado ao contribuinte",
+      };
+      caso.observacoes = `Devolutiva ${interacao.protocolo} ${ACAO_LABEL[parsed.data.acao]} por ${interacao.tratamento.tratadoPorNome}: ${parsed.data.justificativa}`;
+      caso.atualizadoEm = new Date().toISOString();
+
+      return respondValidated(
+        z.object({ interacao: CitizenInteracaoSchema, caso: CasoSchema }),
+        { interacao, caso },
+        { status: 201 },
+      );
+    },
+  ),
+
+  // Módulo 3 — Análise de Redes / Graph Analytics (T12)
+  http.get(`${API_URL}/network/scenarios`, () =>
+    respondValidated(z.array(NetworkScenarioSchema), networkScenariosFixture),
+  ),
 
   http.post(`${API_URL}/cases/:id/decisions`, async ({ params, request }) => {
     const { id } = params as { id: string };

@@ -14,9 +14,11 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import type {
+  CaseAnnotation,
   CaseDecision,
   CaseDocument,
   Caso,
+  CitizenInteracao,
   Contribuinte,
   DecisionAction,
   Divergencia,
@@ -25,8 +27,12 @@ import type {
 } from "@fiscalcheck/shared-types";
 
 import { AgentRecommendationBadge } from "@/components/cases/agent-recommendation-badge";
+import { AnnotationsPanel } from "@/components/cases/annotations-panel";
 import { ApprovalModal } from "@/components/cases/approval-modal";
+import { CaseDeadlineChip } from "@/components/cases/case-deadline-chip";
+import { CaseTimeline, buildCaseTimeline } from "@/components/cases/case-timeline";
 import { DecisionChainEntry } from "@/components/cases/decision-chain-entry";
+import { DevolutivasPanel } from "@/components/cases/devolutivas-panel";
 import { DossieExportButton } from "@/components/cases/dossie-export-button";
 import { NextActionPanel } from "@/components/cases/next-action-panel";
 import { ScoreFactorsPanel } from "@/components/risk/score-factors-panel";
@@ -129,6 +135,22 @@ export function CaseDossieSheet({ casoId, casos, taxpayerById, open, onOpenChang
     queryKey: ["cases", casoId, "documents"],
     enabled: casoId !== null,
     queryFn: () => apiRequest<CaseDocument[]>(`/cases/${casoId}/documents`),
+  });
+
+  /*
+    T14: devolutivas eletrônicas do contribuinte + anotações do auditor.
+    Alimentam a caixa de devolutivas e a linha do tempo unificada.
+  */
+  const interacoes = useQuery({
+    queryKey: ["cases", casoId, "interacoes"],
+    enabled: casoId !== null,
+    queryFn: () => apiRequest<CitizenInteracao[]>(`/cases/${casoId}/interacoes`),
+  });
+
+  const annotations = useQuery({
+    queryKey: ["cases", casoId, "annotations"],
+    enabled: casoId !== null,
+    queryFn: () => apiRequest<CaseAnnotation[]>(`/cases/${casoId}/annotations`),
   });
 
   /*
@@ -274,6 +296,10 @@ export function CaseDossieSheet({ casoId, casos, taxpayerById, open, onOpenChang
                     </span>
                     <span className="text-xs text-muted-foreground">potencial</span>
                   </div>
+                ) : null}
+                {/* T14: prazo com contagem regressiva e alerta de vencimento */}
+                {caso.status !== "encerrado" ? (
+                  <CaseDeadlineChip prazoLimite={caso.prazoLimite} />
                 ) : null}
               </div>
             </SheetHeader>
@@ -430,6 +456,35 @@ export function CaseDossieSheet({ casoId, casos, taxpayerById, open, onOpenChang
                   &ldquo;{caso.observacoes}&rdquo;
                 </p>
               ) : null}
+            </section>
+
+            {/* T14 — devolutivas eletrônicas com pré-triagem do agente */}
+            <DevolutivasPanel casoId={caso.id} interacoes={interacoes.data ?? []} />
+
+            {/* T14 — anotações append-only do auditor */}
+            <AnnotationsPanel
+              casoId={caso.id}
+              annotations={annotations.data ?? []}
+              isLoading={annotations.isLoading}
+            />
+
+            {/* T14 — linha do tempo unificada (decisões + docs + devolutivas + anotações) */}
+            <section
+              className="rounded-lg border border-border bg-surface p-4 shadow-[var(--e-1)]"
+              aria-label="Linha do tempo do caso"
+            >
+              <h4 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <HistoryIcon aria-hidden className="size-3.5" /> Linha do tempo do caso
+              </h4>
+              <CaseTimeline
+                events={buildCaseTimeline(
+                  caso,
+                  decisions.data ?? [],
+                  documents.data ?? [],
+                  interacoes.data ?? [],
+                  annotations.data ?? [],
+                )}
+              />
             </section>
 
             <section

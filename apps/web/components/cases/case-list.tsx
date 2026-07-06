@@ -10,6 +10,8 @@ import { AgentRecommendationBadge } from "@/components/cases/agent-recommendatio
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { prazoInfo } from "@/lib/prazo";
+import { cn } from "@/lib/utils";
 
 /*
   Lista de casos — DataTable com filtro externo (via toolbar da página),
@@ -28,11 +30,6 @@ const CURRENCY_BRL = new Intl.NumberFormat("pt-BR", {
   currency: "BRL",
   maximumFractionDigits: 0,
 });
-
-function formatPrazo(prazo?: string): string {
-  if (!prazo) return "—";
-  return new Date(prazo).toLocaleDateString("pt-BR");
-}
 
 type Props = {
   data: Caso[];
@@ -115,11 +112,31 @@ export function CaseList({ data, taxpayerById, onOpenDossie }: Props) {
       {
         accessorKey: "prazoLimite",
         header: "Prazo",
-        cell: ({ row }) => (
-          <span className="font-mono text-xs text-muted-foreground">
-            {formatPrazo(row.original.prazoLimite)}
-          </span>
-        ),
+        // T14: prazos vencidos/críticos destacados também na Lista (aceite).
+        cell: ({ row }) => {
+          const prazo = row.original.prazoLimite;
+          if (!prazo) return <span className="text-xs text-muted-foreground">—</span>;
+          const info = prazoInfo(prazo);
+          return (
+            <div className="flex flex-col">
+              <span
+                className={cn(
+                  "text-xs font-semibold",
+                  info.tone === "danger"
+                    ? "text-[color:var(--c-risk-5-txt)]"
+                    : info.tone === "warn"
+                      ? "text-[color:var(--c-risk-3-txt)]"
+                      : "text-muted-foreground",
+                )}
+              >
+                {info.label}
+              </span>
+              <span className="font-mono text-[11px] text-muted-foreground">
+                {new Date(`${prazo}T12:00:00`).toLocaleDateString("pt-BR")}
+              </span>
+            </div>
+          );
+        },
         sortingFn: (a, b) => {
           const av = a.original.prazoLimite ?? "";
           const bv = b.original.prazoLimite ?? "";

@@ -23,6 +23,16 @@
 - **Pontos de acesso** — todo score exibido dá acesso ao painel (critério de aceite): seção fixa no Dossiê do caso (T13), botão "Ver fatores" na tabela de scores em `/ai` (Sheet lateral), botão "Ver fatores" nos casos priorizados do Dashboard e painel embutido no detalhe da divergência em `/crossing` (T05). O PDF do dossiê (T28) já incorporava os mesmos fatores.
 - **Coerência de dados** — os scores mock (`apps/web/mocks/fixtures/scores.ts`) espelham o `scoreValor` dos casos e narram os mesmos indícios da recomendação do orquestrador.
 
+## Entrega T12 · Análise de Redes / Graph Analytics (MVP web)
+
+> Frente de UI do RF08/FA09, entregue no `apps/web` sobre a camada mock (MSW).
+
+- **Página `/analise-de-redes`** (papéis auditoriais) — grafo SVG interativo por comunidade suspeita: zoom, seleção de nó, arestas por tipo de vínculo (societário / mesmo endereço / fluxo financeiro) e raio proporcional ao score de risco de rede. Sem lib de grafo nova (ADR-0005) — o volume do POC não justifica dependência.
+- **5 cenários demonstráveis** (`apps/web/mocks/fixtures/network-scenarios.ts`, aceite): fragmentação artificial de receita, conluio de fornecedores, interposição de pessoas, endereço compartilhado e rede familiar (revezamento de MEI). Biblioteca listada abaixo do grafo — clicar troca a visualização.
+- **Drawer do nó** (aceite: clicar abre o detalhe) — resolução de entidades (identidades unificadas), scoring de risco de rede (score, **centralidade**, **ligações com autuados**), "Abrir dossiê" (deep-link T13) e "Adicionar ao caso" (mock, sujeito à validação do auditor).
+- **Padrões + recomendação** — cards de padrões detectados com severidade no espectro de risco e card do agente com CTA "Abrir dossiê consolidado" (redes C-07 e C-11 apontam para casos reais da fila).
+- **Filtros combináveis** — comunidade, período, tipos de vínculo (chips) e profundidade (1 nível = nó articulador + vizinhos diretos).
+
 ## Arquitetura interna
 
 ```text

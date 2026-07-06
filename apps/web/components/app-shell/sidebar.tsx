@@ -10,6 +10,7 @@ import {
   PencilLineIcon,
   ScanSearchIcon,
   SendIcon,
+  Share2Icon,
   ShieldCheckIcon,
   SlidersHorizontalIcon,
   SparklesIcon,
@@ -89,6 +90,13 @@ const NAV_SECTIONS: readonly NavSection[] = [
         icon: SparklesIcon,
         roles: AUDITORIAL_ROLES,
         aurora: true,
+      },
+      {
+        href: "/analise-de-redes",
+        label: "Análise de Redes",
+        description: "Grafo de contribuintes, sócios e endereços",
+        icon: Share2Icon,
+        roles: AUDITORIAL_ROLES,
       },
       {
         href: "/esteira-de-agentes",

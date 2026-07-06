@@ -81,6 +81,38 @@ export {
 } from "./schemas/ctc";
 
 export {
+  AnnotationRequestSchema,
+  CaseAnnotationSchema,
+  DevolutivaAcaoSchema,
+  DevolutivaPreTriagemSchema,
+  DevolutivaTratamentoRequestSchema,
+  DevolutivaTratamentoSchema,
+  type AnnotationRequest,
+  type CaseAnnotation,
+  type DevolutivaAcao,
+  type DevolutivaPreTriagem,
+  type DevolutivaTratamento,
+  type DevolutivaTratamentoRequest,
+} from "./schemas/case-collab";
+
+export {
+  NetworkEdgeSchema,
+  NetworkEdgeTipoSchema,
+  NetworkEsquemaSchema,
+  NetworkNodeSchema,
+  NetworkNodeTipoSchema,
+  NetworkPatternSchema,
+  NetworkScenarioSchema,
+  type NetworkEdge,
+  type NetworkEdgeTipo,
+  type NetworkEsquema,
+  type NetworkNode,
+  type NetworkNodeTipo,
+  type NetworkPattern,
+  type NetworkScenario,
+} from "./schemas/network";
+
+export {
   FatorRiscoSchema,
   NivelRiscoSchema,
   ScoreSchema,
