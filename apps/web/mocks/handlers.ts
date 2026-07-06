@@ -26,6 +26,7 @@ import {
   ComunicacaoSchema,
   ContestacaoRequestSchema,
   ContribuinteSchema,
+  CtcFeedSchema,
   DecisionRequestSchema,
   DivergenciaSchema,
   DossieExportRequestSchema,
@@ -35,6 +36,8 @@ import {
   MetaPilotoSchema,
   MonthlyRecoverySeriesSchema,
   NFSeSchema,
+  type NonFiler,
+  NonFilerSchema,
   type Notificacao,
   NotificacaoSchema,
   PanelKpisSchema,
@@ -87,11 +90,13 @@ import { casosFixture } from "./fixtures/casos";
 import { complianceSealsFixture } from "./fixtures/compliance-seals";
 import { comunicacoesFixture } from "./fixtures/comunicacoes";
 import { contribuintesFixture } from "./fixtures/contribuintes";
+import { findCtcAlert, getCtcFeed } from "./fixtures/ctc-feed";
 import { divergenciasFixture } from "./fixtures/divergencias";
 import { KPIsAnalyticsSchema, kpisFixture } from "./fixtures/kpis";
 import { metasPilotoFixture } from "./fixtures/metas-piloto";
 import { monthlyRecoveryFixture } from "./fixtures/monthly-recovery";
 import { nfseFixture } from "./fixtures/nfse";
+import { nonFilersFixture } from "./fixtures/non-filers";
 import { notificacoesFixture } from "./fixtures/notificacoes";
 import { panelKpisFixture } from "./fixtures/panel-kpis";
 import { buildPanelManagerKpisFixture } from "./fixtures/panel-manager-kpis";
@@ -156,6 +161,21 @@ const caseDocumentsMutable: CaseDocument[] = [...caseDocumentsFixture];
 
 let decisionSeq = caseDecisionsMutable.length + 1;
 let documentSeq = caseDocumentsMutable.length + 1;
+
+/*
+  Estado in-memory do módulo 2 (T06/T07).
+  - Non-filers: fila priorizada; "Iniciar inscrição de ofício" abre um
+    caso candidato REAL em `casosMutable` (aparece na fila /cases) —
+    sempre por ação explícita do auditor (AGENTS.md §1.1).
+  - CTC: a simulação de lotes vive em fixtures/ctc-feed.ts; aqui só a
+    sequência de casos abertos a partir de alertas antecipados.
+*/
+const nonFilersMutable: NonFiler[] = nonFilersFixture.map((nf) => ({
+  ...nf,
+  indicios: nf.indicios.map((i) => ({ ...i })),
+}));
+let radarCaseSeq = 1;
+let ctcCaseSeq = 1;
 
 /*
   Estado in-memory do Portal do Contribuinte (T16 · módulo 4).
@@ -279,7 +299,9 @@ function bumpRiskModelVersion(current: string): string {
 */
 const auditLogMutable: AuditLogEntry[] = [...auditLogExtendedFixture];
 const atypicalAccessesMutable: AtypicalAccess[] = [...atypicalAccessesFixture];
-const systemUsersMutable: SystemUser[] = systemUsersFixture.map((u) => ({ ...u }));
+const systemUsersMutable: SystemUser[] = systemUsersFixture.map((u) => ({
+  ...u,
+}));
 
 let auditLogSeq = auditLogMutable.length + 100;
 let userSeq = systemUsersMutable.length + 100;
@@ -400,7 +422,11 @@ const LoginResponseSchema = z.object({
   issuedAt: z.string(),
 });
 
-function respondValidated<T>(schema: z.ZodType<T>, payload: unknown): Response {
+function respondValidated<T>(
+  schema: z.ZodType<T>,
+  payload: unknown,
+  init?: { status?: number },
+): Response {
   const parsed = schema.safeParse(payload);
   if (!parsed.success) {
     return HttpResponse.json(
@@ -412,7 +438,7 @@ function respondValidated<T>(schema: z.ZodType<T>, payload: unknown): Response {
       { status: 500 },
     );
   }
-  return HttpResponse.json(parsed.data as never);
+  return HttpResponse.json(parsed.data as never, init);
 }
 
 export const handlers = [
@@ -425,6 +451,142 @@ export const handlers = [
   http.get(`${API_URL}/crossing/divergences`, () =>
     respondValidated(z.array(DivergenciaSchema), divergenciasFixture),
   ),
+
+  // Módulo 2 — Non-filer Discovery (T06 · RF02)
+  // Fila priorizada pela receita estimada não declarada (desc).
+  http.get(`${API_URL}/crossing/non-filers`, () =>
+    respondValidated(
+      z.array(NonFilerSchema),
+      [...nonFilersMutable].sort((a, b) => b.receitaEstimada12m - a.receitaEstimada12m),
+    ),
+  ),
+
+  /*
+    "Iniciar inscrição de ofício" — abre caso candidato REAL na fila do
+    módulo 4. Ação exige confirmação do auditor na UI; aqui o efeito é
+    idempotente: segunda tentativa devolve 409 com o caso já aberto.
+  */
+  http.post(`${API_URL}/crossing/non-filers/:id/open-case`, ({ params }) => {
+    const { id } = params as { id: string };
+    const nonFiler = nonFilersMutable.find((nf) => nf.id === id);
+    if (!nonFiler) {
+      return HttpResponse.json(
+        {
+          error_code: "non_filer_not_found",
+          message: "Prestador fora do radar não encontrado.",
+        },
+        { status: 404 },
+      );
+    }
+    if (nonFiler.status === "caso_aberto") {
+      return HttpResponse.json(
+        {
+          error_code: "non_filer_case_already_open",
+          message: "Já existe caso candidato aberto para este prestador.",
+          casoId: nonFiler.casoId,
+        },
+        { status: 409 },
+      );
+    }
+
+    const now = new Date().toISOString();
+    const caso: Caso = {
+      id: `cs-2026-r${String(radarCaseSeq).padStart(3, "0")}`,
+      contribuinteId: nonFiler.id,
+      status: "candidato",
+      criadoEm: now,
+      atualizadoEm: now,
+      agenteResponsavel: "ag-orquestrador",
+      scoreValor: undefined,
+      divergenciaIds: [],
+      valorPotencial: nonFiler.receitaEstimada12m,
+      periodoApuracao: "últimos 12 meses",
+      tributo: "iss",
+      proximaAcaoRecomendada: `Iniciar inscrição de ofício — ${nonFiler.nomeIndicado} sem cadastro mobiliário com receita estimada de R$ ${Math.round(nonFiler.receitaEstimada12m / 1000)} mil/ano.`,
+      recomendacao: {
+        acao: "fiscalizacao",
+        justificativa: `Prestador fora do radar identificado por ${nonFiler.indicios.length} indício(s): ${nonFiler.indicios.map((i) => i.referencia).join("; ")}. Sem inscrição municipal nem declaração compatível.`,
+        confianca: 0.75,
+        baseadaEm: [nonFiler.id],
+      },
+      observacoes: `Caso aberto a partir do Non-filer Discovery (T06). Atividade presumida: ${nonFiler.atividadePresumida}.`,
+    };
+    radarCaseSeq += 1;
+    casosMutable.unshift(caso);
+
+    nonFiler.status = "caso_aberto";
+    nonFiler.casoId = caso.id;
+
+    return respondValidated(
+      z.object({ nonFiler: NonFilerSchema, caso: CasoSchema }),
+      { nonFiler, caso },
+      { status: 201 },
+    );
+  }),
+
+  // Módulo 2 — Feed de Monitoramento Contínuo CTC (T07 · RF09/FA10)
+  http.get(`${API_URL}/crossing/ctc/feed`, () => respondValidated(CtcFeedSchema, getCtcFeed())),
+
+  /*
+    Sugerir convite à autorregularização a partir de um alerta
+    antecipado. Abre caso candidato com recomendação estruturada —
+    a decisão final continua com o auditor no módulo 4.
+  */
+  http.post(`${API_URL}/crossing/ctc/alerts/:id/suggest`, ({ params }) => {
+    const { id } = params as { id: string };
+    const alerta = findCtcAlert(id);
+    if (!alerta) {
+      return HttpResponse.json(
+        {
+          error_code: "ctc_alert_not_found",
+          message: "Alerta não está mais na janela do feed.",
+        },
+        { status: 404 },
+      );
+    }
+    if (alerta.sugestaoEnviada) {
+      return HttpResponse.json(
+        {
+          error_code: "ctc_suggestion_already_sent",
+          message: "Convite à autorregularização já sugerido para este alerta.",
+          casoId: alerta.casoId,
+        },
+        { status: 409 },
+      );
+    }
+
+    const now = new Date().toISOString();
+    const caso: Caso = {
+      id: `cs-2026-c${String(ctcCaseSeq).padStart(3, "0")}`,
+      contribuinteId: alerta.contribuinteId,
+      status: "candidato",
+      criadoEm: now,
+      atualizadoEm: now,
+      agenteResponsavel: "ag-orquestrador",
+      scoreValor: alerta.scoreIncremental,
+      divergenciaIds: [],
+      tributo: "iss",
+      proximaAcaoRecomendada: `Alerta antecipado pelo CTC (${alerta.janelaMinutos} min após o fato gerador) — avaliar convite à autorregularização.`,
+      recomendacao: {
+        acao: "autorregularizacao",
+        justificativa: `Regra "${alerta.regra}" disparou no monitoramento contínuo: ${alerta.descricao}`,
+        confianca: 0.7,
+        baseadaEm: [alerta.id],
+      },
+      observacoes: "Caso aberto a partir do feed CTC (T07) — detecção em quase tempo real.",
+    };
+    ctcCaseSeq += 1;
+    casosMutable.unshift(caso);
+
+    alerta.sugestaoEnviada = true;
+    alerta.casoId = caso.id;
+
+    return respondValidated(
+      z.object({ alertaId: z.string(), casoId: z.string() }),
+      { alertaId: alerta.id, casoId: caso.id },
+      { status: 201 },
+    );
+  }),
 
   // Módulo 1/2 — NFS-e (evidências primárias das divergências e do dossiê T13/T28)
   http.get(`${API_URL}/nfse`, () => respondValidated(z.array(NFSeSchema), nfseFixture)),
@@ -545,7 +707,10 @@ export const handlers = [
     const found = contribuintesFixture.find((c) => c.id === id);
     if (!found) {
       return HttpResponse.json(
-        { error_code: "taxpayer_not_found", message: "Contribuinte não encontrado." },
+        {
+          error_code: "taxpayer_not_found",
+          message: "Contribuinte não encontrado.",
+        },
         { status: 404 },
       );
     }
@@ -786,7 +951,10 @@ export const handlers = [
     const found = comunicacoesFixture.find((c) => c.id === id);
     if (!found) {
       return HttpResponse.json(
-        { error_code: "communication_not_found", message: "Comunicação não encontrada." },
+        {
+          error_code: "communication_not_found",
+          message: "Comunicação não encontrada.",
+        },
         { status: 404 },
       );
     }
@@ -814,7 +982,10 @@ export const handlers = [
     const caso = findCitizenCase(id);
     if (!caso) {
       return HttpResponse.json(
-        { error_code: "citizen_case_not_found", message: "Pendência não encontrada." },
+        {
+          error_code: "citizen_case_not_found",
+          message: "Pendência não encontrada.",
+        },
         { status: 404 },
       );
     }
@@ -829,7 +1000,10 @@ export const handlers = [
     const caso = findCitizenCase(id);
     if (!caso) {
       return HttpResponse.json(
-        { error_code: "citizen_case_not_found", message: "Pendência não encontrada." },
+        {
+          error_code: "citizen_case_not_found",
+          message: "Pendência não encontrada.",
+        },
         { status: 404 },
       );
     }
@@ -838,7 +1012,10 @@ export const handlers = [
     );
     if (jaRegistrada) {
       return HttpResponse.json(
-        { error_code: "ciencia_ja_registrada", message: "A ciência já foi registrada." },
+        {
+          error_code: "ciencia_ja_registrada",
+          message: "A ciência já foi registrada.",
+        },
         { status: 409 },
       );
     }
@@ -864,7 +1041,10 @@ export const handlers = [
     const caso = findCitizenCase(id);
     if (!caso) {
       return HttpResponse.json(
-        { error_code: "citizen_case_not_found", message: "Pendência não encontrada." },
+        {
+          error_code: "citizen_case_not_found",
+          message: "Pendência não encontrada.",
+        },
         { status: 404 },
       );
     }
@@ -895,7 +1075,11 @@ export const handlers = [
       `Guia emitida · ${caso.id.toUpperCase()}`,
       `O contribuinte ${caso.contribuinteId} emitiu a guia ${guia.numero} para regularização integral (protocolo ${interacao.protocolo}).`,
     );
-    return respondValidated(CitizenActionResponseSchema, { interacao, caso, guia });
+    return respondValidated(CitizenActionResponseSchema, {
+      interacao,
+      caso,
+      guia,
+    });
   }),
 
   // Adesão ao parcelamento — transiciona o caso para autorregularização.
@@ -904,7 +1088,10 @@ export const handlers = [
     const caso = findCitizenCase(id);
     if (!caso) {
       return HttpResponse.json(
-        { error_code: "citizen_case_not_found", message: "Pendência não encontrada." },
+        {
+          error_code: "citizen_case_not_found",
+          message: "Pendência não encontrada.",
+        },
         { status: 404 },
       );
     }
@@ -959,7 +1146,11 @@ export const handlers = [
       `Adesão ao parcelamento · ${caso.id.toUpperCase()}`,
       `O contribuinte ${caso.contribuinteId} aderiu ao parcelamento em ${plano.parcelas}x (protocolo ${interacao.protocolo}). Caso movido para autorregularização.`,
     );
-    return respondValidated(CitizenActionResponseSchema, { interacao, caso, guia });
+    return respondValidated(CitizenActionResponseSchema, {
+      interacao,
+      caso,
+      guia,
+    });
   }),
 
   // Canal de resposta/contestação com upload mock + protocolo.
@@ -968,7 +1159,10 @@ export const handlers = [
     const caso = findCitizenCase(id);
     if (!caso) {
       return HttpResponse.json(
-        { error_code: "citizen_case_not_found", message: "Pendência não encontrada." },
+        {
+          error_code: "citizen_case_not_found",
+          message: "Pendência não encontrada.",
+        },
         { status: 404 },
       );
     }
@@ -1007,7 +1201,10 @@ export const handlers = [
     const caso = findCitizenCase(id);
     if (!caso) {
       return HttpResponse.json(
-        { error_code: "citizen_case_not_found", message: "Pendência não encontrada." },
+        {
+          error_code: "citizen_case_not_found",
+          message: "Pendência não encontrada.",
+        },
         { status: 404 },
       );
     }
@@ -1274,7 +1471,10 @@ export const handlers = [
     const atorPapel: Role = roleParsed.success ? roleParsed.data : "auditor";
     if (atorPapel !== "admin") {
       return HttpResponse.json(
-        { error_code: "forbidden_role", message: "Apenas Admin pode exportar a trilha." },
+        {
+          error_code: "forbidden_role",
+          message: "Apenas Admin pode exportar a trilha.",
+        },
         { status: 403 },
       );
     }
@@ -1282,11 +1482,17 @@ export const handlers = [
     const idHeader = request.headers.get("X-Actor-Id") ?? `mock-${atorPapel}`;
     const bodyRaw = await request.json().catch(() => ({}));
     const body = z
-      .object({ format: z.enum(["csv", "json"]).default("csv"), total: z.number().int().min(0) })
+      .object({
+        format: z.enum(["csv", "json"]).default("csv"),
+        total: z.number().int().min(0),
+      })
       .safeParse(bodyRaw);
     if (!body.success) {
       return HttpResponse.json(
-        { error_code: "invalid_export_body", message: "Payload de export inválido." },
+        {
+          error_code: "invalid_export_body",
+          message: "Payload de export inválido.",
+        },
         { status: 400 },
       );
     }
@@ -1321,7 +1527,10 @@ export const handlers = [
     const atorPapel: Role = roleParsed.success ? roleParsed.data : "auditor";
     if (atorPapel !== "admin") {
       return HttpResponse.json(
-        { error_code: "forbidden_role", message: "Apenas Admin pode bloquear acessos." },
+        {
+          error_code: "forbidden_role",
+          message: "Apenas Admin pode bloquear acessos.",
+        },
         { status: 403 },
       );
     }
@@ -1343,7 +1552,10 @@ export const handlers = [
     const current = idx >= 0 ? atypicalAccessesMutable[idx] : undefined;
     if (!current || idx < 0) {
       return HttpResponse.json(
-        { error_code: "atypical_not_found", message: "Acesso atípico não encontrado." },
+        {
+          error_code: "atypical_not_found",
+          message: "Acesso atípico não encontrado.",
+        },
         { status: 404 },
       );
     }
@@ -1390,7 +1602,10 @@ export const handlers = [
     const atorPapel: Role = roleParsed.success ? roleParsed.data : "auditor";
     if (atorPapel !== "admin") {
       return HttpResponse.json(
-        { error_code: "forbidden_role", message: "Apenas Admin pode criar usuários." },
+        {
+          error_code: "forbidden_role",
+          message: "Apenas Admin pode criar usuários.",
+        },
         { status: 403 },
       );
     }
@@ -1415,7 +1630,10 @@ export const handlers = [
     }
     if (systemUsersMutable.some((u) => u.matricula === parsed.data.matricula)) {
       return HttpResponse.json(
-        { error_code: "user_matricula_conflict", message: "Matrícula já cadastrada." },
+        {
+          error_code: "user_matricula_conflict",
+          message: "Matrícula já cadastrada.",
+        },
         { status: 409 },
       );
     }
@@ -1463,7 +1681,10 @@ export const handlers = [
     const atorPapel: Role = roleParsed.success ? roleParsed.data : "auditor";
     if (atorPapel !== "admin") {
       return HttpResponse.json(
-        { error_code: "forbidden_role", message: "Apenas Admin pode editar usuários." },
+        {
+          error_code: "forbidden_role",
+          message: "Apenas Admin pode editar usuários.",
+        },
         { status: 403 },
       );
     }
@@ -1531,7 +1752,10 @@ export const handlers = [
     const atorPapel: Role = roleParsed.success ? roleParsed.data : "auditor";
     if (atorPapel !== "admin") {
       return HttpResponse.json(
-        { error_code: "forbidden_role", message: "Apenas Admin pode desativar usuários." },
+        {
+          error_code: "forbidden_role",
+          message: "Apenas Admin pode desativar usuários.",
+        },
         { status: 403 },
       );
     }

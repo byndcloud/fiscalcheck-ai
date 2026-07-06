@@ -6,6 +6,26 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o 
 
 ## [Não publicado]
 
+### Added — T06 · Non-filer Discovery (RF02) + T07 · Feed CTC (RF09/FA10) (2026-07-06)
+
+`/crossing` reestruturado em **3 abas** — Divergências (T05), **Fora do radar** (T06) e **Monitoramento CTC** (T07) — cobrindo as três frentes do módulo 2 numa única tela.
+
+**T06 — Fora do radar (Non-filer Discovery)**
+
+- **Schema** ([`non-filer.ts`](<./packages/shared-types/src/schemas/non-filer.ts>)): `NonFiler` com indícios tipados por fonte (`nfse_terceiros` | `meios_pagamento` | `fonte_aberta`), cada um com resumo, referência auditável e valor estimado; receita estimada 12m; documentos sempre mascarados.
+- **Fila priorizada** por receita estimada não declarada, com posição numerada, badge por fonte do indício (aceite: *qual fonte revelou*), badge AGENTE e receita em destaque.
+- **CTA "Iniciar inscrição de ofício"** com diálogo de confirmação do auditor (human-in-the-loop): `POST /crossing/non-filers/:id/open-case` abre um **caso candidato real** em `casosMutable` — aparece na fila `/cases` com recomendação estruturada baseada nos indícios e vira link "Ver caso candidato" (deep-link do dossiê). Segunda tentativa → 409.
+- **Fixture** ([`non-filers.ts`](<./apps/web/mocks/fixtures/non-filers.ts>)): 6 perfis sintéticos da economia local (facção têxtil, buffet, pilates, TI, transporte escolar, marcenaria com CNPJ baixado).
+
+**T07 — Feed de Monitoramento Contínuo CTC**
+
+- **Schema** ([`ctc.ts`](<./packages/shared-types/src/schemas/ctc.ts>)): `CtcBatch` (lote com notas, valor, regras avaliadas, tempo de processamento) e `CtcAlert` (regra que disparou, janela fato gerador → detecção em minutos, score incremental).
+- **Simulação determinística** ([`ctc-feed.ts`](<./apps/web/mocks/fixtures/ctc-feed.ts>)): o handler gera 1 lote a cada 8s conforme o relógio avança (sem `Math.random`), mantendo os últimos 18; 1 a cada 3 lotes carrega alerta antecipado com uma de 5 regras de monitoramento.
+- **Feed que atualiza sozinho** (`refetchInterval` 5s, aceite) com indicador "Ao vivo", contadores da janela (lotes, NFS-e, alertas antecipados e **janela média fato gerador → detecção**, aceite) e item alertado realçado em âmbar citando **a regra que disparou** (aceite).
+- **CTA "Sugerir autorregularização"**: `POST /crossing/ctc/alerts/:id/suggest` abre caso candidato real com recomendação `autorregularizacao` citando a regra; alerta vira link "Ver caso". Link "Ver casos abertos nos últimos minutos" → `/cases`.
+- **Infra**: `respondValidated` agora aceita `status` (201 nos POSTs de criação).
+- **Testes** (9 casos novos): [`non-filer-handlers.test.ts`](<./apps/web/tests/non-filer-handlers.test.ts>) (priorização, caso real na fila, 409/404), [`ctc-feed-handlers.test.ts`](<./apps/web/tests/ctc-feed-handlers.test.ts>) (contadores, avanço do relógio gera lotes — fake `Date` —, sugestão idempotente) e [`crossing-tabs.test.tsx`](<./apps/web/tests/crossing-tabs.test.tsx>) (aceites de UI das duas abas).
+
 ### Added — T05 · Cruzamento e Inconsistências (RF02/FA02) + complemento T09 (2026-07-06)
 
 Tela `/crossing` reconstruída como **caso instruído e auditável, não alerta estatístico** (módulo 2), fechando também os pontos de acesso restantes do aceite do T09 ("todo score exibido dá acesso ao painel de fatores", módulo 3).

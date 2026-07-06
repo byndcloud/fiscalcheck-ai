@@ -58,6 +58,24 @@ Tela `/crossing` (front-end, dados mock) reconstruída como **caso instruído e 
 - **Detalhe lado a lado**: valor declarado × documentado em NFS-e com o **cálculo explícito da diferença** (apurado − declarado = diferença), evidências primárias nominais (NFS-e com número, emissão, valor e ISS) e link para o Dossiê (T13) via deep-link `/cases?caso=…`. Painel "Por que este score?" (T09) incluso quando o contribuinte tem score.
 - **Fixtures consistentes por invariante testada**: todo `divergenciaId` referenciado em `casosFixture` existe; `valorApurado − valorDeclarado = valor`; NFS-e de evidência somam exatamente o `valorApurado`.
 
+## Entrega T06 · Non-filer Discovery (RF02)
+
+Aba **"Fora do radar"** em `/crossing` (front-end, dados mock):
+
+- Fila **priorizada por receita estimada não declarada** (12 meses) de prestadores sem cadastro mobiliário nem declaração compatível.
+- Cada item explicita **qual fonte revelou o indício** (badge por fonte: NFS-e de terceiros, meios de pagamento, fonte aberta) com resumo, referência auditável e valor estimado por indício.
+- CTA **"Iniciar inscrição de ofício"** com diálogo de confirmação do auditor (AGENTS.md §1.1) que abre um **caso candidato real** na fila do módulo 4 (`POST /crossing/non-filers/:id/open-case`), com recomendação estruturada baseada nos indícios; segunda tentativa devolve 409 com o caso já aberto.
+- Estados vazio/carregando/erro via `AsyncBoundary`; documentos sempre mascarados.
+
+## Entrega T07 · Feed de Monitoramento Contínuo CTC (RF09/FA10)
+
+Aba **"Monitoramento CTC"** em `/crossing` (front-end, dados mock):
+
+- Feed **em quase tempo real**: o handler MSW simula lotes de NFS-e chegando a cada 8s (geração determinística por `seq`, sem aleatoriedade) e o front atualiza sozinho com `refetchInterval` de 5s.
+- Contadores da janela corrente: lotes, NFS-e processadas, alertas antecipados e **janela média "fato gerador → detecção"** em minutos.
+- Item alertado realçado em âmbar mostra **a regra que disparou** (5 regras de monitoramento) e a janela individual de detecção.
+- CTA **"Sugerir autorregularização"**: abre caso candidato real com recomendação `autorregularizacao` citando a regra (`POST /crossing/ctc/alerts/:id/suggest`) — o convite ao contribuinte só sai depois do fluxo de aprovação do módulo 4. Link para os casos abertos nos últimos minutos.
+
 ## Decisões pendentes
 
 - **Apache AGE** vs **TigerGraph/Neo4j externo**? (Recomendação: AGE para piloto; reavaliar em produção se grafo passar de 100M arestas.)
