@@ -48,6 +48,7 @@ app/                                    # rotas (App Router)
 │   ├── comunicacoes                    # central de notificações eletrônicas (T15)
 │   ├── esteira-de-agentes              # painel da esteira de agentes (T10)
 │   ├── modelo-de-risco                 # config do modelo de risco (T02)
+│   ├── treinamento                     # módulo 6 — ambiente de simulação/capacitação (T20)
 │   └── compliance                      # módulo 6 — visão geral + subrotas T19
 │       ├── trilha                      # trilha de auditoria (admin only) — T19
 │       └── usuarios                    # admin de servidores + step-up MFA — T19
@@ -67,6 +68,7 @@ components/
 ├── dashboard/                          # widgets do painel gerencial (T01)
 ├── risk/                               # ScoreFactorsPanel — "Por que este score?" (T09)
 ├── risk-model/                         # editor + simulador do modelo de risco (T02)
+├── training/                           # faixa âmbar, cards e exercício com gabarito (T20)
 ├── providers.tsx                       # QueryClient (onError global → toast) + MSW bootstrap + Toaster
 └── ui/                                 # shadcn primitives + componentes DS custom
     #  T25: skeleton.tsx, error-state.tsx, async-boundary.tsx, empty-state.tsx, sonner.tsx

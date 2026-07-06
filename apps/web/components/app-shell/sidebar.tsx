@@ -4,6 +4,7 @@ import {
   BarChart3Icon,
   BriefcaseIcon,
   DatabaseIcon,
+  GraduationCapIcon,
   LayoutDashboardIcon,
   type LucideIcon,
   PencilLineIcon,
@@ -43,6 +44,8 @@ type NavItem = {
   icon: LucideIcon;
   roles: readonly Role[];
   aurora?: boolean;
+  /** T20: acento âmbar — reservado ao ambiente de treinamento. */
+  training?: boolean;
 };
 
 type NavSection = {
@@ -148,6 +151,20 @@ const NAV_SECTIONS: readonly NavSection[] = [
         description: "Auditoria e LGPD",
         icon: ShieldCheckIcon,
         roles: ["admin", "supervisor"] as const,
+      },
+    ],
+  },
+  {
+    id: "capacitacao",
+    label: "Capacitação",
+    items: [
+      {
+        href: "/treinamento",
+        label: "Treinamento",
+        description: "Simulação com dados anonimizados",
+        icon: GraduationCapIcon,
+        roles: AUDITORIAL_ROLES,
+        training: true,
       },
     ],
   },
@@ -268,9 +285,11 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
                           "grid size-8 shrink-0 place-items-center rounded-md transition-colors",
                           item.aurora
                             ? "bg-[image:var(--grad-aurora)] text-white shadow-[0_2px_8px_rgba(25,211,232,0.25)]"
-                            : active
-                              ? "bg-white/10 text-[#19d3e8]"
-                              : "bg-white/[0.04] text-[#8ea3c9] group-hover:bg-white/10 group-hover:text-white",
+                            : item.training
+                              ? "bg-[color:var(--c-warning)]/20 text-[color:var(--c-warning)]"
+                              : active
+                                ? "bg-white/10 text-[#19d3e8]"
+                                : "bg-white/[0.04] text-[#8ea3c9] group-hover:bg-white/10 group-hover:text-white",
                         )}
                       >
                         <Icon className="size-[18px]" />

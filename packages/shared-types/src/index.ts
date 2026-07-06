@@ -272,6 +272,23 @@ export {
 } from "./schemas/user-profile";
 
 export {
+  TrainingAttemptRequestSchema,
+  TrainingAttemptResultSchema,
+  TrainingCaseSchema,
+  TrainingDifficultySchema,
+  TrainingDivergenciaSchema,
+  TrainingGabaritoSchema,
+  TrainingTaxpayerSchema,
+  type TrainingAttemptRequest,
+  type TrainingAttemptResult,
+  type TrainingCase,
+  type TrainingDifficulty,
+  type TrainingDivergencia,
+  type TrainingGabarito,
+  type TrainingTaxpayer,
+} from "./schemas/training";
+
+export {
   PeriodoSchema,
   RelatorioFormatoSchema,
   RelatorioGerencialRequestSchema,
