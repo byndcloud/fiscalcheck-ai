@@ -63,7 +63,7 @@ components/
 ├── agents/                             # cards e sheet da esteira de agentes (T10)
 ├── cases/                              # fila, dossiê e workflow de decisão (T13)
 ├── citizen/                            # portal do contribuinte: cards, stepper 3 passos, diálogos (T16)
-├── crossing/                           # divergências: filtros, detalhe lado a lado + evidências (T05)
+├── crossing/                           # divergências (T05), fora do radar (T06) e feed CTC (T07)
 ├── communications/                     # central de notificações (T15)
 ├── compliance/                         # trilha, agente de conformidade, admin (T19)
 ├── dashboard/                          # widgets do painel gerencial (T01)

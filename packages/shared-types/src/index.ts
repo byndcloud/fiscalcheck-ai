@@ -61,6 +61,26 @@ export {
 } from "./schemas/divergencia";
 
 export {
+  FonteIndicioSchema,
+  IndicioNonFilerSchema,
+  NonFilerSchema,
+  NonFilerStatusSchema,
+  type FonteIndicio,
+  type IndicioNonFiler,
+  type NonFiler,
+  type NonFilerStatus,
+} from "./schemas/non-filer";
+
+export {
+  CtcAlertSchema,
+  CtcBatchSchema,
+  CtcFeedSchema,
+  type CtcAlert,
+  type CtcBatch,
+  type CtcFeed,
+} from "./schemas/ctc";
+
+export {
   FatorRiscoSchema,
   NivelRiscoSchema,
   ScoreSchema,
