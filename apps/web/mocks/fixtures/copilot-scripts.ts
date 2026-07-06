@@ -8,10 +8,11 @@ import type { CopilotSource } from "@fiscalcheck/shared-types";
   de "resumo do caso" usando casosFixture/contribuintesFixture, sem
   depender de um roteiro estático daqui).
 
-  9 roteiros estáticos + a resposta contextual = 10 cenários cobertos,
-  atendendo ao critério de aceite "8–10 perguntas roteirizadas".
-  Nenhum dado real de contribuinte/legislação — tudo sintético para a
-  demo (AGENTS.md §1.2).
+  11 roteiros estáticos + a resposta contextual, cobrindo perguntas de
+  perfis internos (score, prazos, legislação) e do cidadão (regularização,
+  contestação) — o Copilot é habilitado para todos os papéis, com
+  sugestões específicas por perfil no painel. Nenhum dado real de
+  contribuinte/legislação — tudo sintético para a demo (AGENTS.md §1.2).
 */
 export interface CopilotScript {
   id: string;
@@ -119,6 +120,30 @@ export const copilotScriptsFixture: CopilotScript[] = [
     resposta:
       "Consigo trazer o histórico de casos de um contribuinte específico se você abrir o Copilot a partir do dossiê dele (chip 'Contexto: CS-...') ou encontrá-lo pela busca global — a partir daí eu resumo status, score e casos relacionados.",
     fontes: [],
+  },
+  {
+    id: "cp-010",
+    gatilhos: [
+      "regularizar minha situação",
+      "regularizar minha situacao",
+      "como regularizar",
+      "emitir guia",
+      "guia de regularização",
+      "guia de regularizacao",
+    ],
+    resposta:
+      "Para regularizar sua situação, acesse a notificação recebida no Portal do Contribuinte, confira o apontamento e emita a guia de regularização com os acréscimos legais calculados automaticamente. Após o pagamento, o comprovante é anexado ao protocolo e a pendência é baixada sem abertura de processo de fiscalização.",
+    fontes: [
+      { label: "Portal do Contribuinte — Autorregularização", ref: "/citizen" },
+      { label: "Código Tributário Municipal, art. 178", ref: "lei-municipal-ctm" },
+    ],
+  },
+  {
+    id: "cp-011",
+    gatilhos: ["contestar", "contestação", "contestacao", "não concordo", "nao concordo"],
+    resposta:
+      "Se você não concorda com o apontamento, registre uma contestação pelo Portal do Contribuinte dentro do prazo indicado na notificação, anexando os documentos que comprovam sua posição. A contestação gera um protocolo, suspende a contagem enquanto estiver em análise e será avaliada por um auditor fiscal, que responderá pelo próprio portal.",
+    fontes: [{ label: "Portal do Contribuinte — Contestação", ref: "/citizen" }],
   },
 ];
 

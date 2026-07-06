@@ -6,7 +6,6 @@ import type * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
-import { CopilotButton } from "./copilot-button";
 import { GlobalSearch } from "./global-search";
 import { NotificationBell } from "./notification-bell";
 import { UserMenu } from "./user-menu";
@@ -14,10 +13,11 @@ import { UserMenu } from "./user-menu";
 /*
   Header do shell autenticado. O slot central hospeda a busca global
   (T24) quando nenhuma página passa `breadcrumb` (nenhuma passa hoje).
-  No grupo de ações: atalho do Copilot Fiscal (T18, à esquerda do sino),
-  sino de notificações e o menu do avatar (T27) — identidade, preferências
-  e sair. Busca e Copilot só renderizam para perfis internos (RBAC interno
-  a cada componente). O botão de menu (mobile) fica a cargo do AppShell.
+  No grupo de ações: sino de notificações e o menu do avatar (T27) —
+  identidade, preferências e sair. A busca só renderiza para perfis
+  internos (RBAC interno ao componente); o Copilot Fiscal vive num FAB
+  no canto inferior direito (ver AppShell). O botão de menu (mobile)
+  fica a cargo do AppShell.
 */
 
 type HeaderProps = {
@@ -58,7 +58,6 @@ export function Header({ breadcrumb, onMenuClick }: HeaderProps) {
       )}
 
       <div className="flex items-center gap-2">
-        <CopilotButton />
         <NotificationBell />
         <Separator orientation="vertical" className="h-6" />
         <UserMenu />

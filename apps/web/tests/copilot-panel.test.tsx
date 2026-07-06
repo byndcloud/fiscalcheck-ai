@@ -35,6 +35,7 @@ vi.stubGlobal(
 
 import { CopilotPanel } from "@/components/copilot/copilot-panel";
 import { useCopilotStore } from "@/stores/copilot-store";
+import { useSession } from "@/stores/session-store";
 
 function renderWithProviders(ui: React.ReactElement) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -88,6 +89,7 @@ describe("CopilotPanel (T18)", () => {
       routeMock(path, options),
     );
     useCopilotStore.setState({ open: false, contextoCasoId: null });
+    useSession.setState({ role: null, user: null });
   });
 
   afterEach(() => {
@@ -117,6 +119,27 @@ describe("CopilotPanel (T18)", () => {
       expect(screen.getByText(/A alíquota de ISS varia de 2% a 5%/)).toBeInTheDocument();
     });
     expect(screen.getByText("Código Tributário Municipal, art. 92")).toBeInTheDocument();
+  });
+
+  it("mostra sugestões específicas do perfil auditor", () => {
+    useSession.setState({ role: "auditor", user: { id: "u-1", displayName: "Auditor" } });
+    useCopilotStore.getState().openCopilot();
+    renderWithProviders(<CopilotPanel />);
+
+    expect(screen.getByRole("button", { name: "Quais os prazos de intimação?" })).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Como regularizar minha situação?" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("mostra sugestões e aviso específicos do perfil cidadão", () => {
+    useSession.setState({ role: "cidadao", user: { id: "u-2", displayName: "Cidadão" } });
+    useCopilotStore.getState().openCopilot();
+    renderWithProviders(<CopilotPanel />);
+
+    expect(screen.getByRole("button", { name: "Como regularizar minha situação?" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Como contestar uma notificação?" })).toBeVisible();
+    expect(screen.getByText(/para efeitos oficiais, utilize os canais do portal/i)).toBeVisible();
   });
 
   it("mostra o chip de contexto quando aberto a partir de um caso e permite removê-lo", async () => {

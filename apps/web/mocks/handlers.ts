@@ -2356,19 +2356,12 @@ export const handlers = [
     return respondValidated(z.array(SearchResultSchema), resultados.slice(0, 20));
   }),
 
-  // Módulo 6 — Copilot Fiscal (T18, RF10/FA11)
+  // Módulo 6 — Copilot Fiscal (T18, RF10/FA11).
+  // Aberto a todos os perfis autenticados (inclusive cidadão): o Copilot
+  // só consulta/orienta, nunca executa ação nem expõe dado de terceiros —
+  // as respostas contextuais de caso continuam vindo do dossiê que o
+  // próprio perfil já pode ver.
   http.post(`${API_URL}/copilot/ask`, async ({ request }) => {
-    const atorPapel = readActorRole(request);
-    if (!isInternalRole(atorPapel)) {
-      return HttpResponse.json(
-        {
-          error_code: "forbidden_role",
-          message: "Copilot Fiscal disponível apenas para perfis internos.",
-        },
-        { status: 403 },
-      );
-    }
-
     const bodyRaw = await request.json().catch(() => ({}));
     const parsed = CopilotAskRequestSchema.safeParse(bodyRaw);
     if (!parsed.success) {

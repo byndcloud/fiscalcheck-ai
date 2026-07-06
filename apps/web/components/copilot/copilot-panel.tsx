@@ -5,7 +5,7 @@ import { LockIcon, SendIcon, SparklesIcon, UserIcon, XIcon } from "lucide-react"
 import { useState } from "react";
 import { toast } from "sonner";
 
-import type { Caso, Contribuinte, CopilotMessage } from "@fiscalcheck/shared-types";
+import type { Caso, Contribuinte, CopilotMessage, Role } from "@fiscalcheck/shared-types";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -21,11 +21,16 @@ import { useCopilotChat } from "@/hooks/use-copilot-chat";
 import { apiRequest } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { useCopilotStore } from "@/stores/copilot-store";
+import { useSession } from "@/stores/session-store";
 
 /*
   Copilot Fiscal (T18 — RF10/FA11, módulo 6). Chat lateral com bolhas,
   chips de fontes e sugestões de pergunta. Histórico só em memória (não
   persiste entre reloads — front-end mock, sem backend real).
+
+  Disponível para todos os perfis: as sugestões iniciais e o aviso de
+  rodapé mudam conforme o papel da sessão (cidadão vê perguntas sobre
+  as próprias obrigações; perfis internos, sobre score/prazos/legislação).
 
   Contexto do Dossiê (chip "Contexto: CS-..."): reaproveita as MESMAS
   queryKeys ["cases"]/["taxpayers"] já usadas por /cases e pelo
@@ -33,12 +38,39 @@ import { useCopilotStore } from "@/stores/copilot-store";
   estiver quente.
 */
 
-const SUGESTOES_INICIAIS = [
-  "Qual a alíquota do ISS?",
-  "Como o score de risco é calculado?",
-  "Como funciona a autorregularização?",
-  "Quais os prazos de intimação?",
-];
+const SUGESTOES_POR_PERFIL: Record<Role, string[]> = {
+  auditor: [
+    "Qual a alíquota do ISS?",
+    "Como o score de risco é calculado?",
+    "Quais os prazos de intimação?",
+    "Como funciona a autorregularização?",
+  ],
+  supervisor: [
+    "Como o score de risco é calculado?",
+    "O que é a explicabilidade dos fatores de risco?",
+    "Como funciona a autorregularização?",
+    "Quais os prazos de intimação?",
+  ],
+  admin: [
+    "Como o score de risco é calculado?",
+    "Qual a alíquota do ISS?",
+    "Como funciona o Simples Nacional?",
+    "Como funciona a autorregularização?",
+  ],
+  cidadao: [
+    "Como regularizar minha situação?",
+    "Como contestar uma notificação?",
+    "Qual o prazo para responder?",
+    "Qual a alíquota do ISS?",
+  ],
+  agente_sistema: [
+    "Qual a alíquota do ISS?",
+    "Como o score de risco é calculado?",
+    "Como funciona a autorregularização?",
+  ],
+};
+
+const SUGESTOES_FALLBACK = SUGESTOES_POR_PERFIL.auditor;
 
 let localMessageSeq = 0;
 function nextLocalMessageId(): string {
@@ -51,6 +83,8 @@ export function CopilotPanel() {
   const contextoCasoId = useCopilotStore((s) => s.contextoCasoId);
   const closeCopilot = useCopilotStore((s) => s.closeCopilot);
   const clearContext = useCopilotStore((s) => s.clearContext);
+  const role = useSession((s) => s.role);
+  const sugestoes = role ? SUGESTOES_POR_PERFIL[role] : SUGESTOES_FALLBACK;
 
   const [messages, setMessages] = useState<CopilotMessage[]>([]);
   const [pergunta, setPergunta] = useState("");
@@ -133,7 +167,11 @@ export function CopilotPanel() {
 
         <div className="flex items-start gap-2 border-b border-border bg-brand-050 px-4 py-2.5 text-xs text-brand-deep">
           <LockIcon aria-hidden className="mt-0.5 size-3.5 shrink-0" />
-          <p>O Copilot consulta e fundamenta — a ação fiscal é sempre decidida pelo auditor.</p>
+          <p>
+            {role === "cidadao"
+              ? "O Copilot orienta e informa — para efeitos oficiais, utilize os canais do portal."
+              : "O Copilot consulta e fundamenta — a ação fiscal é sempre decidida pelo auditor."}
+          </p>
         </div>
 
         <ScrollArea className="flex-1 px-4 py-3">
@@ -142,7 +180,11 @@ export function CopilotPanel() {
               <EmptyState
                 icon={SparklesIcon}
                 title="Pergunte ao Copilot Fiscal"
-                description="Legislação tributária municipal, critérios do score de risco ou o histórico de um contribuinte."
+                description={
+                  role === "cidadao"
+                    ? "Tire dúvidas sobre notificações, prazos, contestações e como regularizar sua situação."
+                    : "Legislação tributária municipal, critérios do score de risco ou o histórico de um contribuinte."
+                }
                 className="border-none bg-transparent"
               />
             ) : (
@@ -199,7 +241,7 @@ export function CopilotPanel() {
         </ScrollArea>
 
         <div className="flex flex-wrap gap-1.5 border-t border-border px-4 py-2">
-          {SUGESTOES_INICIAIS.map((sugestao) => (
+          {sugestoes.map((sugestao) => (
             <button
               key={sugestao}
               type="button"

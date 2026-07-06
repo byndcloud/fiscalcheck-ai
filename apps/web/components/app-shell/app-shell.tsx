@@ -12,6 +12,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { apiRequest } from "@/lib/api-client";
 import { useDossieStore } from "@/stores/dossie-store";
 
+import { CopilotFab } from "./copilot-fab";
 import { Header } from "./header";
 import { Sidebar } from "./sidebar";
 
@@ -84,6 +85,7 @@ export function AppShell({ children, breadcrumb }: AppShellProps) {
         }}
       />
       <CopilotPanel />
+      <CopilotFab />
     </div>
   );
 }
