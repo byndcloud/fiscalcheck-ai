@@ -7,6 +7,7 @@ import {
   FileTextIcon,
   HistoryIcon,
   Loader2Icon,
+  MessageCircleQuestionIcon,
   SparklesIcon,
   UsersIcon,
 } from "lucide-react";
@@ -47,6 +48,7 @@ import {
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ApiError, apiRequest } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
+import { useCopilotStore } from "@/stores/copilot-store";
 import { useSession } from "@/stores/session-store";
 
 /*
@@ -119,6 +121,7 @@ export function CaseDossieSheet({ casoId, casos, taxpayerById, open, onOpenChang
   const queryClient = useQueryClient();
   const role = useSession((s) => s.role);
   const user = useSession((s) => s.user);
+  const openCopilot = useCopilotStore((s) => s.openCopilot);
   const [pendingAction, setPendingAction] = useState<DecisionAction | null>(null);
   const [viewingDocument, setViewingDocument] = useState<CaseDocument | null>(null);
 
@@ -267,16 +270,27 @@ export function CaseDossieSheet({ casoId, casos, taxpayerById, open, onOpenChang
                   </span>
                   {caso.agenteResponsavel ? <AgentRecommendationBadge /> : null}
                 </div>
-                <DossieExportButton
-                  caso={caso}
-                  contribuinte={taxpayer ?? null}
-                  score={scoreDoContribuinte}
-                  divergencias={divergenciasDoCaso}
-                  evidencias={nfseFullList}
-                  decisions={decisions.data ?? []}
-                  documents={documents.data ?? []}
-                  disabled={decisions.isLoading || documents.isLoading}
-                />
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    className="text-aurora"
+                    onClick={() => openCopilot(caso.id)}
+                  >
+                    <MessageCircleQuestionIcon aria-hidden />
+                    Perguntar ao Copilot
+                  </Button>
+                  <DossieExportButton
+                    caso={caso}
+                    contribuinte={taxpayer ?? null}
+                    score={scoreDoContribuinte}
+                    divergencias={divergenciasDoCaso}
+                    evidencias={nfseFullList}
+                    decisions={decisions.data ?? []}
+                    documents={documents.data ?? []}
+                    disabled={decisions.isLoading || documents.isLoading}
+                  />
+                </div>
               </div>
               <SheetTitle>{taxpayer?.razaoSocial ?? `Caso ${caso.contribuinteId}`}</SheetTitle>
               <SheetDescription>

@@ -29,6 +29,8 @@ import {
   ComunicacaoSchema,
   ContestacaoRequestSchema,
   ContribuinteSchema,
+  CopilotAskRequestSchema,
+  CopilotAskResponseSchema,
   CtcFeedSchema,
   DecisionRequestSchema,
   type DevolutivaPreTriagem,
@@ -65,6 +67,8 @@ import {
   type Role,
   RoleSchema,
   ScoreSchema,
+  type SearchResult,
+  SearchResultSchema,
   SmartAlertSchema,
   type SusAvaliacao,
   SusAvaliacaoSchema,
@@ -98,6 +102,11 @@ import { casosFixture } from "./fixtures/casos";
 import { complianceSealsFixture } from "./fixtures/compliance-seals";
 import { comunicacoesFixture } from "./fixtures/comunicacoes";
 import { contribuintesFixture } from "./fixtures/contribuintes";
+import {
+  COPILOT_FALLBACK_RESPOSTA,
+  COPILOT_SUGESTOES_PADRAO,
+  copilotScriptsFixture,
+} from "./fixtures/copilot-scripts";
 import { findCtcAlert, getCtcFeed } from "./fixtures/ctc-feed";
 import { divergenciasFixture } from "./fixtures/divergencias";
 import { geoObrasFixture } from "./fixtures/geo-obras";
@@ -584,6 +593,21 @@ function respondValidated<T>(
 }
 
 seedCaseCollab();
+
+/*
+  Gate de "perfis internos" (T18/T24 — Copilot e busca global). Reflete o
+  mesmo conjunto de AUDITOR_ROLES de apps/web/lib/roles.ts, replicado aqui
+  em vez de importado porque os demais handlers RBAC já seguem esse padrão
+  inline (ver POST /ai/risk-model/config acima).
+*/
+function isInternalRole(role: Role): boolean {
+  return role === "auditor" || role === "supervisor" || role === "admin";
+}
+
+function readActorRole(request: Request): Role {
+  const roleParsed = RoleSchema.safeParse(request.headers.get("X-Actor-Role"));
+  return roleParsed.success ? roleParsed.data : "auditor";
+}
 
 export const handlers = [
   // Módulo 1 — Ingestão
@@ -2348,6 +2372,148 @@ export const handlers = [
         displayName: profile.nome,
       },
       issuedAt: new Date().toISOString(),
+    });
+  }),
+
+  // Transversal — Busca global (T24): CNPJ, caso e contribuinte
+  http.get(`${API_URL}/search`, ({ request }) => {
+    const atorPapel = readActorRole(request);
+    if (!isInternalRole(atorPapel)) {
+      return HttpResponse.json(
+        {
+          error_code: "forbidden_role",
+          message: "Busca global disponível apenas para perfis internos.",
+        },
+        { status: 403 },
+      );
+    }
+
+    const url = new URL(request.url);
+    const q = url.searchParams.get("q")?.trim().toLowerCase() ?? "";
+    if (!q) {
+      return respondValidated(z.array(SearchResultSchema), []);
+    }
+
+    const scoreByContribuinte = new Map(scoresFixture.map((s) => [s.contribuinteId, s]));
+    const casoMaisRecentePorContribuinte = new Map<string, Caso>();
+    for (const caso of casosMutable) {
+      const atual = casoMaisRecentePorContribuinte.get(caso.contribuinteId);
+      if (!atual || caso.atualizadoEm > atual.atualizadoEm) {
+        casoMaisRecentePorContribuinte.set(caso.contribuinteId, caso);
+      }
+    }
+
+    const resultados: SearchResult[] = [];
+
+    for (const contribuinte of contribuintesFixture) {
+      const nomeMatch = `${contribuinte.razaoSocial} ${contribuinte.nomeFantasia ?? ""}`
+        .toLowerCase()
+        .includes(q);
+      const identificadorMatch =
+        `${contribuinte.cnpjMascarado} ${contribuinte.inscricaoMunicipal ?? ""}`
+          .toLowerCase()
+          .includes(q);
+      if (!nomeMatch && !identificadorMatch) continue;
+
+      const score = scoreByContribuinte.get(contribuinte.id);
+      const casoRelacionado = casoMaisRecentePorContribuinte.get(contribuinte.id);
+
+      resultados.push({
+        tipo: identificadorMatch && !nomeMatch ? "cnpj" : "contribuinte",
+        id: contribuinte.id,
+        titulo: contribuinte.razaoSocial,
+        subtitulo: contribuinte.nomeFantasia
+          ? `${contribuinte.nomeFantasia} · ${contribuinte.cnpjMascarado}`
+          : contribuinte.cnpjMascarado,
+        scoreValor: score?.valor,
+        nivelRisco: score?.nivel,
+        casoRelacionadoId: casoRelacionado?.id,
+      });
+    }
+
+    for (const caso of casosMutable) {
+      const contribuinte = contribuintesFixture.find((c) => c.id === caso.contribuinteId);
+      const haystack = [caso.id, caso.tributo ?? "", caso.status, contribuinte?.razaoSocial ?? ""]
+        .join(" ")
+        .toLowerCase();
+      if (!haystack.includes(q)) continue;
+
+      resultados.push({
+        tipo: "caso",
+        id: caso.id,
+        titulo: caso.id.toUpperCase(),
+        subtitulo: contribuinte?.razaoSocial,
+        scoreValor: caso.scoreValor,
+        status: caso.status,
+        casoRelacionadoId: caso.id,
+      });
+    }
+
+    return respondValidated(z.array(SearchResultSchema), resultados.slice(0, 20));
+  }),
+
+  // Módulo 6 — Copilot Fiscal (T18, RF10/FA11).
+  // Aberto a todos os perfis autenticados (inclusive cidadão): o Copilot
+  // só consulta/orienta, nunca executa ação nem expõe dado de terceiros —
+  // as respostas contextuais de caso continuam vindo do dossiê que o
+  // próprio perfil já pode ver.
+  http.post(`${API_URL}/copilot/ask`, async ({ request }) => {
+    const bodyRaw = await request.json().catch(() => ({}));
+    const parsed = CopilotAskRequestSchema.safeParse(bodyRaw);
+    if (!parsed.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_copilot_request",
+          message: "Pergunta inválida.",
+          issues: parsed.error.issues,
+        },
+        { status: 400 },
+      );
+    }
+
+    const { pergunta, contextoCasoId } = parsed.data;
+    const perguntaNormalizada = pergunta.toLowerCase();
+    const now = new Date().toISOString();
+
+    /*
+      Resposta contextual: quando o Copilot é aberto a partir do chip
+      "Contexto: CS-..." do Dossiê e a pergunta pede um resumo, monta a
+      resposta com dados reais do caso mutável (reflete decisões já
+      tomadas), em vez de usar um roteiro estático.
+    */
+    const pedeResumoContextual = /resum|este caso|esse caso|status (do|deste) caso/.test(
+      perguntaNormalizada,
+    );
+    if (contextoCasoId && pedeResumoContextual) {
+      const caso = casosMutable.find((c) => c.id === contextoCasoId.toLowerCase());
+      if (caso) {
+        const contribuinte = contribuintesFixture.find((c) => c.id === caso.contribuinteId);
+        const texto = `O caso ${caso.id.toUpperCase()} (${contribuinte?.razaoSocial ?? caso.contribuinteId}) está em "${caso.status}", com score ${caso.scoreValor ?? "não calculado"} e ${caso.divergenciaIds.length} divergência(s) vinculada(s).${caso.recomendacao ? ` Recomendação do agente: ${caso.recomendacao.justificativa}` : ""}`;
+        return respondValidated(CopilotAskResponseSchema, {
+          mensagem: {
+            id: `cpm-${Date.now()}`,
+            autor: "copilot",
+            texto,
+            fontes: [{ label: `Dossiê ${caso.id.toUpperCase()}` }],
+            timestamp: now,
+          },
+        });
+      }
+    }
+
+    const script = copilotScriptsFixture.find((s) =>
+      s.gatilhos.some((gatilho) => perguntaNormalizada.includes(gatilho)),
+    );
+
+    return respondValidated(CopilotAskResponseSchema, {
+      mensagem: {
+        id: `cpm-${Date.now()}`,
+        autor: "copilot",
+        texto: script?.resposta ?? COPILOT_FALLBACK_RESPOSTA,
+        fontes: script?.fontes ?? [],
+        timestamp: now,
+      },
+      sugestoes: script ? undefined : COPILOT_SUGESTOES_PADRAO,
     });
   }),
 ];

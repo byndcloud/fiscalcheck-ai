@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 
 import type { Caso, Contribuinte } from "@fiscalcheck/shared-types";
 
-import { CaseDossieSheet } from "@/components/cases/case-dossie-sheet";
 import { CaseKanban } from "@/components/cases/case-kanban";
 import { CaseList } from "@/components/cases/case-list";
 import { CasesToolbar } from "@/components/cases/cases-toolbar";
@@ -16,6 +15,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import { apiRequest } from "@/lib/api-client";
+import { useDossieStore } from "@/stores/dossie-store";
 
 const VIEW_STORAGE_KEY = "fiscalcheck.cases.view";
 
@@ -58,7 +58,7 @@ export default function CasesPage() {
 
   const [view, setView] = useState<CaseView>("kanban");
   const [filter, setFilter] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const openDossie = useDossieStore((s) => s.openDossie);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -74,8 +74,8 @@ export default function CasesPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const casoParam = new URLSearchParams(window.location.search).get("caso");
-    if (casoParam) setSelectedId(casoParam);
-  }, []);
+    if (casoParam) openDossie(casoParam);
+  }, [openDossie]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -157,25 +157,11 @@ export default function CasesPage() {
             description="Ajuste o texto do filtro ou limpe para ver todos os casos ativos."
           />
         ) : view === "kanban" ? (
-          <CaseKanban
-            data={filteredCasos}
-            taxpayerById={taxpayerById}
-            onOpenDossie={setSelectedId}
-          />
+          <CaseKanban data={filteredCasos} taxpayerById={taxpayerById} onOpenDossie={openDossie} />
         ) : (
-          <CaseList data={filteredCasos} taxpayerById={taxpayerById} onOpenDossie={setSelectedId} />
+          <CaseList data={filteredCasos} taxpayerById={taxpayerById} onOpenDossie={openDossie} />
         )}
       </AsyncBoundary>
-
-      <CaseDossieSheet
-        casoId={selectedId}
-        casos={casos}
-        taxpayerById={taxpayerById}
-        open={selectedId !== null}
-        onOpenChange={(open) => {
-          if (!open) setSelectedId(null);
-        }}
-      />
     </div>
   );
 }
