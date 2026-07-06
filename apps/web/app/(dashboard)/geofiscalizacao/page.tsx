@@ -226,7 +226,7 @@ export default function GeofiscalizacaoPage() {
         </section>
 
         {/* Métricas do recorte */}
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
           {metricas.map((m) => (
             <div
               key={m.label}

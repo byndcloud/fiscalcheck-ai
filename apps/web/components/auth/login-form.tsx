@@ -76,7 +76,7 @@ export function LoginForm() {
   async function onSubmit(values: LoginFormValues) {
     await new Promise((resolve) => setTimeout(resolve, 350));
     setRole(values.role);
-    toast.success(`Bem-vindo(a) — perfil ${ROLE_LABEL_PT[values.role]}`);
+    toast.success("Bem-vindo(a) ao FiscalCheck AI");
     router.push(homeRouteForRole(values.role));
   }
 
@@ -86,7 +86,7 @@ export function LoginForm() {
     // Autentica no perfil ativo (engrenagem), disponível para todos os papéis.
     await new Promise((resolve) => setTimeout(resolve, 600));
     setRole(selectedRole);
-    toast.success(`Identificação gov.br confirmada — perfil ${ROLE_LABEL_PT[selectedRole]}.`);
+    toast.success("Identificação gov.br confirmada.");
     router.push(homeRouteForRole(selectedRole));
   }
 
