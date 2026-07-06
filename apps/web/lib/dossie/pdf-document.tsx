@@ -108,6 +108,7 @@ const TIPO_DIV_LABEL: Record<string, string> = {
   regime_incorreto: "Regime incorreto",
   endereco_inconsistente: "Endereço inconsistente",
   socio_vinculado: "Sócio vinculado",
+  inativo_atividade: "Inativo com atividade",
 };
 
 const ORIGEM_DIV_LABEL: Record<string, string> = {

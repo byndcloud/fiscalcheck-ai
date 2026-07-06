@@ -63,6 +63,7 @@ components/
 ├── agents/                             # cards e sheet da esteira de agentes (T10)
 ├── cases/                              # fila, dossiê e workflow de decisão (T13)
 ├── citizen/                            # portal do contribuinte: cards, stepper 3 passos, diálogos (T16)
+├── crossing/                           # divergências: filtros, detalhe lado a lado + evidências (T05)
 ├── communications/                     # central de notificações (T15)
 ├── compliance/                         # trilha, agente de conformidade, admin (T19)
 ├── dashboard/                          # widgets do painel gerencial (T01)
@@ -78,6 +79,7 @@ lib/
 ├── case-transitions.ts                 # regras de estado dos casos (T13)
 ├── citizen/                            # simulador de parcelamento + linguagem clara (T16)
 ├── compliance/export-audit.ts          # export CSV/JSON da trilha (T19)
+├── crossing/filter-divergencias.ts     # filtros combináveis da lista de divergências (T05)
 ├── dossie/                             # geração do PDF do dossiê (T28, react-pdf)
 ├── errors.ts                           # resolveErrorMessage — mapa ApiError → pt-BR (T25)
 ├── format-relative-time.ts             # "há 5 min" etc.

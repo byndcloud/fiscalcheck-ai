@@ -49,6 +49,15 @@ modules/crossing/
 - **Precisão** dos cruzamentos: ≥ 80% (validado com feedback do auditor; calibrado pelo módulo 3).
 - **Cobertura** de NFS-e processadas em CTC: 100% dentro de 30 minutos.
 
+## Entrega T05 · Cruzamento e Inconsistências (RF02/FA02)
+
+Tela `/crossing` (front-end, dados mock) reconstruída como **caso instruído e auditável, não alerta estatístico**:
+
+- **Lista de divergências** declarado × NFS-e com badge do tipo, badge **AGENTE** na origem, diferença (R$) em destaque e StatusBadge de risco; estados vazio/carregando/erro via `AsyncBoundary` (T25).
+- **Filtros combináveis** (E entre dimensões, OU nos chips): tipo em chips — incluindo o novo `inativo_atividade` ("inativo com atividade") —, período (competência), faixa de valor e setor (derivado da divisão CNAE da atividade principal). Lógica pura em `apps/web/lib/crossing/filter-divergencias.ts` com golden tests.
+- **Detalhe lado a lado**: valor declarado × documentado em NFS-e com o **cálculo explícito da diferença** (apurado − declarado = diferença), evidências primárias nominais (NFS-e com número, emissão, valor e ISS) e link para o Dossiê (T13) via deep-link `/cases?caso=…`. Painel "Por que este score?" (T09) incluso quando o contribuinte tem score.
+- **Fixtures consistentes por invariante testada**: todo `divergenciaId` referenciado em `casosFixture` existe; `valorApurado − valorDeclarado = valor`; NFS-e de evidência somam exatamente o `valorApurado`.
+
 ## Decisões pendentes
 
 - **Apache AGE** vs **TigerGraph/Neo4j externo**? (Recomendação: AGE para piloto; reavaliar em produção se grafo passar de 100M arestas.)

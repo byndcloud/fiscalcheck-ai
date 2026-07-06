@@ -22,6 +22,8 @@ export const TipoDivergenciaSchema = z.enum([
   "regime_incorreto",
   "endereco_inconsistente",
   "socio_vinculado",
+  // T05 (RF02): contribuinte inativo/suspenso no cadastro, mas com NFS-e emitidas.
+  "inativo_atividade",
 ]);
 export type TipoDivergencia = z.infer<typeof TipoDivergenciaSchema>;
 
@@ -34,7 +36,15 @@ export const DivergenciaSchema = z.object({
   tipo: TipoDivergenciaSchema,
   origem: OrigemDivergenciaSchema,
   severidade: SeveridadeSchema,
+  /** Diferença apurada (R$) — destaque da lista T05. Null quando a divergência não é monetária. */
   valor: z.number().nullable().optional(),
+  /*
+    Lado a lado do detalhe (T05): declarado × documentado em NFS-e.
+    Opcionais porque divergências cadastrais/grafo não têm o par.
+    Invariante esperada: valorApurado − valorDeclarado ≈ valor.
+  */
+  valorDeclarado: z.number().nonnegative().optional(),
+  valorApurado: z.number().nonnegative().optional(),
   competencia: z
     .string()
     .regex(/^\d{4}-\d{2}$/, {

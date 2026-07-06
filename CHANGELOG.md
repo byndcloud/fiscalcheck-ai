@@ -6,6 +6,25 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o 
 
 ## [Não publicado]
 
+### Added — T05 · Cruzamento e Inconsistências (RF02/FA02) + complemento T09 (2026-07-06)
+
+Tela `/crossing` reconstruída como **caso instruído e auditável, não alerta estatístico** (módulo 2), fechando também os pontos de acesso restantes do aceite do T09 ("todo score exibido dá acesso ao painel de fatores", módulo 3).
+
+**T05 — Cruzamento (módulo 2)**
+
+- **Schema** ([`packages/shared-types/src/schemas/divergencia.ts`](<./packages/shared-types/src/schemas/divergencia.ts>)): novo tipo `inativo_atividade` ("inativo com atividade" — filtro citado no edital) e par opcional `valorDeclarado`/`valorApurado` para o lado a lado do detalhe (invariante: `valorApurado − valorDeclarado = valor`). Rótulos/explicações atualizados em todos os consumidores (crossing, treinamento, PDF do dossiê e linguagem clara do cidadão).
+- **Filtros combináveis** (E entre dimensões, OU nos chips): chips por tipo, período (competência), faixa de valor (só monetárias) e setor derivado da divisão CNAE da atividade principal (`setorFromAtividade`). Lógica pura em [`lib/crossing/filter-divergencias.ts`](<./apps/web/lib/crossing/filter-divergencias.ts>) + contador "X de Y divergências" e botão limpar.
+- **Lista**: razão social + CNPJ mascarado (lookup de contribuintes), badge do tipo, badge **AGENTE** (reuso do `AgentRecommendationBadge`) na origem do cruzamento, diferença (R$) em destaque (`--c-risk-4-txt`), StatusBadge de risco por severidade e estados vazio/carregando/erro via `AsyncBoundary` (T25).
+- **Detalhe** ([`components/crossing/divergencia-detail-sheet.tsx`](<./apps/web/components/crossing/divergencia-detail-sheet.tsx>)): lado a lado "valor declarado × documentado em NFS-e", **cálculo explícito da diferença** (apurado − declarado = diferença), evidências primárias nominais (NFS-e com número, emissão, descrição, valor e ISS; fallback textual para evidências de cadastro/grafo), painel "Por que este score?" (T09) quando o contribuinte tem score e **link para o Dossiê (T13)** — novo deep-link `/cases?caso=…` abre o dossiê direto.
+- **Fixtures**: `divergenciasFixture` agora cobre TODOS os `divergenciaIds` referenciados em `casosFixture` (antes ~40 IDs pendurados) — camada handcrafted rica + camada gerada deterministicamente do próprio caso; `nfseFixture` ganhou notas nominais (restaurante, imobiliária, TI suspensa) + geração automática de notas que **somam exatamente o `valorApurado`** de cada divergência declarado × NFS-e.
+- **Testes** (13 casos novos): [`filter-divergencias.test.ts`](<./apps/web/tests/filter-divergencias.test.ts>) (golden tests das combinações), [`divergencias-fixture.test.ts`](<./apps/web/tests/divergencias-fixture.test.ts>) (invariantes: nenhum link quebrado, conta fecha, NFS-e somam o apurado) e [`crossing-page.test.tsx`](<./apps/web/tests/crossing-page.test.tsx>) (badge AGENTE, chips, detalhe com evidências + link dossiê).
+
+**T09 — complemento (módulo 3)**
+
+- **Dashboard**: casos priorizados por risco ganharam botão "Ver fatores" que abre o painel "Por que este score?" em Sheet lateral — o score exibido no dashboard não era acessível antes.
+- **Detalhe da divergência** (`/crossing`): `ScoreFactorsPanel` embutido quando o contribuinte tem score, antecipando o reuso previsto para a visão 360 (T08).
+- **Teste**: [`dashboard-score-factors.test.tsx`](<./apps/web/tests/dashboard-score-factors.test.tsx>).
+
 ### Added — T20 · Ambiente de Simulação e Capacitação (RSC04) (2026-07-05)
 
 Modo "Treinamento" para novos auditores (módulo 6): biblioteca de casos-exercício com dados 100% anonimizados e gabarito baseado em decisão histórica — sem nenhuma mistura com o ambiente "real" (handlers, estado in-memory e rota exclusivos do treino; nenhuma tentativa gera caso, notificação ou entrada de auditoria).
