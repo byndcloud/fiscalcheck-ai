@@ -6,6 +6,7 @@ import {
   DatabaseIcon,
   GraduationCapIcon,
   LayoutDashboardIcon,
+  ListOrderedIcon,
   type LucideIcon,
   MapPinnedIcon,
   PencilLineIcon,
@@ -34,9 +35,10 @@ import { useSession } from "@/stores/session-store";
   texto branco/muted-navy, seções agrupadas em OPERAÇÃO / GOVERNANÇA,
   estado ativo destacado por barra aurora vertical + tinta translúcida.
 
-  A ordem e o filtro por papel permanecem inalterados (7 módulos + dashboard),
-  e o item de IA continua com aurora explícita — traço reservado ao
-  módulo agêntico pelo DS §3.2.
+  A ordem e o filtro por papel permanecem inalterados (7 módulos + dashboard).
+  Nenhum item usa mais o acento aurora no ícone — a camada aurora (DS §3.2)
+  sinaliza saídas de IA dentro das telas, não navegação; os ícones da
+  sidebar seguem todos o mesmo padrão neutro.
 */
 
 type NavItem = {
@@ -45,7 +47,6 @@ type NavItem = {
   description: string;
   icon: LucideIcon;
   roles: readonly Role[];
-  aurora?: boolean;
   /** T20: acento âmbar — reservado ao ambiente de treinamento. */
   training?: boolean;
 };
@@ -85,12 +86,18 @@ const NAV_SECTIONS: readonly NavSection[] = [
         roles: AUDITORIAL_ROLES,
       },
       {
-        href: "/ai",
-        label: "Risco & IA",
-        description: "Scores e agentes",
+        href: "/ia-preditiva",
+        label: "IA Preditiva",
+        description: "Scores de risco e agentes",
         icon: SparklesIcon,
         roles: AUDITORIAL_ROLES,
-        aurora: true,
+      },
+      {
+        href: "/fila-de-risco",
+        label: "Fila de risco",
+        description: "Priorização por score e visão 360",
+        icon: ListOrderedIcon,
+        roles: AUDITORIAL_ROLES,
       },
       {
         href: "/analise-de-redes",
@@ -299,13 +306,11 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
                         aria-hidden="true"
                         className={cn(
                           "grid size-8 shrink-0 place-items-center rounded-md transition-colors",
-                          item.aurora
-                            ? "bg-[image:var(--grad-aurora)] text-white shadow-[0_2px_8px_rgba(25,211,232,0.25)]"
-                            : item.training
-                              ? "bg-[color:var(--c-warning)]/20 text-[color:var(--c-warning)]"
-                              : active
-                                ? "bg-white/10 text-[#19d3e8]"
-                                : "bg-white/[0.04] text-[#8ea3c9] group-hover:bg-white/10 group-hover:text-white",
+                          item.training
+                            ? "bg-[color:var(--c-warning)]/20 text-[color:var(--c-warning)]"
+                            : active
+                              ? "bg-white/10 text-[#19d3e8]"
+                              : "bg-white/[0.04] text-[#8ea3c9] group-hover:bg-white/10 group-hover:text-white",
                         )}
                       >
                         <Icon className="size-[18px]" />

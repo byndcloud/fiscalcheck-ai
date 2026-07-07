@@ -15,12 +15,21 @@
 - **Explicabilidade (XAI)** — registro dos fatores que justificam cada classificação.
 - **Active Learning** — cada feedback do auditor realimenta retrain + calibragem (agente de calibragem).
 
+## Entrega T08 · Fila priorizada e Visão 360 (MVP web)
+
+> Frente de UI do RF03/FA03, entregue no `apps/web` sobre a camada mock (MSW).
+
+- **Página `/fila-de-risco`** (papéis auditoriais) — fila de contribuintes ordenada pelo Agente de Score (desc, nunca re-priorizada pelo front), com rótulo aurora "Fila ordenada pelo Agente de Score", score-chip + pill semáforo (DS §3.3/§8), valor potencial recuperável, setor (CNAE), situação cadastral e status de tratamento (caso vinculado ou "sem tratamento"). Dados compostos pelo mock em `GET /ai/queue` (`RiskQueueItem`).
+- **Segmentação da carteira** — chips-filtro combináveis por nível de risco (com contagem e valor potencial somado), porte/regime e tipo de inconsistência — visão macro para direcionar campanhas por segmento.
+- **Visão 360 `/fila-de-risco/[contribuinteId]`** — agregado `GET /taxpayers/:id/360` (`Contribuinte360`): medidor de score do DS §8 (`RiskGauge`, SVG acessível com `role="meter"`), próxima ação sempre rotulada como recomendação do agente, e abas com T09 embutido + evolução do score no tempo (`ScoreHistoryChart`, com `modeloVersao` por ponto para rastreabilidade), declarações × NFS-e, dívida ativa × pagamentos e casos vinculados (deep-link para o dossiê T13).
+- **Coerência de dados** — a evolução do score segue o calendário de publicações do modelo (T02: v2.2 → v2.4) e as declarações mock narram os mesmos indícios dos fatores XAI; contribuintes sem score exercitam os empty states.
+
 ## Entrega T09 · Explicabilidade das classificações (MVP web)
 
 > Frente de UI do RF03, entregue no `apps/web` sobre a camada mock (MSW).
 
 - **`ScoreFactorsPanel`** (`apps/web/components/risk/score-factors-panel.tsx`) — painel "Por que este score?": barras de contribuição por fator (±pts) ordenadas por magnitude no espectro de risco do DS, origem do fator (cruzamento / rede societária / cadastro / histórico), evidência textual e rodapé com a nota "Explicabilidade registrada para defesa perante órgãos de controle" + `modeloVersao`/`calculadoEm`.
-- **Pontos de acesso** — todo score exibido dá acesso ao painel (critério de aceite): seção fixa no Dossiê do caso (T13), botão "Ver fatores" na tabela de scores em `/ai` (Sheet lateral), botão "Ver fatores" nos casos priorizados do Dashboard e painel embutido no detalhe da divergência em `/crossing` (T05). O PDF do dossiê (T28) já incorporava os mesmos fatores.
+- **Pontos de acesso** — todo score exibido dá acesso ao painel (critério de aceite): seção fixa no Dossiê do caso (T13), botão "Ver fatores" na tabela de scores em `/ia-preditiva` (antiga `/ai`; Sheet lateral), botão "Ver fatores" nos casos priorizados do Dashboard e painel embutido no detalhe da divergência em `/crossing` (T05). O PDF do dossiê (T28) já incorporava os mesmos fatores.
 - **Coerência de dados** — os scores mock (`apps/web/mocks/fixtures/scores.ts`) espelham o `scoreValor` dos casos e narram os mesmos indícios da recomendação do orquestrador.
 
 ## Entrega T12 · Análise de Redes / Graph Analytics (MVP web)

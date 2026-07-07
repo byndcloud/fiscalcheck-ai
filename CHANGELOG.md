@@ -6,6 +6,22 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o 
 
 ## [Não publicado]
 
+### Changed — Rota `/ai` renomeada para `/ia-preditiva` (2026-07-07)
+
+- Página "Risco & IA" renomeada para **"IA Preditiva"** (alinhada ao nome do módulo 3 em `docs/modules/`) e movida de `/ai` para `/ia-preditiva`, seguindo a convenção pt-BR kebab-case das demais rotas (`/analise-de-redes`, `/modelo-de-risco`).
+- Ícone da sidebar perdeu o acento aurora exclusivo — todos os itens de navegação seguem o mesmo padrão neutro; a camada aurora (DS §3.2) continua reservada às saídas de IA dentro das telas.
+- Layout: `min-w-0` na coluna de conteúdo do `AppShell` e `overflow-x-auto` no `DataTable` — tabelas largas rolam internamente em vez de forçar scroll horizontal na página inteira; a fila de risco ficou mais compacta (situação cadastral embutida na célula do contribuinte, destaque só quando ≠ ativa).
+
+### Added — T08 · Fila priorizada e Score de Risco / Visão 360 (RF03/FA03) (2026-07-06)
+
+Fila do auditor ordenada pelo Agente de Score e página de detalhe do contribuinte (módulo 3) — a seleção de quem fiscalizar deixa de ser aleatória e cada score é navegável até a sua explicação (T09).
+
+- **Schemas** ([`risk-queue.ts`](<./packages/shared-types/src/schemas/risk-queue.ts>) e [`contribuinte-360.ts`](<./packages/shared-types/src/schemas/contribuinte-360.ts>)): `RiskQueueItem` (score + cadastro + caso vinculado + tipo de inconsistência numa linha só, com `statusTratamento` distinguindo quem já está em tratamento) e `Contribuinte360` (agregado read-only com declarações PGDAS/DES, NFS-e, dívida ativa, pagamentos, evolução do score e casos).
+- **Handlers MSW**: `GET /ai/queue` compõe a fila a partir das fixtures existentes (scores, contribuintes, casos, divergências) ordenada por score desc — `valorPotencial` prefere o do caso vinculado para bater com o Kanban; `GET /taxpayers/:id/360` agrega a visão completa (404 amigável para id inexistente). Históricos em [`contribuinte-360.ts`](<./apps/web/mocks/fixtures/contribuinte-360.ts>) com evolução do score coerente com o histórico de publicações do modelo (T02: v2.2 → v2.4) e declarações que narram os mesmos indícios dos fatores XAI.
+- **Página nova `/fila-de-risco`** (item próprio na sidebar, papéis auditoriais): rótulo aurora "Fila ordenada pelo Agente de Score" (DS §3.2 — saída de IA, nunca ação fiscal), painel **"Segmentação da carteira"** com chips-filtro por nível de risco (contagem + valor potencial somado), porte/regime e tipo de inconsistência, e tabela com posição, contribuinte (CNPJ `data-sensitive`), **score-chip do DS §8** + pill semáforo, valor potencial recuperável, setor (CNAE), situação cadastral, status de tratamento e CTA "Visão 360". A ordem do agente nunca é re-priorizada pelo front. Estados vazio/carregando/erro via `AsyncBoundary` (T25).
+- **Visão 360 `/fila-de-risco/[contribuinteId]`**: header de detalhe (razão social, CNPJ, IM, regime, situação), faixa hero com o **medidor de score do DS §8** ([`risk-gauge.tsx`](<./apps/web/components/risk/risk-gauge.tsx>) — semicírculo SVG com gradiente de risco, ponteiro e número Montserrat 48/800, `role="meter"`) + próxima ação recomendada rotulada como recomendação do agente ("o agente recomenda · a decisão é do auditor"), e 4 abas: **Visão geral** ("Por que este score?" T09 embutido + [`score-history-chart.tsx`](<./apps/web/components/risk/score-history-chart.tsx>) com `modeloVersao` por ponto no tooltip — rastreabilidade — + dados cadastrais/sócios), **Declarações & NFS-e**, **Dívida & pagamentos** e **Casos vinculados** (deep-link "Abrir dossiê" via dossiê global T13). Empty states pt-BR por seção; 404 renderiza erro com retorno à fila.
+- **Testes** (6 casos novos): [`risk-queue-page.test.tsx`](<./apps/web/tests/risk-queue-page.test.tsx>) (ordenação preservada, rótulo do agente, CTA Visão 360, segmentação filtra sem re-priorizar) e [`contribuinte-360-page.test.tsx`](<./apps/web/tests/contribuinte-360-page.test.tsx>) (medidor acessível, T09 embutido, dossiê a partir dos casos vinculados, 404 amigável).
+
 ### Added — T14 · Anotações, prazos e devolutivas no caso (RF04) + T12 · Análise de Redes (RF08/FA09) (2026-07-06)
 
 **T14 — Gestão do caso no dossiê (módulo 4)**

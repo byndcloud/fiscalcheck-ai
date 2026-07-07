@@ -13,7 +13,7 @@ const AUDITORIAL_LABELS = [
   "Dashboard",
   "Ingestão",
   "Detecção",
-  "Risco & IA",
+  "IA Preditiva",
   "Esteira de agentes",
   "Casos",
   "Comunicações",
