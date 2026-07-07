@@ -69,10 +69,12 @@ export function AuditLogTable({ entries, onSelect }: Props) {
               <th scope="col" className="px-3 py-2.5">
                 Ação
               </th>
-              <th scope="col" className="px-3 py-2.5">
+              {/* Colunas técnicas saem em telas estreitas — o detalhe do evento
+                  continua mostrando tudo. Evita scroll horizontal na trilha. */}
+              <th scope="col" className="hidden px-3 py-2.5 md:table-cell">
                 Recurso
               </th>
-              <th scope="col" className="px-3 py-2.5">
+              <th scope="col" className="hidden px-3 py-2.5 lg:table-cell">
                 IP
               </th>
               <th scope="col" className="px-3 py-2.5">
@@ -138,12 +140,12 @@ function AuditLogRow({
           </p>
         ) : null}
       </td>
-      <td className="px-3 py-2.5 align-top">
-        <code className="font-data text-[12px] text-text-muted">
+      <td className="hidden px-3 py-2.5 align-top md:table-cell">
+        <code className="break-all font-data text-[12px] text-text-muted">
           {maskSensitiveText(entry.resource)}
         </code>
       </td>
-      <td className="px-3 py-2.5 align-top">
+      <td className="hidden px-3 py-2.5 align-top lg:table-cell">
         <code className="font-data text-[12px] text-text-muted">{maskIp(entry.ipAddress)}</code>
       </td>
       <td className="px-3 py-2.5 align-top">

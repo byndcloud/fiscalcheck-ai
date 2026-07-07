@@ -106,10 +106,10 @@ export function UserList({ users, onEdit }: Props) {
                 <th scope="col" className="px-3 py-2.5">
                   Status
                 </th>
-                <th scope="col" className="px-3 py-2.5">
+                <th scope="col" className="hidden px-3 py-2.5 md:table-cell">
                   MFA
                 </th>
-                <th scope="col" className="px-3 py-2.5">
+                <th scope="col" className="hidden px-3 py-2.5 lg:table-cell">
                   Último acesso
                 </th>
                 <th scope="col" className="px-3 py-2.5 text-right">
@@ -143,7 +143,7 @@ export function UserList({ users, onEdit }: Props) {
                       {STATUS_LABEL[user.status]}
                     </span>
                   </td>
-                  <td className="px-3 py-2.5 align-top">
+                  <td className="hidden px-3 py-2.5 align-top md:table-cell">
                     {user.mfaHabilitado ? (
                       <span className="inline-flex items-center gap-1 text-[12px] text-[color:var(--c-risk-1)]">
                         <ShieldCheckIcon aria-hidden="true" className="size-3.5" />
@@ -156,7 +156,7 @@ export function UserList({ users, onEdit }: Props) {
                       </span>
                     )}
                   </td>
-                  <td className="px-3 py-2.5 align-top text-[12px] text-muted-foreground">
+                  <td className="hidden px-3 py-2.5 align-top text-[12px] text-muted-foreground lg:table-cell">
                     {user.ultimoAcesso ? formatRelativeTime(user.ultimoAcesso) : "—"}
                   </td>
                   <td className="px-3 py-2.5 align-top">

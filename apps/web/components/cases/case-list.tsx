@@ -43,8 +43,10 @@ export function CaseList({ data, taxpayerById, onOpenDossie }: Props) {
       {
         accessorKey: "id",
         header: "ID",
+        // Identificador técnico — sai em telas estreitas (aparece no dossiê).
+        meta: { className: "hidden xl:table-cell" },
         cell: ({ row }) => (
-          <span className="font-mono text-xs text-text-strong">
+          <span className="font-data text-xs text-text-strong">
             {String(row.getValue("id")).toUpperCase()}
           </span>
         ),
@@ -54,13 +56,19 @@ export function CaseList({ data, taxpayerById, onOpenDossie }: Props) {
         header: "Contribuinte",
         cell: ({ row }) => {
           const taxpayer = taxpayerById?.get(row.original.contribuinteId);
+          const nome =
+            taxpayer?.nomeFantasia ?? taxpayer?.razaoSocial ?? row.original.contribuinteId;
           return (
-            <div className="flex flex-col text-xs">
-              <span className="font-medium text-foreground">
-                {taxpayer?.nomeFantasia ?? taxpayer?.razaoSocial ?? row.original.contribuinteId}
+            <div className="flex min-w-0 flex-col text-xs">
+              <span
+                className="line-clamp-2 break-words font-medium text-foreground"
+                title={nome}
+                data-sensitive
+              >
+                {nome}
               </span>
               {taxpayer ? (
-                <span className="font-mono text-[11px] text-muted-foreground">
+                <span className="font-data text-[11px] text-muted-foreground" data-sensitive>
                   {taxpayer.cnpjMascarado}
                 </span>
               ) : null}
@@ -92,17 +100,18 @@ export function CaseList({ data, taxpayerById, onOpenDossie }: Props) {
         header: "Score",
         cell: ({ row }) => {
           const score = row.original.scoreValor ?? 0;
-          return <span className="font-mono text-sm text-foreground">{score}</span>;
+          return <span className="font-data text-sm text-foreground">{score}</span>;
         },
         sortingFn: (a, b) => (a.original.scoreValor ?? 0) - (b.original.scoreValor ?? 0),
       },
       {
         accessorKey: "valorPotencial",
         header: "Potencial",
+        meta: { className: "hidden lg:table-cell" },
         cell: ({ row }) => {
           const v = row.original.valorPotencial;
           return v ? (
-            <span className="font-mono text-xs text-text-strong">{CURRENCY_BRL.format(v)}</span>
+            <span className="font-data text-xs text-text-strong">{CURRENCY_BRL.format(v)}</span>
           ) : (
             <span className="text-xs text-muted-foreground">—</span>
           );
@@ -131,7 +140,7 @@ export function CaseList({ data, taxpayerById, onOpenDossie }: Props) {
               >
                 {info.label}
               </span>
-              <span className="font-mono text-[11px] text-muted-foreground">
+              <span className="font-data text-[11px] text-muted-foreground">
                 {new Date(`${prazo}T12:00:00`).toLocaleDateString("pt-BR")}
               </span>
             </div>
@@ -146,6 +155,7 @@ export function CaseList({ data, taxpayerById, onOpenDossie }: Props) {
       {
         id: "recomendacao",
         header: "Ação recomendada",
+        meta: { className: "hidden xl:table-cell" },
         cell: ({ row }) => {
           const acao = row.original.recomendacao?.acao;
           if (!acao) {

@@ -55,13 +55,13 @@ export default function AiPage() {
       {
         accessorKey: "contribuinteId",
         header: "Contribuinte",
-        cell: ({ getValue }) => <span className="font-mono text-xs">{getValue<string>()}</span>,
+        cell: ({ getValue }) => <span className="font-data text-xs">{getValue<string>()}</span>,
       },
       {
         accessorKey: "valor",
         header: "Score",
         cell: ({ getValue }) => (
-          <span className="font-mono font-medium">{getValue<number>()} / 100</span>
+          <span className="font-data font-medium">{getValue<number>()} / 100</span>
         ),
       },
       {
@@ -72,12 +72,15 @@ export default function AiPage() {
       {
         accessorKey: "modeloVersao",
         header: "Modelo",
+        // Metadado técnico — sai em telas estreitas (visível nos fatores do score).
+        meta: { className: "hidden lg:table-cell" },
       },
       {
         accessorKey: "proximaAcaoRecomendada",
         header: "Próxima ação recomendada",
+        meta: { className: "hidden md:table-cell" },
         cell: ({ getValue }) => (
-          <p className="max-w-md text-xs text-muted-foreground line-clamp-2">
+          <p className="max-w-md text-xs text-muted-foreground line-clamp-2 break-words">
             {getValue<string | undefined>() ?? "—"}
           </p>
         ),

@@ -176,19 +176,28 @@ export default function IngestionPage() {
 
   const columns = useMemo<ColumnDef<ArquivoIngerido>[]>(
     () => [
-      { accessorKey: "nome", header: "Arquivo" },
+      {
+        accessorKey: "nome",
+        header: "Arquivo",
+        // Nomes de arquivo não têm espaços: break-all evita largura mínima gigante.
+        cell: ({ getValue }) => (
+          <span className="break-all font-data text-xs">{getValue<string>()}</span>
+        ),
+      },
       { accessorKey: "fonte", header: "Fonte" },
       {
         accessorKey: "linhas",
         header: "Linhas",
+        meta: { className: "hidden md:table-cell" },
         cell: ({ getValue }) => (
-          <span className="font-mono">{NUM_FMT.format(getValue<number>())}</span>
+          <span className="font-data">{NUM_FMT.format(getValue<number>())}</span>
         ),
       },
       {
         accessorKey: "tamanhoBytes",
         header: "Tamanho",
-        cell: ({ getValue }) => <span className="font-mono">{humanBytes(getValue<number>())}</span>,
+        meta: { className: "hidden lg:table-cell" },
+        cell: ({ getValue }) => <span className="font-data">{humanBytes(getValue<number>())}</span>,
       },
       {
         accessorKey: "status",
@@ -198,7 +207,7 @@ export default function IngestionPage() {
       {
         accessorKey: "erros",
         header: "Erros",
-        cell: ({ getValue }) => <span className="font-mono">{getValue<number>()}</span>,
+        cell: ({ getValue }) => <span className="font-data">{getValue<number>()}</span>,
       },
     ],
     [],

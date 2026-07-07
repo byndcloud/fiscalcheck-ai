@@ -226,16 +226,18 @@ export default function GeofiscalizacaoPage() {
         </section>
 
         {/* Métricas do recorte */}
-        <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {metricas.map((m) => (
             <div
               key={m.label}
-              className="rounded-lg border border-border bg-surface p-4 shadow-[var(--e-1)]"
+              className="min-w-0 rounded-lg border border-border bg-surface p-4 shadow-[var(--e-1)]"
             >
               <p className="text-xs font-bold uppercase leading-tight tracking-[0.03em] text-muted-foreground">
                 {m.label}
               </p>
-              <p className="mt-1 font-data text-lg font-semibold text-text-strong">{m.valor}</p>
+              <p className="mt-1 break-words font-data text-lg font-semibold leading-snug text-text-strong">
+                {m.valor}
+              </p>
               <p className="mt-0.5 text-[12.5px] leading-snug text-muted-foreground">{m.sub}</p>
             </div>
           ))}
