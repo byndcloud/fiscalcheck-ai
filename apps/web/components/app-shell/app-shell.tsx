@@ -70,7 +70,8 @@ export function AppShell({ children, breadcrumb }: AppShellProps) {
         </SheetContent>
       </Sheet>
 
-      <div className="flex min-h-svh flex-col">
+      {/* min-w-0 impede que conteúdo largo (tabelas) expanda a coluna 1fr do grid. */}
+      <div className="flex min-h-svh min-w-0 flex-col">
         <Header breadcrumb={breadcrumb} onMenuClick={() => setMobileOpen((prev) => !prev)} />
         <main className="flex-1 overflow-x-hidden px-4 py-6 md:px-8 md:py-8">{children}</main>
       </div>

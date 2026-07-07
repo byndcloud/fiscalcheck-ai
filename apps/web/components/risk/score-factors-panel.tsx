@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
   - rodapé fixo com a nota de registro para defesa + versão do modelo,
     garantindo reprodutibilidade (modeloVersao + calculadoEm).
 
-  Reaproveitado no Dossiê (T13), na tabela Risco & IA e no PDF (T28).
+  Reaproveitado no Dossiê (T13), na tabela IA Preditiva e no PDF (T28).
 */
 
 const ORIGEM_LABEL: Record<FatorRisco["origem"], string> = {

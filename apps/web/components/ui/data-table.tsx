@@ -68,7 +68,8 @@ function DataTable<TData, TValue>({
         </div>
       ) : null}
 
-      <div className="overflow-hidden rounded-md border border-border bg-surface shadow-[var(--e-1)]">
+      {/* overflow-x-auto: em telas estreitas a tabela rola internamente, sem empurrar a página. */}
+      <div className="overflow-x-auto rounded-md border border-border bg-surface shadow-[var(--e-1)]">
         <table className="w-full caption-bottom text-sm">
           <thead className="bg-n-25 text-xs uppercase tracking-wide text-muted-foreground">
             {table.getHeaderGroups().map((headerGroup) => (

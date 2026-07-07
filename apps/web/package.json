@@ -4,9 +4,9 @@
   "private": true,
   "description": "FiscalCheck AI — Frontend Next.js do auditor fiscal",
   "scripts": {
-    "dev": "next dev --turbo -H 0.0.0.0 -p ${PORT:-3000}",
+    "dev": "next dev --turbo -H 0.0.0.0",
     "build": "next build",
-    "start": "next start -H 0.0.0.0 -p ${PORT:-3000}",
+    "start": "next start -H 0.0.0.0",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",

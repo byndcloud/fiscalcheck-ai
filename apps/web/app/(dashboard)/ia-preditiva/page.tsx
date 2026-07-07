@@ -104,7 +104,7 @@ export default function AiPage() {
   return (
     <div className="grid gap-6">
       <PageHeader
-        title="Risco & IA"
+        title="IA Preditiva"
         description="Scores de risco explicáveis (XAI) e status dos agentes LangGraph. O auditor sempre decide; a IA apenas recomenda."
       />
 
