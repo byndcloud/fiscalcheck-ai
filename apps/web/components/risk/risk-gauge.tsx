@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
   sistema e precisa reproduzir a spec ao pixel — semicírculo 180° com o
   gradiente de risco contínuo (§3.3), trilha neutra por baixo, ponteiro
   com pivô escuro e ponta na cor do nível, número central em Montserrat
-  48/800 na cor do nível e extremos da escala em Roboto Mono 10px.
+  48/800 na cor do nível e extremos da escala em Montserrat 10px.
 
   Entrada animada: arco e ponteiro partem do zero e transicionam ao valor
   real via CSS (`--dur-slow` / `--ease-ds`); a supressão por
@@ -164,7 +164,7 @@ export function RiskGauge({ valor, nivel, className }: RiskGaugeProps) {
         <circle cx={CX} cy={CY} r={7} fill="var(--n-800)" />
         <circle cx={CX} cy={CY} r={2.5} fill="var(--n-0)" />
 
-        {/* Extremos da escala — Roboto Mono 10px (DS §4) */}
+        {/* Extremos da escala — Montserrat 10px (DS §4) */}
         <text
           x={CX - RADIUS}
           y={HEIGHT - 10}

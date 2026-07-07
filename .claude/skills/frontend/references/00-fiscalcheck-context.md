@@ -31,11 +31,10 @@ A spec completa está em [`docs/design-system/design-system.md`](../../../../doc
 
 ### 2.1 Tipografia — regra dura do projeto
 
-Recomendações genéricas (do template da skill ou de outras fontes) sobre "usar Inter/Roboto/Arial como escolha primária" **não valem aqui**. O DS v2.0 fixa três famílias:
+Recomendações genéricas (do template da skill ou de outras fontes) sobre "usar Inter/Roboto/Arial como escolha primária" **não valem aqui**. O DS v2.1 fixa duas famílias:
 
 - **Raleway** (Google Fonts, 400–800) é a face canônica de UI — títulos, corpo, labels e botões. Utility Tailwind: `font-sans`.
-- **Montserrat** (Google Fonts, 600–800) é a face de *display numérico* — KPIs (25/700), score do medidor (48/800), valor hero (35/800), valor secundário (19–22/700), métricas de rede. Utility Tailwind: `font-display`.
-- **Roboto Mono** (Google Fonts, 400–700) fica restrita a identificadores e dados tabulares miúdos — IDs de caso, CNPJ, competências, protocolos, contadores, valores em linhas de tabela, extremos da escala do medidor. Utility Tailwind: `font-data`/`font-mono`.
+- **Montserrat** (Google Fonts, 400–800) cobre **todos os números e dados**: display numérico — KPIs (25/700), score do medidor (48/800), valor hero (35/800), valor secundário (19–22/700), métricas de rede (utility `font-display`) — **e** identificadores e dados tabulares miúdos — IDs de caso, CNPJ, competências, protocolos, contadores, valores em linhas de tabela, extremos da escala do medidor (utility `font-data`/`font-mono`, 400–600). A Roboto Mono foi removida na v2.1.
 - A **Rawline** permanece como equivalente institucional aceito para contextos gov.br (arquivos em [`apps/web/app/fonts/`](../../../../apps/web/app/fonts/), OFL 1.1) — entra apenas como fallback declarativo em `--font-ui`, não substitui Raleway na produção.
 
 Não troque essas famílias. Não importe outras.
@@ -104,5 +103,5 @@ Ver [`docs/design-system/design-system.md` §2 "Padrão transversal"](../../../.
 - ❌ Espectro de risco usado decorativamente (ex.: barra de progresso de upload colorida do verde ao vermelho) — confunde a semântica do score.
 - ❌ `useEffect(() => { fetch(...) }, [])` — sempre TanStack Query.
 - ❌ Estado de servidor duplicado no Zustand — store é só para UI local.
-- ❌ Importar `Inter`, `Arial`, ou fontes do `next/font/google` que não sejam **Raleway**, **Montserrat** ou **Roboto Mono** — quebra a identidade do DS v2.0.
+- ❌ Importar `Inter`, `Arial`, `Roboto Mono` ou qualquer fonte do `next/font/google` que não seja **Raleway** ou **Montserrat** — quebra a identidade do DS v2.1.
 - ❌ Esconder o foco com `outline: none` sem fornecer ring alternativo — barreira de acessibilidade.

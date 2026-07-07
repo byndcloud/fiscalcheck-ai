@@ -19,7 +19,7 @@ e alinhadas ao Design System do FiscalCheck.
 
 ## Referência obrigatória
 
-> **`references/00-fiscalcheck-context.md`** — stack fixa (Next.js 15 + Tailwind v4 + shadcn/ui + Raleway + Montserrat + Roboto Mono), Design System v2.0, regras de cor (marca / Aurora / risco), idioma, human-in-the-loop na UI, arquivos críticos. **Leia antes de qualquer entrega.**
+> **`references/00-fiscalcheck-context.md`** — stack fixa (Next.js 15 + Tailwind v4 + shadcn/ui + Raleway + Montserrat), Design System v2.1, regras de cor (marca / Aurora / risco), idioma, human-in-the-loop na UI, arquivos críticos. **Leia antes de qualquer entrega.**
 
 Para detalhes visuais completos (tipografia, paleta, componentes, motion), consulte `docs/design-system/design-system.md`.
 

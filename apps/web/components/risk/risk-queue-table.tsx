@@ -40,7 +40,7 @@ const NIVEL_SHORT_LABEL: Record<NivelRisco, string> = {
 
 /*
   Score-chip do DS v2.0 §8: retângulo 42×30 com fundo tingido pelo nível
-  (mesma técnica de color-mix do StatusBadge) e numeral Roboto Mono 15/700.
+  (mesma técnica de color-mix do StatusBadge) e numeral Montserrat 15/700.
   Texto usa os tokens --c-risk-N-txt para garantir contraste ≥ 4.5:1.
 */
 const SCORE_CHIP_CLASSES: Record<NivelRisco, string> = {
