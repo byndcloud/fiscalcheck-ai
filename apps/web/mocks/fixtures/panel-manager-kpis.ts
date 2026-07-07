@@ -59,13 +59,13 @@ const KPI_TEMPLATES: readonly KpiTrend[] = [
     label: "Potencial recuperável",
     descricao: "estimativa da esteira agêntica",
     unidade: "brl",
-    valor: 11_300_000,
+    valor: 14_580_000,
     variacaoPct: 9.1,
     positive: true,
     sub: "vs. mês anterior",
     serie: [
       8_400_000, 8_700_000, 9_000_000, 9_200_000, 9_500_000, 9_800_000, 10_000_000, 10_300_000,
-      10_600_000, 10_900_000, 11_100_000, 11_300_000,
+      10_600_000, 10_900_000, 11_100_000, 14_580_000,
     ],
   },
   {

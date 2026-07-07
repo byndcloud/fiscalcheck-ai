@@ -43,6 +43,21 @@ describe("Fixtures do cruzamento (T05)", () => {
     }
   });
 
+  it("há cenário DIMP × declarado demonstrável (RF 3.1.1 — meios de pagamento)", () => {
+    const dimp = divergenciasFixture.filter((d) => d.origem === "dimp_vs_declarado");
+    expect(dimp.length).toBeGreaterThanOrEqual(2);
+
+    for (const d of dimp) {
+      // Monetária por definição: o cruzamento é cartões × declarado.
+      expect(d.valorApurado, `divergência DIMP ${d.id} sem valor apurado`).toBeDefined();
+      // A evidência aponta para a carga DIMP do painel de ingestão (módulo 1).
+      expect(
+        d.evidencias.some((ev) => ev.startsWith("arq-")),
+        `divergência DIMP ${d.id} sem evidência de arquivo de carga`,
+      ).toBe(true);
+    }
+  });
+
   it("evidências NFS-e existem e somam o valor apurado", () => {
     const nfseById = new Map(nfseFixture.map((n) => [n.id, n]));
     const comEvidenciaFiscal = divergenciasFixture.filter(

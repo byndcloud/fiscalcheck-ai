@@ -6,6 +6,36 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o 
 
 ## [Não publicado]
 
+### Added — Aderência ao Edital: cards de fontes na Ingestão, cruzamento DIMP, metodologia TR 7.2 nas metas e integridade da trilha (2026-07-07)
+
+Quatro melhorias da "1ª onda" do plano de aderência ao Edital/TR, todas construídas sobre telas existentes.
+
+**Ingestão (módulo 1 · RF 3.1.1)**
+
+- **Cards de fontes conectadas** em `/ingestion`: grade com as 6 fontes oficiais (NFS-e, PGDAS-D, DIMP, DEFIS, ECD, Cadastro Mobiliário), cada card com status da última carga (badge semântico), registros, erros e data/hora. Fonte sem arquivo aparece como "Aguardando carga" — a grade representa o **conector**, não o arquivo.
+- **Importação manual (ADMIN ONLY)**: botão "Importar arquivo" no cabeçalho abre dialog (fonte + nome com extensão validada); `POST /ingestion/files/import` cria o arquivo em "Validando" no topo da lista e registra `ingestao.importacao_manual` na trilha append-only. Papéis não-admin recebem 403.
+- **Novas integrações (ADMIN ONLY)**: botão "Nova integração" registra um conector novo sem refactor (nome, tipo API/SFTP/upload, periodicidade) — `POST /ingestion/integrations` + evento `ingestao.integracao_criada` na trilha; o conector entra na grade como "Aguardando carga" com rodapé "Integração personalizada".
+- **Histórico ampliado**: fixture de arquivos passou de 5 para 10 cargas (competências de maio–julho) e a grade ganhou respiro maior entre os cards e a tabela de arquivos.
+- **Testes** (4 casos novos): [`ingestion-handlers.test.ts`](<./apps/web/tests/ingestion-handlers.test.ts>) (import cria arquivo real, RBAC 403/400, integração listada + evento na trilha).
+
+**Cruzamento DIMP × declarado (módulo 2 · RF 3.1.1 — meios de pagamento)**
+
+- **Schema**: nova origem `dimp_vs_declarado` em `OrigemDivergenciaSchema` — o TR cita expressamente dados de meios de pagamento; antes o cruzamento demonstrava apenas PGDAS-D × NFS-e.
+- **2 cenários demonstráveis** (`dv-060` salão de beleza, `dv-061` academia): recebimentos em cartão informados pela DIMP × receita declarada, com evidência apontando para a **carga DIMP do painel de ingestão** (`arq-002`) — cadeia fonte → cruzamento → caso fechada.
+- **Detalhe adaptado**: o lado a lado vira "Declarado × movimentação em cartões (DIMP)" e o cálculo explícito cita o cruzamento DIMP quando a origem é de meios de pagamento.
+
+**Metas do CPSI (módulo 5 · TR 7.2)**
+
+- **Schema**: `MetaAfericaoTR` opcional em `MetaPiloto` (referência à cláusula + fórmula + método de coleta).
+- **Metodologia visível no card**: bloco colapsável "Como é aferida · TR 7.2.x" em cada meta do Painel do Gestor — acurácia por subamostra auditada (7.2.1), ganho de capacidade vs. baseline formalizado (7.2.2) e SUS in-app nos últimos 15 dias (7.2.3). A comissão fiscalizadora acompanha as metas dentro da ferramenta com a metodologia oficial.
+
+**Integridade da trilha (módulo 6 · TR 5.4.9)**
+
+- **Hash encadeado** ([`lib/compliance/audit-chain.ts`](<./apps/web/lib/compliance/audit-chain.ts>)): fingerprint imutável de cada evento encadeado do mais antigo ao mais recente — alterar ou remover qualquer evento passado muda o hash final. FNV-1a no mock; produção prevê SHA-256 com âncora externa.
+- **`GET /compliance/audit-log-v2/integrity`**: recalcula a cadeia a cada verificação e devolve status, total de eventos e hash (schema `AuditChainIntegrity`).
+- **Card de integridade** na tela `/compliance/trilha`: "Cadeia íntegra" com escudo verde, hash da cadeia e botão "Verificar novamente" — a imutabilidade deixa de ser narrada e passa a ser demonstrável; um export (que gera evento novo) muda o hash na hora.
+- **Testes** (6 casos novos): [`audit-chain.test.ts`](<./apps/web/tests/audit-chain.test.ts>) (determinismo, sensibilidade a adulteração/remoção, contrato do endpoint, hash avança com evento novo) e cenário DIMP em [`divergencias-fixture.test.ts`](<./apps/web/tests/divergencias-fixture.test.ts>).
+
 ### Added — T14 · Anotações, prazos e devolutivas no caso (RF04) + T12 · Análise de Redes (RF08/FA09) (2026-07-06)
 
 **T14 — Gestão do caso no dossiê (módulo 4)**

@@ -104,6 +104,8 @@ export default function ComplianceOverviewPage() {
         />
       ) : (
         <>
+          {isAdmin ? <OverviewQuickNav /> : null}
+
           <section aria-label="Selos de conformidade" className="grid gap-3">
             <div className="flex items-baseline justify-between">
               <h2 className="text-sm font-semibold text-text-strong">Selos dos controles</h2>
@@ -118,8 +120,6 @@ export default function ComplianceOverviewPage() {
             <AgentPanel accesses={atypicalQuery.data ?? []} canAct={isAdmin} />
             <RecentActivity entries={lastFive} />
           </div>
-
-          {isAdmin ? <OverviewQuickNav /> : null}
         </>
       )}
     </div>

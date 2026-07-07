@@ -52,6 +52,25 @@ export const AuditLogEntrySchema = z.object({
 export type AuditLogEntry = z.infer<typeof AuditLogEntrySchema>;
 
 /*
+  Verificação de integridade da cadeia (TR 5.4.9 — trilhas "detalhadas,
+  completas e imutáveis"). O hash encadeado é recalculado do primeiro
+  ao último evento a cada verificação: qualquer alteração/remoção em um
+  evento passado muda o hash final e denuncia a violação. No MVP o
+  cálculo é feito pelo mock (FNV-1a encadeado); em produção será
+  SHA-256 com âncora externa.
+*/
+export const AuditChainIntegritySchema = z.object({
+  status: z.enum(["integra", "violada"]),
+  totalEventos: z.number().int().nonnegative(),
+  primeiroEventoEm: z.string(),
+  ultimoEventoEm: z.string(),
+  chainHash: z.string().min(1),
+  algoritmo: z.string().min(1),
+  verificadoEm: z.string(),
+});
+export type AuditChainIntegrity = z.infer<typeof AuditChainIntegritySchema>;
+
+/*
   Visão específica do Agente de Conformidade: um subconjunto dos
   eventos atípicos que exige decisão explícita do Admin. Carrega o
   ID do evento original (`entryId`) para o drill-in referenciar a

@@ -25,6 +25,20 @@ export type MetaUnidade = z.infer<typeof MetaUnidadeSchema>;
 export const MetaStatusSchema = z.enum(["no_alvo", "em_risco", "critico"]);
 export type MetaStatus = z.infer<typeof MetaStatusSchema>;
 
+/*
+  Metodologia oficial de aferição (TR 7.2). Cada meta carrega a
+  referência à cláusula, a fórmula de cálculo e o método de coleta —
+  a comissão fiscalizadora acompanha as metas dentro da ferramenta
+  com a mesma metodologia do contrato.
+*/
+export const MetaAfericaoTRSchema = z.object({
+  /** Cláusula do TR (ex.: "TR 7.2.1"). */
+  referencia: z.string().min(1),
+  formula: z.string().min(1),
+  metodo: z.string().min(1),
+});
+export type MetaAfericaoTR = z.infer<typeof MetaAfericaoTRSchema>;
+
 export const MetaPilotoSchema = z.object({
   id: z.string().min(1),
   codigo: z.enum(["acuracia", "escala", "usabilidade"]),
@@ -39,5 +53,6 @@ export const MetaPilotoSchema = z.object({
   prazoEm: z.string(),
   atualizadoEm: z.string(),
   fonte: z.string().optional(),
+  afericaoTR: MetaAfericaoTRSchema.optional(),
 });
 export type MetaPiloto = z.infer<typeof MetaPilotoSchema>;

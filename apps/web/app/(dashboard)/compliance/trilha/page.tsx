@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import type { AuditLogEntry } from "@fiscalcheck/shared-types";
 
+import { AuditIntegrityCard } from "@/components/compliance/audit-integrity-card";
 import { AuditLogDetailSheet } from "@/components/compliance/audit-log-detail-sheet";
 import { AuditLogTable } from "@/components/compliance/audit-log-table";
 import {
@@ -147,6 +148,8 @@ export default function CompliancesTrilhaPage() {
       />
 
       <SigiloBanner />
+
+      <AuditIntegrityCard />
 
       {auditQuery.isLoading ? (
         <output

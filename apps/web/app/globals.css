@@ -81,10 +81,10 @@
   --app-bg: #f4f6fb;
   --border-ds: #e1e6f0;
 
-  /* === DS · Tipografia (v2.0 — três papéis) ===
-     Raleway (UI), Montserrat (display numérico) e Roboto Mono (dados
-     tabulares miúdos e identificadores) são injetadas via `next/font/google`
-     em apps/web/app/layout.tsx. A Rawline permanece como equivalente
+  /* === DS · Tipografia (v2.0 — dois papéis) ===
+     Raleway (UI) e Montserrat (display numérico + dados tabulares e
+     identificadores) são injetadas via `next/font/google` em
+     apps/web/app/layout.tsx. A Rawline permanece como equivalente
      institucional aceito para contextos gov.br — os .woff2 seguem
      auto-hospedados em apps/web/app/fonts/ (OFL 1.1), mas entram apenas
      como fallback declarativo em --font-ui, não são mais carregados por
@@ -94,8 +94,7 @@
   --font-ui: var(--font-raleway), "Raleway", "Rawline", system-ui, -apple-system, "Segoe UI",
     sans-serif;
   --font-display: var(--font-montserrat), "Montserrat", var(--font-raleway), "Raleway", sans-serif;
-  --font-data: var(--font-roboto-mono), "Roboto Mono", ui-monospace, SFMono-Regular, Menlo,
-    monospace;
+  --font-data: var(--font-montserrat), "Montserrat", var(--font-raleway), "Raleway", sans-serif;
 
   /* === DS · Espaçamento (base 4 px) === */
   --s-1: 4px;

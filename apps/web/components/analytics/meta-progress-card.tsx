@@ -1,4 +1,4 @@
-import { AlertTriangleIcon, CheckCircle2Icon, GaugeIcon } from "lucide-react";
+import { AlertTriangleIcon, CheckCircle2Icon, ChevronRightIcon, GaugeIcon } from "lucide-react";
 
 import type { MetaPiloto, MetaStatus } from "@fiscalcheck/shared-types";
 
@@ -17,7 +17,13 @@ import { cn } from "@/lib/utils";
 
 const STATUS_META: Record<
   MetaStatus,
-  { label: string; icon: typeof CheckCircle2Icon; tone: string; bar: string; ring: string }
+  {
+    label: string;
+    icon: typeof CheckCircle2Icon;
+    tone: string;
+    bar: string;
+    ring: string;
+  }
 > = {
   no_alvo: {
     label: "No alvo",
@@ -133,6 +139,25 @@ export function MetaProgressCard({ meta, children }: MetaProgressCardProps) {
             <dd>Prazo {DATE.format(new Date(meta.prazoEm))}</dd>
           </div>
         </dl>
+
+        {/* Metodologia oficial de aferição (TR 7.2) — colapsada por padrão. */}
+        {meta.afericaoTR ? (
+          <details className="group rounded-lg border border-[#e1e6f0] bg-[#f8fafd]">
+            <summary className="flex cursor-pointer list-none items-center gap-1.5 px-3 py-2 text-[11px] font-semibold text-[#54607a] [&::-webkit-details-marker]:hidden">
+              <ChevronRightIcon
+                aria-hidden="true"
+                className="size-3 transition-transform group-open:rotate-90"
+              />
+              Como é aferida · {meta.afericaoTR.referencia}
+            </summary>
+            <div className="grid gap-2 border-t border-[#e1e6f0] px-3 py-2.5">
+              <p className="font-data text-[11px] leading-snug text-[#121826]">
+                {meta.afericaoTR.formula}
+              </p>
+              <p className="text-[11px] leading-snug text-[#66718a]">{meta.afericaoTR.metodo}</p>
+            </div>
+          </details>
+        ) : null}
       </div>
 
       {children ? <footer className="pt-1">{children}</footer> : null}

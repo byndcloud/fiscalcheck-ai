@@ -18,6 +18,7 @@ export const TIPO_LABEL: Record<TipoDivergencia, string> = {
 
 export const ORIGEM_LABEL: Record<Divergencia["origem"], string> = {
   declarado_vs_nfse: "Declarado × NFS-e",
+  dimp_vs_declarado: "DIMP × Declarado (cartões)",
   grafo_socios: "Grafo societário",
   cadastro: "Cadastro mobiliário",
   regime_incompativel: "Regime incompatível",

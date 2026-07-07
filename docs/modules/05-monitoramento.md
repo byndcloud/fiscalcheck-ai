@@ -20,6 +20,7 @@ Rota `/analytics` no `apps/web`, restrita a `supervisor` + `admin`. Estende a im
 
 - **KPIs em tempo real** (7): casos abertos, casos em análise, valor recuperado, potencial recuperável, produtividade auditor, divergências críticas, autorregularização — cada um com sparkline (12 pontos) e drill-down para `/cases`.
 - **Metas do piloto (RF05)**: acurácia 70%, ganho de escala 100%, usabilidade 80%. Card de meta mostra baseline × atual × alvo + status (`no_alvo` / `em_risco` / `critico`). A regra determinística vive em [`apps/web/lib/analytics/meta-status.ts`](../../apps/web/lib/analytics/meta-status.ts).
+- **Metodologia de aferição (TR 7.2)**: cada card traz o bloco colapsável "Como é aferida · TR 7.2.x" com a fórmula oficial e o método de coleta (`MetaAfericaoTR` no schema) — acurácia por subamostra auditada, ganho de capacidade vs. baseline formalizado e SUS aplicado in-app nos últimos 15 dias do piloto.
 - **Captura SUS**: modal com as 10 perguntas do System Usability Scale (Brooke, 1996). O score alimenta a meta de usabilidade — cálculo puro em [`apps/web/lib/analytics/sus.ts`](../../apps/web/lib/analytics/sus.ts).
 - **Gráficos interativos** com `recharts` ([ADR-0005](../adr/0005-recharts.md)): AreaChart de recuperação mensal e PieChart de status de casos.
 - **Gerador de relatórios** (`ReportGeneratorModal`): Calibragem / Validação em PDF (`@react-pdf/renderer`) ou XLSX (SheetJS via dynamic import — [ADR-0006](../adr/0006-xlsx-sheetjs.md)). Cada emissão registra evento append-only na trilha via `POST /analytics/reports/generate`.

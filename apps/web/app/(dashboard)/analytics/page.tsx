@@ -157,7 +157,7 @@ export default function AnalyticsPage() {
               Metas do piloto
             </h2>
             <p className="text-sm text-muted-foreground">
-              Baseline × atual × alvo — acurácia, ganho de escala e usabilidade.
+              Baseline × atual × alvo — aferidas com a metodologia oficial do TR 7.2.
             </p>
           </div>
           {susAvaliacoes.length > 0 ? (

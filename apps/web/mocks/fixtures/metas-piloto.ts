@@ -31,6 +31,12 @@ export const metasPilotoFixture: MetaPiloto[] = [
     prazoEm: PRAZO_FINAL,
     atualizadoEm: "2026-07-03T18:00:00Z",
     fonte: "Golden tests + amostra amostral do módulo 3",
+    afericaoTR: {
+      referencia: "TR 7.2.1",
+      formula: "Acurácia (%) = (classificações confirmadas ÷ casos da subamostra auditada) × 100",
+      metodo:
+        "Validação por subamostra aleatória de casos classificados pelo modelo, auditada manualmente pela equipe fiscal do Município.",
+    },
   },
   {
     id: "meta-escala",
@@ -46,6 +52,13 @@ export const metasPilotoFixture: MetaPiloto[] = [
     prazoEm: PRAZO_FINAL,
     atualizadoEm: "2026-07-04T12:00:00Z",
     fonte: "Casos decididos por auditor · semana (módulo 4)",
+    afericaoTR: {
+      referencia: "TR 7.2.2",
+      formula:
+        "Ganho (%) = ((casos analisados no piloto − baseline mensal) ÷ baseline mensal) × 100",
+      metodo:
+        "Comparação com a média histórica de capacidade formalizada no início do piloto (baseline registrado em jan/2026).",
+    },
   },
   {
     id: "meta-usabilidade",
@@ -61,5 +74,11 @@ export const metasPilotoFixture: MetaPiloto[] = [
     prazoEm: PRAZO_FINAL,
     atualizadoEm: "2026-07-02T14:20:00Z",
     fonte: "Questionário SUS · System Usability Scale",
+    afericaoTR: {
+      referencia: "TR 7.2.3",
+      formula: "Nota SUS = média das 10 questões padronizadas (escala 0–100) dos respondentes",
+      metodo:
+        "Questionário estruturado baseado em SUS aplicado in-app aos usuários do piloto nos últimos 15 dias, com tabulação exportável.",
+    },
   },
 ];

@@ -11,7 +11,7 @@
 
 - **Agente Guardrail** — RBAC, sigilo fiscal, logs imutáveis, acessos atípicos, bloqueio de uso indevido.
 - **Proteção de Dados** — TLS 1.2+ em trânsito, AES-256 em repouso, MFA obrigatório.
-- **Cadeia de Custódia** — logs imutáveis (append-only) com autoria, aprovação/rejeição e timestamp.
+- **Cadeia de Custódia** — logs imutáveis (append-only) com autoria, aprovação/rejeição e timestamp. No protótipo web, a imutabilidade é **demonstrável** na tela `/compliance/trilha`: hash encadeado sobre os campos imutáveis de cada evento (`apps/web/lib/compliance/audit-chain.ts`) exposto pelo card de integridade (TR 5.4.9) — alterar ou remover evento passado muda o hash da cadeia. Mock usa FNV-1a; produção prevê SHA-256 com âncora externa.
 - **Conformidade LGPD** — pseudonimização, apoio a RIPD, política de retenção, resposta a incidente ≤ 24h, preferência por localização nacional.
 
 ## Arquitetura interna

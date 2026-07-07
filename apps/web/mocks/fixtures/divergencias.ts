@@ -17,7 +17,10 @@ import { casosFixture } from "./casos";
   Todos os dados são sintéticos (AGENTS.md §1.2 — sigilo fiscal).
 */
 
-const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+const BRL = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+});
 
 const handcrafted: Divergencia[] = [
   {
@@ -159,6 +162,41 @@ const handcrafted: Divergencia[] = [
       "Sócio Henrique F. integra outra intermediadora no mesmo endereço, com carteira de imóveis sobreposta.",
     detectadoEm: "2026-05-21T11:25:00Z",
     evidencias: ["ct-010"],
+  },
+  /*
+    Cruzamento DIMP × declarado (RF 3.1.1 do TR — meios de pagamento).
+    Evidência aponta para a carga DIMP do painel de ingestão (arq-002),
+    fechando a cadeia fonte → cruzamento → caso.
+  */
+  {
+    id: "dv-060",
+    contribuinteId: "ct-020",
+    tipo: "subdeclaracao",
+    origem: "dimp_vs_declarado",
+    severidade: 4,
+    valor: 46_300.0,
+    valorDeclarado: 22_100.0,
+    valorApurado: 68_400.0,
+    competencia: "2026-05",
+    descricao:
+      "Recebimentos em cartões informados pela DIMP (R$ 68.400,00) muito acima da receita declarada no PGDAS (R$ 22.100,00) — serviços de beleza com predominância de pagamento eletrônico.",
+    detectadoEm: "2026-07-02T11:20:00Z",
+    evidencias: ["arq-002"],
+  },
+  {
+    id: "dv-061",
+    contribuinteId: "ct-027",
+    tipo: "omissao",
+    origem: "dimp_vs_declarado",
+    severidade: 3,
+    valor: 36_400.0,
+    valorDeclarado: 0,
+    valorApurado: 36_400.0,
+    competencia: "2026-05",
+    descricao:
+      "DIMP registra R$ 36.400,00 em mensalidades recebidas por cartão no período, sem nenhuma declaração correspondente na apuração do Simples.",
+    detectadoEm: "2026-07-02T11:34:00Z",
+    evidencias: ["arq-002"],
   },
   // Inativo com atividade (RF02 — filtro do edital)
   {
