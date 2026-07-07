@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
   Tabela da trilha (T19 · módulo 6).
 
   DataTable custom (não usa o genérico) porque exige:
-  - Roboto Mono predominante nas colunas de dados;
+  - fonte de dados (Montserrat, via font-data) predominante nas colunas;
   - linha inteira em vermelho quando `atypical=true`;
   - máscara de IP e de CPF/CNPJ por padrão no resource/details.
 */

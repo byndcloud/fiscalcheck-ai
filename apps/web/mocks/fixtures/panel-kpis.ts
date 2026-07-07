@@ -27,7 +27,7 @@ export const panelKpisFixture: PanelKpis = {
   },
   potencialRecuperavel: {
     label: "Potencial recuperável",
-    valorBrl: 11_300_000,
+    valorBrl: 14_580_000,
     competencia: "2026-06",
     competenciaAnterior: "2026-05",
     variacaoAbsoluta: 940_000,

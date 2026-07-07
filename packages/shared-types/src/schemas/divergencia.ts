@@ -9,6 +9,9 @@ import { z } from "zod";
 
 export const OrigemDivergenciaSchema = z.enum([
   "declarado_vs_nfse",
+  // RF 3.1.1 do TR: cruzamento com dados de meios de pagamento (DIMP) —
+  // movimentação em cartões × receita declarada.
+  "dimp_vs_declarado",
   "grafo_socios",
   "cadastro",
   "regime_incompativel",

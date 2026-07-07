@@ -57,6 +57,7 @@ Tela `/crossing` (front-end, dados mock) reconstruída como **caso instruído e 
 - **Filtros combináveis** (E entre dimensões, OU nos chips): tipo em chips — incluindo o novo `inativo_atividade` ("inativo com atividade") —, período (competência), faixa de valor e setor (derivado da divisão CNAE da atividade principal). Lógica pura em `apps/web/lib/crossing/filter-divergencias.ts` com golden tests.
 - **Detalhe lado a lado**: valor declarado × documentado em NFS-e com o **cálculo explícito da diferença** (apurado − declarado = diferença), evidências primárias nominais (NFS-e com número, emissão, valor e ISS) e link para o Dossiê (T13) via deep-link `/cases?caso=…`. Painel "Por que este score?" (T09) incluso quando o contribuinte tem score.
 - **Fixtures consistentes por invariante testada**: todo `divergenciaId` referenciado em `casosFixture` existe; `valorApurado − valorDeclarado = valor`; NFS-e de evidência somam exatamente o `valorApurado`.
+- **Cruzamento DIMP × declarado** (RF 3.1.1 — meios de pagamento): origem `dimp_vs_declarado` com cenários demonstráveis (recebimentos em cartão informados pelas credenciadoras × receita declarada). O lado a lado do detalhe vira "Declarado × movimentação em cartões (DIMP)" e a evidência aponta para a carga DIMP do painel de ingestão (módulo 1) — cadeia fonte → cruzamento → caso.
 
 ## Entrega T06 · Non-filer Discovery (RF02)
 

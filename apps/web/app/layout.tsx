@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
-import { Montserrat, Raleway, Roboto_Mono } from "next/font/google";
+import { Montserrat, Raleway } from "next/font/google";
 
 import { Providers } from "@/components/providers";
 
 import "./globals.css";
 
 /*
-  FiscalCheck Design System v2.0 §4 — três papéis tipográficos.
+  FiscalCheck Design System v2.0 §4 — dois papéis tipográficos.
 
   Raleway (UI): face canônica de títulos, corpo, labels e botões.
-  Montserrat (display numérico): KPIs (25/700), medidor de score (48/800),
-    valor hero (35/800), valor secundário (19–22/700), métricas de rede.
-  Roboto Mono (dados tabulares miúdos e identificadores): IDs de caso,
-    CNPJ, competências, protocolos, contadores, valores em linhas de tabela,
-    extremos da escala do medidor.
+  Montserrat (display numérico + dados): KPIs (25/700), medidor de score
+    (48/800), valor hero (35/800), valor secundário (19–22/700), métricas
+    de rede E TAMBÉM os dados tabulares miúdos e identificadores (IDs de
+    caso, CNPJ, competências, protocolos, contadores, valores em linhas de
+    tabela) — antes em Roboto Mono, agora unificados na Montserrat. Por
+    isso os pesos leves (400/500) também são carregados.
 
   A Rawline (auto-hospedada em apps/web/app/fonts/, OFL 1.1) permanece
   como equivalente institucional aceito em contextos gov.br, mas deixa
@@ -29,15 +30,8 @@ const raleway = Raleway({
 
 const montserrat = Montserrat({
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-montserrat",
-  display: "swap",
-});
-
-const robotoMono = Roboto_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-roboto-mono",
   display: "swap",
 });
 
@@ -75,7 +69,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html
       lang="pt-BR"
       suppressHydrationWarning
-      className={`${raleway.variable} ${montserrat.variable} ${robotoMono.variable}`}
+      className={`${raleway.variable} ${montserrat.variable}`}
     >
       <body className="min-h-screen bg-background font-sans antialiased">
         <Providers>{children}</Providers>

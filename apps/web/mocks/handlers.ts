@@ -7,6 +7,7 @@ import {
   AnnotationRequestSchema,
   type AtypicalAccess,
   AtypicalAccessSchema,
+  AuditChainIntegritySchema,
   type AuditLogEntry,
   AuditLogEntrySchema,
   AuditableActionSchema,
@@ -93,9 +94,19 @@ import { refreshMeta } from "@/lib/analytics/meta-status";
 import { computeSusMedia, computeSusScore } from "@/lib/analytics/sus";
 import { nextStatus, shouldEmitDocument } from "@/lib/case-transitions";
 import { simulateParcelamento } from "@/lib/citizen/parcelamento";
+import { CHAIN_ALGORITHM, computeChainHash } from "@/lib/compliance/audit-chain";
 
 import { agentesFixture } from "./fixtures/agentes";
-import { ArquivoIngeridoSchema, arquivosFixture } from "./fixtures/arquivos";
+import {
+  type ArquivoIngerido,
+  ArquivoIngeridoSchema,
+  type IntegracaoFonte,
+  IntegracaoFonteSchema,
+  IntegracaoPeriodicidadeSchema,
+  IntegracaoTipoSchema,
+  arquivosFixture,
+  integracoesFixture,
+} from "./fixtures/arquivos";
 import { atypicalAccessesFixture } from "./fixtures/atypical-accesses";
 import { auditLogFixture } from "./fixtures/audit-log";
 import { auditLogExtendedFixture } from "./fixtures/audit-log-extended";
@@ -619,11 +630,143 @@ function readActorRole(request: Request): Role {
   return roleParsed.success ? roleParsed.data : "auditor";
 }
 
+/*
+  Estado in-memory do módulo 1 (Ingestão). Importação manual e criação
+  de integrações são ações restritas ao Admin e registradas na trilha
+  (append-only) — mesmo padrão do módulo 6.
+*/
+const arquivosMutable: ArquivoIngerido[] = arquivosFixture.map((a) => ({ ...a }));
+const integracoesMutable: IntegracaoFonte[] = integracoesFixture.map((i) => ({ ...i }));
+let arquivoSeq = arquivosMutable.length + 1;
+let integracaoSeq = integracoesMutable.length + 1;
+
+const ImportFileRequestSchema = z.object({
+  nome: z.string().trim().min(5, "Nome do arquivo muito curto."),
+  fonte: ArquivoIngeridoSchema.shape.fonte,
+});
+
+const CreateIntegrationRequestSchema = z.object({
+  nome: z.string().trim().min(3, "Nome da integração muito curto."),
+  tipo: IntegracaoTipoSchema,
+  periodicidade: IntegracaoPeriodicidadeSchema,
+  descricao: z.string().trim().max(200).optional(),
+});
+
 export const handlers = [
   // Módulo 1 — Ingestão
   http.get(`${API_URL}/ingestion/files`, () =>
-    respondValidated(z.array(ArquivoIngeridoSchema), arquivosFixture),
+    respondValidated(z.array(ArquivoIngeridoSchema), arquivosMutable),
   ),
+
+  http.post(`${API_URL}/ingestion/files/import`, async ({ request }) => {
+    const atorPapel = readActorRole(request);
+    if (atorPapel !== "admin") {
+      return HttpResponse.json(
+        {
+          error_code: "forbidden_role",
+          message: "Apenas o Administrador pode importar arquivos manualmente.",
+        },
+        { status: 403 },
+      );
+    }
+    const bodyRaw = await request.json().catch(() => ({}));
+    const body = ImportFileRequestSchema.safeParse(bodyRaw);
+    if (!body.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_import_body",
+          message: body.error.issues[0]?.message ?? "Payload de importação inválido.",
+        },
+        { status: 400 },
+      );
+    }
+
+    arquivoSeq += 1;
+    // Linhas/tamanho derivados do seq: determinístico, sem Math.random.
+    const linhas = 200 + arquivoSeq * 137;
+    const novo: ArquivoIngerido = {
+      id: `arq-${String(arquivoSeq).padStart(3, "0")}`,
+      nome: body.data.nome,
+      fonte: body.data.fonte,
+      tamanhoBytes: linhas * 640,
+      linhas,
+      recebidoEm: new Date().toISOString(),
+      status: "validando",
+      erros: 0,
+    };
+    arquivosMutable.unshift(novo);
+
+    pushAudit({
+      timestamp: new Date().toISOString(),
+      action: "ingestao.importacao_manual",
+      actorId: request.headers.get("X-Actor-Id") ?? "mock-admin",
+      actorName: request.headers.get("X-Actor-Name") ?? "Administrador",
+      actorRole: atorPapel,
+      ipAddress: "10.20.30.11",
+      resource: `ingestao:${novo.id}`,
+      result: "sucesso",
+      atypical: false,
+      details: `Importação manual do arquivo ${novo.nome} (fonte ${novo.fonte}) — validação de esquema iniciada.`,
+    });
+
+    return respondValidated(ArquivoIngeridoSchema, novo, { status: 201 });
+  }),
+
+  http.get(`${API_URL}/ingestion/integrations`, () =>
+    respondValidated(z.array(IntegracaoFonteSchema), integracoesMutable),
+  ),
+
+  http.post(`${API_URL}/ingestion/integrations`, async ({ request }) => {
+    const atorPapel = readActorRole(request);
+    if (atorPapel !== "admin") {
+      return HttpResponse.json(
+        {
+          error_code: "forbidden_role",
+          message: "Apenas o Administrador pode criar novas integrações.",
+        },
+        { status: 403 },
+      );
+    }
+    const bodyRaw = await request.json().catch(() => ({}));
+    const body = CreateIntegrationRequestSchema.safeParse(bodyRaw);
+    if (!body.success) {
+      return HttpResponse.json(
+        {
+          error_code: "invalid_integration_body",
+          message: body.error.issues[0]?.message ?? "Payload de integração inválido.",
+        },
+        { status: 400 },
+      );
+    }
+
+    integracaoSeq += 1;
+    const criadaPor = request.headers.get("X-Actor-Name") ?? "Administrador";
+    const nova: IntegracaoFonte = {
+      id: `int-${String(integracaoSeq).padStart(3, "0")}`,
+      nome: body.data.nome,
+      tipo: body.data.tipo,
+      periodicidade: body.data.periodicidade,
+      descricao: body.data.descricao,
+      criadaEm: new Date().toISOString(),
+      criadaPor,
+    };
+    integracoesMutable.push(nova);
+
+    pushAudit({
+      timestamp: new Date().toISOString(),
+      action: "ingestao.integracao_criada",
+      actorId: request.headers.get("X-Actor-Id") ?? "mock-admin",
+      actorName: criadaPor,
+      actorRole: atorPapel,
+      ipAddress: "10.20.30.11",
+      resource: `ingestao:${nova.id}`,
+      result: "sucesso",
+      atypical: false,
+      details: `Integração "${nova.nome}" criada (${nova.tipo}, periodicidade ${nova.periodicidade}) — aguardando primeira carga.`,
+    });
+
+    return respondValidated(IntegracaoFonteSchema, nova, { status: 201 });
+  }),
 
   // Módulo 2 — Cruzamento
   http.get(`${API_URL}/crossing/divergences`, () =>
@@ -1078,7 +1221,10 @@ export const handlers = [
       );
       if (!caso || !interacao) {
         return HttpResponse.json(
-          { error_code: "devolutiva_not_found", message: "Devolutiva não encontrada." },
+          {
+            error_code: "devolutiva_not_found",
+            message: "Devolutiva não encontrada.",
+          },
           { status: 404 },
         );
       }
@@ -1872,6 +2018,27 @@ export const handlers = [
     });
 
     return respondValidated(z.array(AuditLogEntrySchema), filtered);
+  }),
+
+  /*
+    Verificação de integridade da cadeia (TR 5.4.9). Recalcula o hash
+    encadeado do primeiro ao último evento a cada chamada — como a
+    trilha in-memory é append-only, o status é sempre "integra"; a
+    violação só seria detectável comparando com um hash ancorado
+    externamente (fora do escopo do mock).
+  */
+  http.get(`${API_URL}/compliance/audit-log-v2/integrity`, () => {
+    const oldest = auditLogMutable[auditLogMutable.length - 1];
+    const newest = auditLogMutable[0];
+    return respondValidated(AuditChainIntegritySchema, {
+      status: "integra",
+      totalEventos: auditLogMutable.length,
+      primeiroEventoEm: oldest?.timestamp ?? new Date().toISOString(),
+      ultimoEventoEm: newest?.timestamp ?? new Date().toISOString(),
+      chainHash: computeChainHash(auditLogMutable),
+      algoritmo: CHAIN_ALGORITHM,
+      verificadoEm: new Date().toISOString(),
+    });
   }),
 
   http.post(`${API_URL}/compliance/audit-log-v2/export`, async ({ request }) => {

@@ -9,7 +9,7 @@
 
 ## Funcionalidades-chave
 
-- **Ingestão Multifonte (ETL)** — conectores via API, sem refactor para adicionar fonte.
+- **Ingestão Multifonte (ETL)** — conectores via API, sem refactor para adicionar fonte. No protótipo web (`/ingestion`), cada fonte oficial (NFS-e, PGDAS-D, DIMP, DEFIS, ECD, Cadastro Mobiliário) tem card próprio com status da última carga, registros, erros e data/hora — fonte sem movimento aparece como "Aguardando carga" (RF 3.1.1). O Admin pode **importar arquivos manualmente** e **cadastrar novas integrações** (API/SFTP/upload + periodicidade) pelos botões do cabeçalho; ambas as ações são restritas por RBAC e registradas na trilha append-only do módulo 6.
 - **Agente 24/7** — monitora disponibilização de novas cargas, executa ETL, valida esquema/qualidade, sinaliza falhas antes que contaminem a análise.
 - **Pseudonimização LGPD** — aplicada **antes** de qualquer treinamento ou envio a LLM.
 - **Escalabilidade e Desempenho** — volume crescente sem degradação; Polars + particionamento.

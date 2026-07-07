@@ -39,7 +39,10 @@ import { cn } from "@/lib/utils";
   - link para o Dossiê (T13) quando a divergência já instrui um caso.
 */
 
-const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+const BRL = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+});
 
 type NivelRiscoUI = "conforme" | "baixo" | "medio" | "alto" | "critico";
 
@@ -79,6 +82,10 @@ export function DivergenciaDetailSheet({
   const temParValores =
     divergencia.valorDeclarado !== undefined && divergencia.valorApurado !== undefined;
 
+  // RF 3.1.1: quando a origem é DIMP, o lado "documentado" é a
+  // movimentação em cartões, não a soma de NFS-e.
+  const isDimp = divergencia.origem === "dimp_vs_declarado";
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
@@ -115,7 +122,9 @@ export function DivergenciaDetailSheet({
           {temParValores ? (
             <section aria-label="Declarado versus documentado" className="grid gap-2">
               <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Declarado × documentado em NFS-e
+                {isDimp
+                  ? "Declarado × movimentação em cartões (DIMP)"
+                  : "Declarado × documentado em NFS-e"}
               </h4>
               <div className="grid gap-3 sm:grid-cols-2">
                 <article className="rounded-[var(--r-md)] border border-border bg-surface p-3">
@@ -131,13 +140,15 @@ export function DivergenciaDetailSheet({
                 </article>
                 <article className="rounded-[var(--r-md)] border border-brand-100 bg-brand-050 p-3">
                   <p className="text-[11px] uppercase tracking-wide text-brand-deep">
-                    Documentado em NFS-e
+                    {isDimp ? "Movimentado em cartões (DIMP)" : "Documentado em NFS-e"}
                   </p>
                   <p className="mt-1 font-data text-lg font-semibold text-text-strong">
                     {BRL.format(divergencia.valorApurado ?? 0)}
                   </p>
                   <p className="mt-0.5 text-[11px] text-brand-deep/80">
-                    Soma das notas de origem (evidências)
+                    {isDimp
+                      ? "Transações de meios de pagamento informadas pelas credenciadoras"
+                      : "Soma das notas de origem (evidências)"}
                   </p>
                 </article>
               </div>
@@ -161,7 +172,9 @@ export function DivergenciaDetailSheet({
                   {BRL.format(divergencia.valor ?? 0)}
                 </span>
                 <span className="w-full text-center text-[11px] text-muted-foreground">
-                  Diferença apurada pelo cruzamento declarado × NFS-e
+                  {isDimp
+                    ? "Diferença apurada pelo cruzamento declarado × DIMP"
+                    : "Diferença apurada pelo cruzamento declarado × NFS-e"}
                 </span>
               </div>
             </section>
@@ -213,9 +226,9 @@ export function DivergenciaDetailSheet({
               </ul>
             ) : (
               <p className="rounded-[var(--r-md)] border border-border bg-n-25 p-3 text-xs text-muted-foreground">
-                Evidências não fiscais (cadastro/grafo):{" "}
-                <span className="font-data">{divergencia.evidencias.join(", ")}</span>. O detalhe
-                completo fica registrado na cadeia de custódia do caso.
+                {isDimp ? "Extrato consolidado da carga DIMP" : "Evidências não fiscais"} (
+                <span className="font-data">{divergencia.evidencias.join(", ")}</span>
+                ). O detalhe completo fica registrado na cadeia de custódia do caso.
               </p>
             )}
           </section>

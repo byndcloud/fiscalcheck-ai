@@ -262,10 +262,12 @@ export {
 
 export {
   AtypicalAccessSchema,
+  AuditChainIntegritySchema,
   AuditLogEntrySchema,
   AuditLogResultSchema,
   BlockAtypicalRequestSchema,
   type AtypicalAccess,
+  type AuditChainIntegrity,
   type AuditLogEntry,
   type AuditLogResult,
   type BlockAtypicalRequest,
@@ -310,9 +312,11 @@ export {
 } from "./schemas/panel-manager-kpis";
 
 export {
+  MetaAfericaoTRSchema,
   MetaPilotoSchema,
   MetaStatusSchema,
   MetaUnidadeSchema,
+  type MetaAfericaoTR,
   type MetaPiloto,
   type MetaStatus,
   type MetaUnidade,

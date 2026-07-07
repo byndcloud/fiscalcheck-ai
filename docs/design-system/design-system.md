@@ -132,23 +132,22 @@ Superfície e fundo: `--surface #FFFFFF` · `--app-bg #F4F6FB` · `--border #E1E
 
 ## 4. Tipografia
 
-**Revisada na v2.0.** O sistema passa de dois para **três papéis tipográficos**:
+**Revisada na v2.1.** O sistema usa **dois papéis tipográficos**:
 
 | Papel | Família | Observação |
 | --- | --- | --- |
 | UI / títulos / corpo | **Raleway** | Face primária de produção (400–800). Substitui a Rawline como face de referência; geometria próxima, ampla disponibilidade e mesmos pesos |
-| Display numérico — KPIs, scores, valores de destaque | **Montserrat** | 600/700/800. Numerais largos e estáveis dão presença aos valores monetários e ao score sem recorrer à mono |
-| Identificadores e dados tabulares | **Roboto Mono** | 400–700. Restrita a IDs de caso, CNPJ, competências, protocolos, contadores e valores em linhas de tabela — onde o alinhamento tabular importa |
+| Números e dados — KPIs, scores, valores de destaque, identificadores e dados tabulares | **Montserrat** | 400–800. Cobre o display numérico (KPIs 700, medidor 800, valores hero 800) **e** os identificadores e dados tabulares miúdos (IDs de caso, CNPJ, competências, protocolos, contadores e valores em linhas de tabela — 400–600) |
 
 Pilha de fontes:
 
 ```css
 --font-ui: "Raleway",system-ui,-apple-system,"Segoe UI",sans-serif;
 --font-display: "Montserrat","Raleway",sans-serif;
---font-data: "Roboto Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+--font-data: "Montserrat","Raleway",sans-serif;
 ```
 
-> **Divisão de trabalho numérica.** Na v1.0 todos os números de destaque eram Roboto Mono. Na v2.0, **números grandes são Montserrat** (KPI, medidor, valores hero) e a **mono fica nos números pequenos e identificadores** (células de tabela, CNPJ, metas, contadores de navegação). O contraste entre as duas faces passou a fazer parte da assinatura visual dos painéis.
+> **Divisão de trabalho numérica.** Na v1.0 todos os números de destaque eram Roboto Mono. Na v2.0, os números grandes passaram a Montserrat e a mono ficou nos identificadores. Na **v2.1 a Montserrat foi unificada para todos os números e dados** — display e tabular —, encerrando o uso da Roboto Mono: pesos leves (400/500) cobrem os dados miúdos e identificadores; pesos firmes (700/800) os valores de destaque.
 
 Escala de tipos (recalibrada para densidade de painel):
 
@@ -163,9 +162,9 @@ Escala de tipos (recalibrada para densidade de painel):
 | Valor hero | Montserrat | 35–48 px | 800 | Score do medidor (48), valor a regularizar (35); tracking −0,5 a −1,5 px |
 | Valor KPI | Montserrat | 25 px | 700 | Cards de indicador |
 | Valor secundário | Montserrat | 19–22 px | 700 | Contagens por nível de risco, métricas de rede, evidências |
-| Dado tabular | Roboto Mono | 11–15 px | 600–700 | IDs, CNPJ, valores em tabela, score-chip (15), metas, protocolos |
+| Dado tabular | Montserrat | 11–15 px | 500–700 | IDs, CNPJ, valores em tabela, score-chip (15/700), metas, protocolos |
 
-> As faces são servidas via Google Fonts (Raleway 400–800 · Montserrat 600–800 · Roboto Mono 400–700). A Rawline permanece aceitável como equivalente institucional da Raleway em contextos gov.br, mas o documento e o protótipo referenciam a Raleway como face canônica.
+> As faces são servidas via Google Fonts (Raleway 400–800 · Montserrat 400–800). A Rawline permanece aceitável como equivalente institucional da Raleway em contextos gov.br, mas o documento e o protótipo referenciam a Raleway como face canônica.
 
 ---
 
@@ -221,7 +220,7 @@ Barra fixa de **252 px** sobre gradiente escuro vertical (`#071D41 → #0A2552`)
 
 - **Logotipo** — tile 38 px com gradiente Aurora 135°, nome do produto em Raleway 800 e tagline em caps 9 px.
 - **Grupos rotulados** — `OPERAÇÃO`, `INTELIGÊNCIA`, `CIDADÃO`; rótulo em caps 10 px / 700 / tracking 0,1 em, cor `#5E78A8`. O grupo Inteligência carrega ponto ciano pulsante.
-- **Item de navegação** — 13,5 px / 600, raio `--r-md`, ícone de traço 18 px. Estado ativo: fundo `rgba(91,141,239,.20)` + anel interno sutil + texto branco; inativo: texto `#A9BBDA`. Contadores em Roboto Mono 11 px em pílula translúcida.
+- **Item de navegação** — 13,5 px / 600, raio `--r-md`, ícone de traço 18 px. Estado ativo: fundo `rgba(91,141,239,.20)` + anel interno sutil + texto branco; inativo: texto `#A9BBDA`. Contadores em Montserrat 11 px em pílula translúcida.
 - **Cartão do usuário** ancorado ao rodapé, sobre superfície translúcida.
 
 ### Barra superior (novo na v2.0)
@@ -258,11 +257,11 @@ Tons semânticos com borda lateral de 4 px, raio `--r-md`, tag de categoria em c
 
 ### KPI cards (layout revisado na v2.0)
 
-Nova anatomia, de cima para baixo: **rótulo em label caps** (11 px / 700) à esquerda com **tile de ícone tingido** (30 px, cor semântica a 10 %) à direita; **valor em Montserrat 25 px / 700**; linha de rodapé com **pílula de tendência** (Roboto Mono 12 px sobre fundo semântico) + texto de apoio 12 px. Raio `--r-lg`, elevação `--e-1`. Indicadores do RF05: recuperado, casos abertos, potencial recuperável, acurácia.
+Nova anatomia, de cima para baixo: **rótulo em label caps** (11 px / 700) à esquerda com **tile de ícone tingido** (30 px, cor semântica a 10 %) à direita; **valor em Montserrat 25 px / 700**; linha de rodapé com **pílula de tendência** (Montserrat 12 px sobre fundo semântico) + texto de apoio 12 px. Raio `--r-lg`, elevação `--e-1`. Indicadores do RF05: recuperado, casos abertos, potencial recuperável, acurácia.
 
 ### Tabela de casos (layout revisado na v2.0)
 
-Grade fixa por colunas (caso · contribuinte · score · risco · divergência · status). Cabeçalho em label caps 10,5 px sobre `--n-25`; linhas com *hover* `--c-brand-050`; ID do caso em Roboto Mono azul; contribuinte em duas linhas (nome 13,5 px / 700 + CNPJ mono e setor, com microtag `AGENTE` quando aplicável). O score aparece como **score-chip**: retângulo 42×30 px de raio 8 px, fundo do nível de risco e numeral Roboto Mono 15 px / 700 — separado da pílula de nível, que traz o rótulo textual. Valores monetários em Roboto Mono; chevron de acesso ao dossiê ao fim da linha.
+Grade fixa por colunas (caso · contribuinte · score · risco · divergência · status). Cabeçalho em label caps 10,5 px sobre `--n-25`; linhas com *hover* `--c-brand-050`; ID do caso em Montserrat azul; contribuinte em duas linhas (nome 13,5 px / 700 + CNPJ em Montserrat e setor, com microtag `AGENTE` quando aplicável). O score aparece como **score-chip**: retângulo 42×30 px de raio 8 px, fundo do nível de risco e numeral Montserrat 15 px / 700 — separado da pílula de nível, que traz o rótulo textual. Valores monetários em Montserrat; chevron de acesso ao dossiê ao fim da linha.
 
 ### Estados transversais — vazio, carregamento, erro e toast (T25)
 
@@ -287,7 +286,7 @@ Camada obrigatória em toda tela que consuma dados. Padroniza o que antes ficava
 
 ### Medidor de score (assinatura)
 
-Semicírculo com o gradiente de risco contínuo (traço 22 px, pontas arredondadas), trilha neutra por baixo, ponteiro com pivô escuro e ponta colorida pelo nível. **Número central em Montserrat 48 px / 800** na cor do nível (na v1.0 era mono), legenda "de 100 · prioridade" e extremos da escala em Roboto Mono 10 px. Entrada animada (suprimível). É o objeto visual mais memorável do sistema.
+Semicírculo com o gradiente de risco contínuo (traço 22 px, pontas arredondadas), trilha neutra por baixo, ponteiro com pivô escuro e ponta colorida pelo nível. **Número central em Montserrat 48 px / 800** na cor do nível (na v1.0 era mono), legenda "de 100 · prioridade" e extremos da escala em Montserrat 10 px. Entrada animada (suprimível). É o objeto visual mais memorável do sistema.
 
 ### Próxima melhor ação (novo na v2.0)
 
@@ -347,10 +346,10 @@ Card institucional sóbrio com cabeçalho escuro da prefeitura, linguagem clara 
   --n-800:#1F2737; --n-900:#121826;
   --t-strong:#121826; --t-default:#1F2737; --t-muted:#54607A; --t-on-brand:#FFFFFF;
   --surface:#FFFFFF; --app-bg:#F4F6FB; --border:#E1E6F0;
-  /* Tipografia (v2.0) */
+  /* Tipografia (v2.1) */
   --font-ui:"Raleway",system-ui,-apple-system,"Segoe UI",sans-serif;
   --font-display:"Montserrat","Raleway",sans-serif;
-  --font-data:"Roboto Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --font-data:"Montserrat","Raleway",sans-serif;
   /* Espaçamento */
   --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:20px;
   --s-6:24px; --s-8:32px; --s-10:40px; --s-12:48px; --s-16:64px;
@@ -370,7 +369,7 @@ Card institucional sóbrio com cabeçalho escuro da prefeitura, linguagem clara 
 
 ## 11. Governança
 
-- **Versionamento semântico** do sistema (atual: v2.0). Mudanças de token são *breaking* e exigem nova *major* — a troca da pilha tipográfica nesta versão é o que justifica o salto 1.0 → 2.0.
+- **Versionamento semântico** do sistema (atual: v2.1). Mudanças de token são *breaking* e exigem nova *major* — a troca da pilha tipográfica na v2.0 é o que justifica o salto 1.0 → 2.0; a v2.1 apenas reaponta `--font-data` para a Montserrat (sem novo token), por isso é *minor*.
 - Mudanças normativas devem ser absorvidas por **configuração de tokens**, sem refatoração de componentes (alinhado ao RNF05 — manutenção evolutiva).
 - Componentes do FiscalCheck DS são mantidos neste documento; quando uma referência externa atualizar um padrão que afete o sistema (ex.: gov.br DS), a equipe avalia caso a caso a incorporação.
 - **Referências analisadas durante a construção** (não-exaustivo): gov.br Design System (UI Kit e *dashboard* administrativo), GOV.UK Design System, US Web Design System, NHS Design System, sistemas internos do time em produtos fiscais e financeiros, e boas práticas de sistemas de design para serviços públicos.
@@ -378,7 +377,16 @@ Card institucional sóbrio com cabeçalho escuro da prefeitura, linguagem clara 
 
 ---
 
-## 12. Changelog — v1.0 → v2.0
+## 12. Changelog
+
+### v2.0 → v2.1
+
+**Tipografia**
+
+- **Roboto Mono removida.** `--font-data` deixa de apontar para a mono e passa a **Montserrat** ("Montserrat","Raleway",sans-serif) — a face de dados fica unificada com a de display. Identificadores, CNPJ, competências, protocolos, contadores e valores em linhas de tabela agora são Montserrat (pesos 400–600); valores de destaque seguem em 700/800.
+- Sem novo token: `--font-ui`, `--font-display` e `--font-data` permanecem; apenas o valor de `--font-data` mudou. Google Fonts serve Raleway 400–800 · Montserrat 400–800.
+
+### v1.0 → v2.0
 
 **Tipografia**
 
