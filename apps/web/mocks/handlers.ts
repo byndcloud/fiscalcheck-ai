@@ -29,6 +29,7 @@ import {
   ComplianceSealSchema,
   ComunicacaoSchema,
   ContestacaoRequestSchema,
+  Contribuinte360Schema,
   ContribuinteSchema,
   CopilotAskRequestSchema,
   CopilotAskResponseSchema,
@@ -65,6 +66,8 @@ import {
   RiskModelConfigSchema,
   RiskModelPublishRequestSchema,
   RiskModelPublishResponseSchema,
+  type RiskQueueItem,
+  RiskQueueItemSchema,
   type Role,
   RoleSchema,
   ScoreSchema,
@@ -112,6 +115,13 @@ import { caseDocumentsFixture } from "./fixtures/case-documents";
 import { casosFixture } from "./fixtures/casos";
 import { complianceSealsFixture } from "./fixtures/compliance-seals";
 import { comunicacoesFixture } from "./fixtures/comunicacoes";
+import {
+  declaracoesFixture,
+  dividaAtivaFixture,
+  pagamentosFixture,
+  scoreHistoricoFixture,
+  valorPotencialEstimadoFixture,
+} from "./fixtures/contribuinte-360";
 import { contribuintesFixture } from "./fixtures/contribuintes";
 import {
   COPILOT_FALLBACK_RESPOSTA,
@@ -906,6 +916,52 @@ export const handlers = [
   http.get(`${API_URL}/ai/scores`, () => respondValidated(z.array(ScoreSchema), scoresFixture)),
   http.get(`${API_URL}/ai/agents`, () => respondValidated(z.array(AgenteSchema), agentesFixture)),
 
+  /*
+    T08 — Fila priorizada do auditor (RF03/FA03). O mock compõe
+    score + cadastro + caso vinculado + divergência principal numa linha
+    só, ordenada por score desc — mesma agregação que o serviço real fará.
+    Coerência: `valorPotencial` prefere o valor do caso vinculado (bate
+    com o Kanban); sem caso, usa a estimativa da fixture 360.
+  */
+  http.get(`${API_URL}/ai/queue`, () => {
+    const queue: RiskQueueItem[] = scoresFixture.flatMap((score) => {
+      const contribuinte = contribuintesFixture.find((c) => c.id === score.contribuinteId);
+      if (!contribuinte) return [];
+
+      const casoRecente = casosMutable
+        .filter((caso) => caso.contribuinteId === score.contribuinteId)
+        .sort((a, b) => (a.atualizadoEm < b.atualizadoEm ? 1 : -1))[0];
+
+      const divergenciaPrincipal = divergenciasFixture
+        .filter((dv) => dv.contribuinteId === score.contribuinteId)
+        .sort((a, b) => b.severidade - a.severidade)[0];
+
+      return [
+        {
+          contribuinteId: contribuinte.id,
+          razaoSocial: contribuinte.razaoSocial,
+          nomeFantasia: contribuinte.nomeFantasia,
+          cnpjMascarado: contribuinte.cnpjMascarado,
+          setor: contribuinte.atividadePrincipal,
+          regime: contribuinte.regime,
+          situacao: contribuinte.situacao,
+          scoreValor: score.valor,
+          nivel: score.nivel,
+          valorPotencial:
+            casoRecente?.valorPotencial ?? valorPotencialEstimadoFixture[contribuinte.id],
+          statusTratamento: casoRecente?.status ?? "sem_tratamento",
+          casoId: casoRecente?.id,
+          tipoInconsistencia: divergenciaPrincipal?.tipo,
+          calculadoEm: score.calculadoEm,
+          modeloVersao: score.modeloVersao,
+        },
+      ];
+    });
+
+    queue.sort((a, b) => b.scoreValor - a.scoreValor);
+    return respondValidated(z.array(RiskQueueItemSchema), queue);
+  }),
+
   // Módulo 3 — Configuração do Modelo de Risco (T02)
   http.get(`${API_URL}/ai/risk-model/config`, () =>
     respondValidated(RiskModelConfigSchema, riskModelConfigMutable),
@@ -1026,6 +1082,42 @@ export const handlers = [
       );
     }
     return respondValidated(ContribuinteSchema, found);
+  }),
+
+  /*
+    T08 — Visão 360 do contribuinte (RF03/FA03). Agregado read-only:
+    cadastro + score atual (T09) + históricos (declarações, dívida ativa,
+    pagamentos, evolução do score) + NFS-e emitidas + casos vinculados.
+    Contribuinte sem score/históricos devolve arrays vazios — a UI
+    exercita os empty states com eles.
+  */
+  http.get(`${API_URL}/taxpayers/:id/360`, ({ params }) => {
+    const { id } = params as { id: string };
+    const contribuinte = contribuintesFixture.find((c) => c.id === id);
+    if (!contribuinte) {
+      return HttpResponse.json(
+        {
+          error_code: "taxpayer_not_found",
+          message: "Contribuinte não encontrado.",
+        },
+        { status: 404 },
+      );
+    }
+
+    const casosVinculados = casosMutable
+      .filter((caso) => caso.contribuinteId === id)
+      .sort((a, b) => (a.atualizadoEm < b.atualizadoEm ? 1 : -1));
+
+    return respondValidated(Contribuinte360Schema, {
+      contribuinte,
+      score: scoresFixture.find((s) => s.contribuinteId === id),
+      scoreHistorico: scoreHistoricoFixture[id] ?? [],
+      declaracoes: declaracoesFixture[id] ?? [],
+      nfse: nfseFixture.filter((nf) => nf.prestadorId === id),
+      dividaAtiva: dividaAtivaFixture[id] ?? [],
+      pagamentos: pagamentosFixture[id] ?? [],
+      casos: casosVinculados,
+    });
   }),
 
   // Módulo 4 — Casos

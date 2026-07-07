@@ -150,6 +150,30 @@ export {
 } from "./schemas/caso";
 
 export {
+  RiskQueueItemSchema,
+  StatusTratamentoSchema,
+  type RiskQueueItem,
+  type StatusTratamento,
+} from "./schemas/risk-queue";
+
+export {
+  Contribuinte360Schema,
+  DeclaracaoResumoSchema,
+  DividaAtivaItemSchema,
+  PagamentoSchema,
+  ScoreHistoricoPontoSchema,
+  SituacaoDividaSchema,
+  StatusDeclaracaoSchema,
+  type Contribuinte360,
+  type DeclaracaoResumo,
+  type DividaAtivaItem,
+  type Pagamento,
+  type ScoreHistoricoPonto,
+  type SituacaoDivida,
+  type StatusDeclaracao,
+} from "./schemas/contribuinte-360";
+
+export {
   CaseDecisionSchema,
   DecisionActionSchema,
   DecisionRequestSchema,
