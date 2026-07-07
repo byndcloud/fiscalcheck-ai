@@ -148,12 +148,19 @@ export function DivergenciasTab() {
         header: "Contribuinte",
         cell: ({ row }) => {
           const taxpayer = taxpayerById.get(row.original.contribuinteId);
+          const nome = taxpayer?.razaoSocial ?? row.original.contribuinteId;
           return (
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-text-strong">
-                {taxpayer?.razaoSocial ?? row.original.contribuinteId}
+              {/* line-clamp em vez de truncate: nomes longos quebram na
+                  vertical sem forçar largura mínima na tabela. */}
+              <p
+                className="line-clamp-2 break-words text-sm font-medium text-text-strong"
+                title={nome}
+                data-sensitive
+              >
+                {nome}
               </p>
-              <p className="font-data text-[11px] text-muted-foreground">
+              <p className="font-data text-[11px] text-muted-foreground" data-sensitive>
                 {taxpayer?.cnpjMascarado ?? "—"}
               </p>
             </div>
@@ -170,6 +177,8 @@ export function DivergenciasTab() {
       {
         accessorKey: "origem",
         header: "Origem",
+        // Coluna secundária: o detalhe já mostra a origem — sai em telas estreitas.
+        meta: { className: "hidden lg:table-cell" },
         cell: ({ getValue }) => (
           <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
             <AgentRecommendationBadge />
@@ -180,6 +189,7 @@ export function DivergenciasTab() {
       {
         accessorKey: "competencia",
         header: "Período",
+        meta: { className: "hidden md:table-cell" },
         cell: ({ getValue }) => (
           <span className="font-data text-xs">{formatCompetencia(getValue<string>())}</span>
         ),

@@ -89,8 +89,14 @@ function AsyncBoundary({
     );
   }
 
+  /*
+    `contents`: no estado de sucesso o wrapper não gera caixa própria —
+    os filhos participam do grid/flex do pai e herdam o `gap` da página.
+    Sem isso, telas que passam várias seções como children (ex.: Análise
+    de Redes, Geofiscalização) ficavam com as seções coladas entre si.
+  */
   return (
-    <div data-slot="async-boundary" data-state="ready" className={cn(className)}>
+    <div data-slot="async-boundary" data-state="ready" className={cn("contents", className)}>
       {children}
     </div>
   );

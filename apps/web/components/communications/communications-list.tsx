@@ -69,7 +69,7 @@ export function CommunicationsList({ data, taxpayerById, onSelect, emptyMessage 
         accessorFn: (row) => row.protocolo,
         cell: ({ row }) => (
           <div className="flex flex-col gap-0.5">
-            <span className="font-mono text-xs font-semibold text-text-strong">
+            <span className="font-data text-xs font-semibold text-text-strong">
               {row.original.protocolo}
             </span>
             <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
@@ -87,13 +87,18 @@ export function CommunicationsList({ data, taxpayerById, onSelect, emptyMessage 
         },
         cell: ({ row }) => {
           const tp = taxpayerById.get(row.original.contribuinteId);
+          const nome = tp?.razaoSocial ?? row.original.contribuinteId;
           return (
-            <div className="flex flex-col gap-0.5">
-              <span className="font-mono text-xs text-brand-deep">
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <span className="font-data text-xs text-brand-deep">
                 {row.original.casoId.toUpperCase()}
               </span>
-              <span className="text-xs text-foreground">
-                {tp?.razaoSocial ?? row.original.contribuinteId}
+              <span
+                className="line-clamp-2 break-words text-xs text-foreground"
+                title={nome}
+                data-sensitive
+              >
+                {nome}
               </span>
             </div>
           );
@@ -109,6 +114,8 @@ export function CommunicationsList({ data, taxpayerById, onSelect, emptyMessage 
         id: "rastreio",
         header: "Rastreio",
         enableSorting: false,
+        // Stepper largo (220px) e redundante com o Status — sai em telas estreitas.
+        meta: { className: "hidden xl:table-cell" },
         cell: ({ row }) => (
           <StatusStepper
             status={row.original.status as StatusComunicacao}
@@ -133,8 +140,9 @@ export function CommunicationsList({ data, taxpayerById, onSelect, emptyMessage 
         id: "enviadaEm",
         header: "Enviada em",
         accessorFn: (row) => row.enviadaEm,
+        meta: { className: "hidden lg:table-cell" },
         cell: ({ row }) => (
-          <span className="font-mono text-[11px] text-foreground">
+          <span className="font-data text-[11px] text-foreground">
             {formatShort(row.original.enviadaEm)}
           </span>
         ),
@@ -147,7 +155,7 @@ export function CommunicationsList({ data, taxpayerById, onSelect, emptyMessage 
           const { toneClass, suffix } = prazoTone(row.original.prazoRespostaEm);
           return (
             <div className="flex flex-col gap-0.5">
-              <span className={cn("font-mono text-[11px]", toneClass)}>
+              <span className={cn("font-data text-[11px]", toneClass)}>
                 {formatShort(row.original.prazoRespostaEm)}
               </span>
               {suffix ? (

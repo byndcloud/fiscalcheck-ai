@@ -2,6 +2,7 @@
 
 import {
   type ColumnDef,
+  type RowData,
   type SortingState,
   flexRender,
   getCoreRowModel,
@@ -18,10 +19,24 @@ import { cn } from "@/lib/utils";
 /*
   FiscalCheck DS — DataTable.
   Camada fina sobre @tanstack/react-table com estilos DS:
-   - cabeçalho tipográfico --font-ui, dados em --font-mono quando numérico
+   - cabeçalho tipográfico --font-ui, dados em --font-data quando numérico
    - focos e hovers via tokens brand
    - busca global opcional (props.searchable)
+
+  Responsividade: colunas secundárias podem declarar
+  `meta: { className: "hidden lg:table-cell" }` para sair do fluxo em
+  telas estreitas — a tabela deve caber na largura disponível sem gerar
+  scroll horizontal (conteúdo excedente cresce na vertical).
 */
+
+declare module "@tanstack/react-table" {
+  // A assinatura genérica é exigida pelo declaration merging do TanStack.
+  // biome-ignore lint/correctness/noUnusedVariables: merge de tipos exige os dois genéricos
+  interface ColumnMeta<TData extends RowData, TValue> {
+    /** Classes aplicadas ao <th> e ao <td> da coluna (ex.: esconder em telas estreitas). */
+    className?: string;
+  }
+}
 
 type DataTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];
@@ -68,7 +83,8 @@ function DataTable<TData, TValue>({
         </div>
       ) : null}
 
-      {/* overflow-x-auto: em telas estreitas a tabela rola internamente, sem empurrar a página. */}
+      {/* overflow-x-auto é só o último recurso: as colunas usam meta.className
+          para sair do fluxo em telas estreitas e o conteúdo quebra na vertical. */}
       <div className="overflow-x-auto rounded-md border border-border bg-surface shadow-[var(--e-1)]">
         <table className="w-full caption-bottom text-sm">
           <thead className="bg-n-25 text-xs uppercase tracking-wide text-muted-foreground">
@@ -81,7 +97,10 @@ function DataTable<TData, TValue>({
                     <th
                       key={header.id}
                       scope="col"
-                      className="h-10 px-4 text-left align-middle font-medium"
+                      className={cn(
+                        "h-10 px-3 text-left align-middle font-medium",
+                        header.column.columnDef.meta?.className,
+                      )}
                     >
                       {header.isPlaceholder ? null : canSort ? (
                         <button
@@ -118,7 +137,13 @@ function DataTable<TData, TValue>({
                   className="border-b border-border transition-colors hover:bg-brand-050/40"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-3 align-middle text-foreground">
+                    <td
+                      key={cell.id}
+                      className={cn(
+                        "px-3 py-3 align-middle text-foreground",
+                        cell.column.columnDef.meta?.className,
+                      )}
+                    >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}

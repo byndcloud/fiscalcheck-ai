@@ -78,10 +78,16 @@ export function RiskQueueTable({ items }: RiskQueueTableProps) {
         header: "Contribuinte",
         cell: ({ row }) => (
           <div className="min-w-0 max-w-[16rem]">
-            <p className="truncate text-sm font-medium text-text-strong" data-sensitive>
+            {/* line-clamp em vez de truncate: quebra na vertical sem forçar
+                largura mínima na tabela. */}
+            <p
+              className="line-clamp-2 break-words text-sm font-medium text-text-strong"
+              title={row.original.razaoSocial}
+              data-sensitive
+            >
               {row.original.razaoSocial}
             </p>
-            <p className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
+            <p className="flex items-center gap-2 font-data text-xs text-muted-foreground">
               <span data-sensitive>{row.original.cnpjMascarado}</span>
               {/* Situação embutida — só chama atenção quando NÃO está ativa. */}
               {row.original.situacao !== "ativa" ? (
@@ -117,6 +123,7 @@ export function RiskQueueTable({ items }: RiskQueueTableProps) {
       {
         accessorKey: "valorPotencial",
         header: "Valor potencial",
+        meta: { className: "hidden lg:table-cell" },
         cell: ({ getValue }) => (
           <span className="font-data text-sm text-text-strong">
             {formatCurrencyBRL(getValue<number | undefined>())}
@@ -126,6 +133,7 @@ export function RiskQueueTable({ items }: RiskQueueTableProps) {
       {
         accessorKey: "setor",
         header: "Setor",
+        meta: { className: "hidden xl:table-cell" },
         cell: ({ getValue }) => {
           const setor = getValue<string | undefined>();
           // Quebra em até 2 linhas em vez de forçar largura mínima na tabela.

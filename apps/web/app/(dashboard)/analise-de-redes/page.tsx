@@ -131,7 +131,7 @@ export default function AnaliseDeRedesPage() {
         description="Graph analytics com resolução de entidades: contribuintes, sócios, endereços e fornecedores conectados para revelar vínculos invisíveis caso a caso. Módulo 3."
         action={
           scenario ? (
-            <span className="inline-flex items-center gap-2 rounded-pill bg-brand-050 px-3.5 py-2 text-xs font-bold text-brand">
+            <span className="inline-flex max-w-full flex-wrap items-center gap-x-2 gap-y-1 rounded-pill bg-brand-050 px-3.5 py-2 text-xs font-bold text-brand">
               Comunidade suspeita <span className="font-data">{scenario.codigo}</span> · score de
               rede {scenario.scoreRede}
             </span>
@@ -273,25 +273,29 @@ export default function AnaliseDeRedesPage() {
               </div>
             </section>
 
-            {/* Métricas da comunidade */}
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            {/* Métricas da comunidade — colunas explícitas (2 → 3 → 6) para as
+                quebras serem sempre simétricas (nunca 5+1) e o card nunca ficar
+                mais estreito que valores como "R$ 1.240.000" */}
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 2xl:grid-cols-6">
               {metricas.map((m) => (
                 <div
                   key={m.label}
-                  className="rounded-lg border border-border bg-surface p-4 shadow-[var(--e-1)]"
+                  className="min-w-0 rounded-lg border border-border bg-surface p-4 shadow-[var(--e-1)]"
                 >
                   <p className="min-h-8 text-xs font-bold uppercase leading-tight tracking-[0.03em] text-muted-foreground">
                     {m.label}
                   </p>
-                  <p className="mt-1 font-data text-lg font-semibold text-text-strong">{m.valor}</p>
+                  <p className="mt-1 break-words font-data text-lg font-semibold leading-snug text-text-strong">
+                    {m.valor}
+                  </p>
                   <p className="mt-0.5 text-[12.5px] leading-snug text-muted-foreground">{m.sub}</p>
                 </div>
               ))}
             </div>
 
-            <div className="grid items-start gap-4 xl:grid-cols-[1fr_340px]">
+            <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
               {/* Canvas do grafo + legenda */}
-              <div className="rounded-lg border border-border bg-surface p-2 shadow-[var(--e-1)]">
+              <div className="min-w-0 rounded-lg border border-border bg-surface p-2 shadow-[var(--e-1)]">
                 <NetworkGraph
                   nodes={nodes}
                   edges={edges}
@@ -437,7 +441,7 @@ export default function AnaliseDeRedesPage() {
                             </span>
                             <Badge variant="outline">{ESQUEMA_LABEL[s.esquema]}</Badge>
                           </div>
-                          <div className="flex items-center gap-3 font-data text-xs text-muted-foreground">
+                          <div className="flex flex-wrap items-center gap-3 font-data text-xs text-muted-foreground">
                             <span>{s.periodo}</span>
                             <span className="font-semibold text-[color:var(--c-risk-4-txt)]">
                               {BRL.format(s.valorEstimado)}
